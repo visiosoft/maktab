@@ -50,7 +50,8 @@ const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, l
         setNewRow({
             firstName: '',
             lastName: '',
-            passportNo: ''
+            passportNo: '',
+            group: ''
         });
     };
 
@@ -88,7 +89,8 @@ const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, l
         setEditData({
             firstName: passenger.firstName,
             lastName: passenger.lastName,
-            passportNo: passenger.passportNo
+            passportNo: passenger.passportNo,
+            group: passenger.group?._id || ''
         });
     };
 
@@ -225,7 +227,18 @@ const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, l
                                     />
                                 </td>
                                 <td>
-                                    <span className="text-muted">-</span>
+                                    <select
+                                        className="table-cell-input"
+                                        value={newRow.group}
+                                        onChange={(e) => handleNewRowChange('group', e.target.value)}
+                                    >
+                                        <option value="">No Group</option>
+                                        {groups.map(group => (
+                                            <option key={group._id} value={group._id}>
+                                                {group.groupName}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </td>
                                 <td>
                                     <span className="text-muted">-</span>
@@ -312,13 +325,28 @@ const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, l
                                             )}
                                         </td>
                                         <td>
-                                            <div className="table-cell-display">
-                                                {passenger.group ? (
-                                                    <span className="group-badge">{passenger.group.groupName}</span>
-                                                ) : (
-                                                    <span className="text-muted">No Group</span>
-                                                )}
-                                            </div>
+                                            {isEditing ? (
+                                                <select
+                                                    className="table-cell-input"
+                                                    value={editData.group}
+                                                    onChange={(e) => handleEditChange('group', e.target.value)}
+                                                >
+                                                    <option value="">No Group</option>
+                                                    {groups.map(group => (
+                                                        <option key={group._id} value={group._id}>
+                                                            {group.groupName}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <div className="table-cell-display">
+                                                    {passenger.group ? (
+                                                        <span className="group-badge">{passenger.group.groupName}</span>
+                                                    ) : (
+                                                        <span className="text-muted">No Group</span>
+                                                    )}
+                                                </div>
+                                            )}
                                         </td>
                                         <td>
                                             <div className="table-cell-display">
