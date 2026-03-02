@@ -4,7 +4,7 @@ import { groupsAPI, companiesAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { Home, Building2, LogOut, FileText, Calendar, Download, Users } from 'lucide-react';
+import { Home, Building2, LogOut, FileText, Calendar, Download, Users, UserCheck } from 'lucide-react';
 import './Reports.css';
 
 const Reports = () => {
@@ -190,9 +190,9 @@ const Reports = () => {
                     <Home size={20} />
                     <span>Dashboard</span>
                 </button>
-                <button className="nav-item" onClick={() => navigate('/hotels')}>
-                    <Building2 size={20} />
-                    <span>Hotels</span>
+                <button className="nav-item" onClick={() => navigate('/passengers')}>
+                    <UserCheck size={20} />
+                    <span>Passengers</span>
                 </button>
                 <button className="nav-item" onClick={() => navigate('/groups')}>
                     <Users size={20} />

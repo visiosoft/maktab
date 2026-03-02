@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Input from '../components/Input';
-import { Users, Plus, Edit2, Trash2, Search, Calendar, Plane, Home, Building2, LogOut, FileText, Grid, List } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, Search, Calendar, Plane, Home, Building2, LogOut, FileText, Grid, List, UserCheck } from 'lucide-react';
 import { SAUDI_AIRPORTS } from '../constants/airports';
 import './Groups.css';
 
@@ -16,7 +16,7 @@ const Groups = () => {
     const [company, setCompany] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
+    const [viewMode, setViewMode] = useState('table'); // 'grid' or 'table'
 
     useEffect(() => {
         fetchGroups();
@@ -85,7 +85,14 @@ const Groups = () => {
 
     const filteredGroups = groups.filter(group =>
         group.groupName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        group.hotel?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        group.hotel?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.maktab?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.arrivalFlightNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.departureFlightNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.arrivalAirport?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.departureAirport?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        getAirportCity(group.arrivalAirport || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        getAirportCity(group.departureAirport || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -113,9 +120,9 @@ const Groups = () => {
                     <Home size={20} />
                     <span>Dashboard</span>
                 </button>
-                <button className="nav-item" onClick={() => navigate('/hotels')}>
-                    <Building2 size={20} />
-                    <span>Hotels</span>
+                <button className="nav-item" onClick={() => navigate('/passengers')}>
+                    <UserCheck size={20} />
+                    <span>Passengers</span>
                 </button>
                 <button className="nav-item active" onClick={() => navigate('/groups')}>
                     <Users size={20} />

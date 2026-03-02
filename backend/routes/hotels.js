@@ -1,25 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const { authMiddleware, isCompanyAdmin } = require('../middleware/auth');
+const { authMiddleware, isSuperAdmin, isCompanyAdmin, isAdmin } = require('../middleware/auth');
 const Hotel = require('../models/Hotel');
+const SuperAdmin = require('../models/SuperAdmin');
 const CompanyAdmin = require('../models/CompanyAdmin');
 
-// All routes require authentication and company admin role
+// All routes require authentication
 router.use(authMiddleware);
-router.use(isCompanyAdmin);
 
 // @route   GET /api/hotels
-// @desc    Get all hotels for the company admin's company
-// @access  Company Admin
-router.get('/', async (req, res) => {
+// @desc    Get all hotels (generic for all companies)
+// @access  Super Admin, Company Admin
+router.get('/', isAdmin, async (req, res) => {
     try {
-        const admin = await CompanyAdmin.findById(req.user.id);
-
-        if (!admin) {
-            return res.status(404).json({ message: 'Admin not found' });
-        }
-
-        const hotels = await Hotel.find({ company: admin.company })
+        const hotels = await Hotel.find()
             .populate('createdBy', 'username email')
             .sort({ name: 1 });
 
@@ -32,8 +26,8 @@ router.get('/', async (req, res) => {
 
 // @route   POST /api/hotels
 // @desc    Create a new hotel
-// @access  Company Admin
-router.post('/', async (req, res) => {
+// @access  Super Admin
+router.post('/', isSuperAdmin, async (req, res) => {
     try {
         const { name, address, city, phone } = req.body;
 
@@ -41,19 +35,13 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ message: 'Hotel name is required' });
         }
 
-        const admin = await CompanyAdmin.findById(req.user.id);
-
-        if (!admin) {
-            return res.status(404).json({ message: 'Admin not found' });
-        }
-
         const hotel = new Hotel({
             name,
             address,
             city,
             phone,
-            company: admin.company,
-            createdBy: req.user.id
+            createdBy: req.user.id,
+            createdByModel: 'SuperAdmin'
         });
 
         await hotel.save();
@@ -73,26 +61,15 @@ router.post('/', async (req, res) => {
 
 // @route   PUT /api/hotels/:id
 // @desc    Update a hotel
-// @access  Company Admin
-router.put('/:id', async (req, res) => {
+// @access  Super Admin
+router.put('/:id', isSuperAdmin, async (req, res) => {
     try {
         const { name, address, city, phone } = req.body;
-
-        const admin = await CompanyAdmin.findById(req.user.id);
-
-        if (!admin) {
-            return res.status(404).json({ message: 'Admin not found' });
-        }
 
         const hotel = await Hotel.findById(req.params.id);
 
         if (!hotel) {
             return res.status(404).json({ message: 'Hotel not found' });
-        }
-
-        // Check if hotel belongs to the admin's company
-        if (hotel.company.toString() !== admin.company.toString()) {
-            return res.status(403).json({ message: 'Access denied' });
         }
 
         if (name) hotel.name = name;
@@ -117,24 +94,13 @@ router.put('/:id', async (req, res) => {
 
 // @route   DELETE /api/hotels/:id
 // @desc    Delete a hotel
-// @access  Company Admin
-router.delete('/:id', async (req, res) => {
+// @access  Super Admin
+router.delete('/:id', isSuperAdmin, async (req, res) => {
     try {
-        const admin = await CompanyAdmin.findById(req.user.id);
-
-        if (!admin) {
-            return res.status(404).json({ message: 'Admin not found' });
-        }
-
         const hotel = await Hotel.findById(req.params.id);
 
         if (!hotel) {
             return res.status(404).json({ message: 'Hotel not found' });
-        }
-
-        // Check if hotel belongs to the admin's company
-        if (hotel.company.toString() !== admin.company.toString()) {
-            return res.status(403).json({ message: 'Access denied' });
         }
 
         await Hotel.findByIdAndDelete(req.params.id);

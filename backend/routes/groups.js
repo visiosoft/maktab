@@ -120,10 +120,7 @@ router.post('/', async (req, res) => {
 
         // Validate hotel if provided
         if (hotel) {
-            const hotelExists = await Hotel.findOne({
-                _id: hotel,
-                company: admin.company
-            });
+            const hotelExists = await Hotel.findById(hotel);
             if (!hotelExists) {
                 return res.status(400).json({ message: 'Invalid hotel selection' });
             }
@@ -244,10 +241,7 @@ router.put('/:id', async (req, res) => {
 
         // Validate hotel if provided
         if (hotel) {
-            const hotelExists = await Hotel.findOne({
-                _id: hotel,
-                company: admin.company
-            });
+            const hotelExists = await Hotel.findById(hotel);
             if (!hotelExists) {
                 return res.status(400).json({ message: 'Invalid hotel selection' });
             }

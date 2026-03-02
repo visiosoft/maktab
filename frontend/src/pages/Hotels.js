@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { hotelsAPI, companiesAPI } from '../services/api';
+import { hotelsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -13,7 +13,6 @@ const Hotels = () => {
     const navigate = useNavigate();
     const { logout } = useAuth();
     const [hotels, setHotels] = useState([]);
-    const [company, setCompany] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
@@ -27,17 +26,7 @@ const Hotels = () => {
 
     useEffect(() => {
         fetchHotels();
-        fetchCompany();
     }, []);
-
-    const fetchCompany = async () => {
-        try {
-            const response = await companiesAPI.getAll();
-            setCompany(response.data);
-        } catch (error) {
-            console.error('Error fetching company:', error);
-        }
-    };
 
     const fetchHotels = async () => {
         try {
@@ -111,8 +100,8 @@ const Hotels = () => {
                             <Building2 size={28} />
                         </div>
                         <div className="dashboard-logo-text">
-                            <h1>{company?.name || 'Maktab'}</h1>
-                            <p>Hotels Management</p>
+                            <h1>Maktab</h1>
+                            <p>Super Admin - Hotels Management</p>
                         </div>
                     </div>
                     <Button variant="danger" size="small" onClick={logout}>
@@ -123,17 +112,13 @@ const Hotels = () => {
             </div>
 
             <div className="dashboard-nav">
-                <button className="nav-item" onClick={() => navigate('/company-admin/dashboard')}>
+                <button className="nav-item" onClick={() => navigate('/super-admin/dashboard')}>
                     <Home size={20} />
                     <span>Dashboard</span>
                 </button>
                 <button className="nav-item active" onClick={() => navigate('/hotels')}>
                     <Building2 size={20} />
                     <span>Hotels</span>
-                </button>
-                <button className="nav-item" onClick={() => navigate('/groups')}>
-                    <Users size={20} />
-                    <span>Groups</span>
                 </button>
             </div>
 

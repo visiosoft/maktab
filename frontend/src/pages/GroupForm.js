@@ -6,7 +6,7 @@ import Button from '../components/Button';
 import Card from '../components/Card';
 import Input from '../components/Input';
 import Modal from '../components/Modal';
-import { Save, X, Plus, Building2, Users, Home, LogOut, FileText } from 'lucide-react';
+import { Save, X, Plus, Building2, Users, Home, LogOut, FileText, UserCheck } from 'lucide-react';
 import { SAUDI_AIRPORTS } from '../constants/airports';
 import './GroupForm.css';
 
@@ -181,9 +181,9 @@ const GroupForm = () => {
                     <Home size={20} />
                     <span>Dashboard</span>
                 </button>
-                <button className="nav-item" onClick={() => navigate('/hotels')}>
-                    <Building2 size={20} />
-                    <span>Hotels</span>
+                <button className="nav-item" onClick={() => navigate('/passengers')}>
+                    <UserCheck size={20} />
+                    <span>Passengers</span>
                 </button>
                 <button className="nav-item active" onClick={() => navigate('/groups')}>
                     <Users size={20} />

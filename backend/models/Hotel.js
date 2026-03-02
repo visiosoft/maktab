@@ -18,15 +18,15 @@ const HotelSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
-    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'CompanyAdmin',
+        refPath: 'createdByModel',
         required: true
+    },
+    createdByModel: {
+        type: String,
+        required: true,
+        enum: ['SuperAdmin', 'CompanyAdmin']
     },
     createdAt: {
         type: Date,
@@ -45,6 +45,6 @@ HotelSchema.pre('save', function (next) {
 });
 
 // Index for faster searches
-HotelSchema.index({ company: 1, name: 1 });
+HotelSchema.index({ name: 1 });
 
 module.exports = mongoose.model('Hotel', HotelSchema);

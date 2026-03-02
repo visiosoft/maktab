@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+
 import { superAdminAPI, companiesAPI } from '../services/api';
 import {
     Building2,
@@ -10,7 +12,11 @@ import {
     Edit,
     Trash2,
     Mail,
-    UserPlus
+    UserPlus,
+    Home,
+    ChevronDown,
+    ChevronRight,
+    Key
 } from 'lucide-react';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
@@ -18,13 +24,19 @@ import Input from '../components/Input';
 import './Dashboard.css';
 
 const SuperAdminDashboard = () => {
+    const navigate = useNavigate();
     const { user, logout } = useAuth();
     const [stats, setStats] = useState(null);
     const [companies, setCompanies] = useState([]);
+    const [companyAdmins, setCompanyAdmins] = useState({});
+    const [expandedRows, setExpandedRows] = useState({});
     const [loading, setLoading] = useState(true);
     const [showCompanyModal, setShowCompanyModal] = useState(false);
     const [showAdminModal, setShowAdminModal] = useState(false);
+    const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState(null);
+    const [selectedAdmin, setSelectedAdmin] = useState(null);
+    const [newPassword, setNewPassword] = useState('');
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -92,6 +104,16 @@ const SuperAdminDashboard = () => {
             await companiesAPI.createAdmin(selectedCompany._id, adminFormData);
             setShowAdminModal(false);
             setAdminFormData({ username: '', email: '', password: '', firstName: '', lastName: '', phone: '' });
+
+            // Refresh admins list if the row is expanded
+            if (expandedRows[selectedCompany._id]) {
+                const response = await companiesAPI.getAdmins(selectedCompany._id);
+                setCompanyAdmins(prev => ({
+                    ...prev,
+                    [selectedCompany._id]: response.data
+                }));
+            }
+
             setSelectedCompany(null);
             alert('Company admin created successfully!');
         } catch (error) {
@@ -103,6 +125,70 @@ const SuperAdminDashboard = () => {
     const openAdminModal = (company) => {
         setSelectedCompany(company);
         setShowAdminModal(true);
+    };
+
+    const toggleRowExpansion = async (companyId) => {
+        setExpandedRows(prev => ({
+            ...prev,
+            [companyId]: !prev[companyId]
+        }));
+
+        // Fetch admins if not already loaded
+        if (!companyAdmins[companyId] && !expandedRows[companyId]) {
+            try {
+                const response = await companiesAPI.getAdmins(companyId);
+                setCompanyAdmins(prev => ({
+                    ...prev,
+                    [companyId]: response.data
+                }));
+            } catch (error) {
+                console.error('Error fetching admins:', error);
+            }
+        }
+    };
+
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
+        if (!newPassword || newPassword.length < 6) {
+            alert('Password must be at least 6 characters');
+            return;
+        }
+
+        try {
+            await companiesAPI.resetAdminPassword(selectedCompany._id, selectedAdmin._id, newPassword);
+            setShowResetPasswordModal(false);
+            setSelectedAdmin(null);
+            setSelectedCompany(null);
+            setNewPassword('');
+            alert('Password reset successfully!');
+        } catch (error) {
+            console.error('Error resetting password:', error);
+            alert(error.response?.data?.message || 'Failed to reset password');
+        }
+    };
+
+    const openResetPasswordModal = (company, admin) => {
+        setSelectedCompany(company);
+        setSelectedAdmin(admin);
+        setShowResetPasswordModal(true);
+    };
+
+    const handleDeleteAdmin = async (companyId, adminId) => {
+        if (window.confirm('Are you sure you want to delete this admin?')) {
+            try {
+                await companiesAPI.deleteAdmin(companyId, adminId);
+                // Refresh admins for this company
+                const response = await companiesAPI.getAdmins(companyId);
+                setCompanyAdmins(prev => ({
+                    ...prev,
+                    [companyId]: response.data
+                }));
+                alert('Admin deleted successfully!');
+            } catch (error) {
+                console.error('Error deleting admin:', error);
+                alert('Failed to delete admin');
+            }
+        }
     };
 
     if (loading) {
@@ -133,6 +219,24 @@ const SuperAdminDashboard = () => {
                         </Button>
                     </div>
                 </div>
+            </div>
+
+            {/* Navigation Menu */}
+            <div className="dashboard-nav">
+                <button
+                    className="nav-item active"
+                    onClick={() => navigate('/super-admin/dashboard')}
+                >
+                    <Home size={20} />
+                    <span>Dashboard</span>
+                </button>
+                <button
+                    className="nav-item"
+                    onClick={() => navigate('/hotels')}
+                >
+                    <Building2 size={20} />
+                    <span>Hotels</span>
+                </button>
             </div>
 
             {/* Main Content */}
@@ -201,40 +305,129 @@ const SuperAdminDashboard = () => {
                             <p>No companies yet. Create your first company!</p>
                         </div>
                     ) : (
-                        <div className="companies-grid">
-                            {companies.map((company) => (
-                                <div key={company._id} className="company-card">
-                                    <div className="company-header">
-                                        <div className="company-info">
-                                            <h4>{company.name}</h4>
-                                            <p><Mail size={14} /> {company.email}</p>
-                                            {company.industry && <p>Industry: {company.industry}</p>}
-                                        </div>
-                                        <span className={`company-status ${company.isActive ? 'active' : 'inactive'}`}>
-                                            {company.isActive ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </div>
-                                    <div className="company-actions">
-                                        <button
-                                            className="icon-button success"
-                                            title="Add Admin"
-                                            onClick={() => openAdminModal(company)}
-                                        >
-                                            <UserPlus size={20} />
-                                        </button>
-                                        <button className="icon-button primary" title="Edit">
-                                            <Edit size={20} />
-                                        </button>
-                                        <button
-                                            className="icon-button danger"
-                                            title="Delete"
-                                            onClick={() => handleDeleteCompany(company._id)}
-                                        >
-                                            <Trash2 size={20} />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="companies-table-container">
+                            <table className="companies-table">
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: '40px' }}></th>
+                                        <th>Company Name</th>
+                                        <th>Email</th>
+                                        <th>Industry</th>
+                                        <th>Quota</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {companies.map((company) => (
+                                        <React.Fragment key={company._id}>
+                                            <tr className="company-row">
+                                                <td>
+                                                    <button
+                                                        className="expand-btn"
+                                                        onClick={() => toggleRowExpansion(company._id)}
+                                                    >
+                                                        {expandedRows[company._id] ? (
+                                                            <ChevronDown size={18} />
+                                                        ) : (
+                                                            <ChevronRight size={18} />
+                                                        )}
+                                                    </button>
+                                                </td>
+                                                <td><strong>{company.name}</strong></td>
+                                                <td>{company.email}</td>
+                                                <td>{company.industry || '-'}</td>
+                                                <td>{company.passengerQuota}</td>
+                                                <td>
+                                                    <span className={`status-badge ${company.isActive ? 'active' : 'inactive'}`}>
+                                                        {company.isActive ? 'Active' : 'Inactive'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div className="action-buttons">
+                                                        <button
+                                                            className="btn-icon success"
+                                                            title="Add Admin"
+                                                            onClick={() => openAdminModal(company)}
+                                                        >
+                                                            <UserPlus size={18} />
+                                                        </button>
+                                                        <button
+                                                            className="btn-icon danger"
+                                                            title="Delete"
+                                                            onClick={() => handleDeleteCompany(company._id)}
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {expandedRows[company._id] && (
+                                                <tr className="nested-row">
+                                                    <td colSpan="7">
+                                                        <div className="nested-table-container">
+                                                            <h4>Company Admins</h4>
+                                                            {companyAdmins[company._id]?.length === 0 ? (
+                                                                <p className="no-admins">No admins for this company</p>
+                                                            ) : (
+                                                                <table className="nested-table">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Username</th>
+                                                                            <th>Email</th>
+                                                                            <th>Full Name</th>
+                                                                            <th>Phone</th>
+                                                                            <th>Status</th>
+                                                                            <th>Actions</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {companyAdmins[company._id]?.map((admin) => (
+                                                                            <tr key={admin._id}>
+                                                                                <td>{admin.username}</td>
+                                                                                <td>{admin.email}</td>
+                                                                                <td>
+                                                                                    {admin.firstName || admin.lastName
+                                                                                        ? `${admin.firstName || ''} ${admin.lastName || ''}`.trim()
+                                                                                        : '-'}
+                                                                                </td>
+                                                                                <td>{admin.phone || '-'}</td>
+                                                                                <td>
+                                                                                    <span className={`status-badge ${admin.isActive ? 'active' : 'inactive'}`}>
+                                                                                        {admin.isActive ? 'Active' : 'Inactive'}
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div className="action-buttons">
+                                                                                        <button
+                                                                                            className="btn-icon primary"
+                                                                                            title="Reset Password"
+                                                                                            onClick={() => openResetPasswordModal(company, admin)}
+                                                                                        >
+                                                                                            <Key size={16} />
+                                                                                        </button>
+                                                                                        <button
+                                                                                            className="btn-icon danger"
+                                                                                            title="Delete Admin"
+                                                                                            onClick={() => handleDeleteAdmin(company._id, admin._id)}
+                                                                                        >
+                                                                                            <Trash2 size={16} />
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </div>
@@ -366,6 +559,48 @@ const SuperAdminDashboard = () => {
                         value={adminFormData.phone}
                         onChange={(e) => setAdminFormData({ ...adminFormData, phone: e.target.value })}
                     />
+                </form>
+            </Modal>
+
+            {/* Reset Password Modal */}
+            <Modal
+                isOpen={showResetPasswordModal}
+                onClose={() => {
+                    setShowResetPasswordModal(false);
+                    setSelectedAdmin(null);
+                    setSelectedCompany(null);
+                    setNewPassword('');
+                }}
+                title={`Reset Password for ${selectedAdmin?.username}`}
+            >
+                <form onSubmit={handleResetPassword}>
+                    <Input
+                        label="New Password"
+                        type="password"
+                        name="newPassword"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        minLength="6"
+                        placeholder="Enter new password (min 6 characters)"
+                    />
+                    <div className="form-actions">
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => {
+                                setShowResetPasswordModal(false);
+                                setSelectedAdmin(null);
+                                setSelectedCompany(null);
+                                setNewPassword('');
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button type="submit" variant="primary">
+                            Reset Password
+                        </Button>
+                    </div>
                 </form>
             </Modal>
         </div>

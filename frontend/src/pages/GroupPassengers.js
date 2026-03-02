@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import PassengersTable from '../components/PassengersTable';
-import { ArrowLeft, Users, Home, Building2, LogOut, FileText } from 'lucide-react';
+import { ArrowLeft, Users, Home, Building2, LogOut, FileText, UserCheck } from 'lucide-react';
 import { SAUDI_AIRPORTS } from '../constants/airports';
 import './GroupPassengers.css';
 
@@ -134,13 +134,13 @@ const GroupPassengers = () => {
                 passengerIds: selectedPassengers,
                 groupId: id
             });
-            
+
             // Refresh data
             await Promise.all([
                 fetchGroupData(),
                 fetchUnassignedPassengers()
             ]);
-            
+
             setSelectedPassengers([]);
             alert(`${selectedPassengers.length} passenger(s) assigned to group successfully!`);
         } catch (error) {
@@ -201,9 +201,9 @@ const GroupPassengers = () => {
                     <Home size={20} />
                     <span>Dashboard</span>
                 </button>
-                <button className="nav-item" onClick={() => navigate('/hotels')}>
-                    <Building2 size={20} />
-                    <span>Hotels</span>
+                <button className="nav-item" onClick={() => navigate('/passengers')}>
+                    <UserCheck size={20} />
+                    <span>Passengers</span>
                 </button>
                 <button className="nav-item active" onClick={() => navigate('/groups')}>
                     <Users size={20} />
@@ -267,8 +267,8 @@ const GroupPassengers = () => {
                     <Card style={{ marginTop: '2rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                             <h3>Available Passengers (No Group Assigned)</h3>
-                            <Button 
-                                variant="primary" 
+                            <Button
+                                variant="primary"
                                 onClick={handleAssignPassengers}
                                 disabled={selectedPassengers.length === 0 || assigning}
                             >
@@ -280,8 +280,8 @@ const GroupPassengers = () => {
                                 <thead>
                                     <tr>
                                         <th style={{ width: '50px' }}>
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 checked={selectedPassengers.length === unassignedPassengers.length && unassignedPassengers.length > 0}
                                                 onChange={handleSelectAll}
                                             />
@@ -297,8 +297,8 @@ const GroupPassengers = () => {
                                     {unassignedPassengers.map((passenger, index) => (
                                         <tr key={passenger._id}>
                                             <td>
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     checked={selectedPassengers.includes(passenger._id)}
                                                     onChange={() => handleSelectPassenger(passenger._id)}
                                                 />

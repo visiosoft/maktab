@@ -77,7 +77,7 @@ router.get('/unassigned', async (req, res) => {
                 { group: null }
             ]
         })
-        .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 });
 
         res.json(passengers);
     } catch (error) {
@@ -111,7 +111,7 @@ router.post('/bulk-import', async (req, res) => {
         const availableSlots = company.passengerQuota - currentPassengerCount;
 
         if (availableSlots <= 0) {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 message: `Passenger quota reached. Your company quota is ${company.passengerQuota} passengers.`,
                 quota: company.passengerQuota,
                 current: currentPassengerCount
@@ -192,7 +192,14 @@ router.get('/', async (req, res) => {
 
         const passengers = await Passenger.find({ company: admin.company })
             .populate('createdBy', 'username email')
-            .populate('group', 'groupName')
+            .populate({
+                path: 'group',
+                select: 'groupName maktab hotel',
+                populate: {
+                    path: 'hotel',
+                    select: 'name'
+                }
+            })
             .sort({ createdAt: -1 });
 
         res.json(passengers);
@@ -226,9 +233,9 @@ router.post('/', async (req, res) => {
         // Check company quota
         const company = await Company.findById(admin.company);
         const currentPassengerCount = await Passenger.countDocuments({ company: admin.company });
-        
+
         if (currentPassengerCount >= company.passengerQuota) {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 message: `Passenger quota reached. Your company quota is ${company.passengerQuota} passengers.`,
                 quota: company.passengerQuota,
                 current: currentPassengerCount

@@ -57,7 +57,7 @@ function AppRoutes() {
             <Route
                 path="/hotels"
                 element={
-                    <PrivateRoute requiredRole="company_admin">
+                    <PrivateRoute requiredRole="super_admin">
                         <Hotels />
                     </PrivateRoute>
                 }

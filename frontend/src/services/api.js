@@ -62,6 +62,8 @@ export const companiesAPI = {
         api.put(`/companies/${companyId}/admins/${adminId}`, data),
     deleteAdmin: (companyId, adminId) =>
         api.delete(`/companies/${companyId}/admins/${adminId}`),
+    resetAdminPassword: (companyId, adminId, newPassword) =>
+        api.post(`/companies/${companyId}/admins/${adminId}/reset-password`, { newPassword }),
 };
 
 // Passengers API

@@ -317,4 +317,35 @@ router.delete('/:companyId/admins/:adminId', authMiddleware, isSuperAdmin, async
     }
 });
 
+// @route   POST /api/companies/:companyId/admins/:adminId/reset-password
+// @desc    Reset company admin password
+// @access  Super Admin
+router.post('/:companyId/admins/:adminId/reset-password', authMiddleware, isSuperAdmin, async (req, res) => {
+    try {
+        const { newPassword } = req.body;
+
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        }
+
+        const admin = await CompanyAdmin.findById(req.params.adminId);
+
+        if (!admin) {
+            return res.status(404).json({ message: 'Company admin not found' });
+        }
+
+        if (admin.company.toString() !== req.params.companyId) {
+            return res.status(400).json({ message: 'Admin does not belong to this company' });
+        }
+
+        admin.password = newPassword;
+        await admin.save();
+
+        res.json({ message: 'Password reset successfully' });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({ message: 'Server error resetting password' });
+    }
+});
+
 module.exports = router;

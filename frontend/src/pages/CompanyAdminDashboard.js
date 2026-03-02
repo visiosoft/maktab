@@ -27,7 +27,7 @@ const CompanyAdminDashboard = () => {
     const [stats, setStats] = useState({
         totalPassengers: 0,
         quota: 100,
-        remaining: 100,
+        remaining: 0,
         maktabCounts: {
             A: 0,
             B: 0,
@@ -38,6 +38,10 @@ const CompanyAdminDashboard = () => {
     });
     const [loading, setLoading] = useState(true);
     const [showCompanyModal, setShowCompanyModal] = useState(false);
+    const [showMaktabModal, setShowMaktabModal] = useState(false);
+    const [selectedMaktab, setSelectedMaktab] = useState(null);
+    const [maktabPassengers, setMaktabPassengers] = useState([]);
+    const [loadingPassengers, setLoadingPassengers] = useState(false);
 
     useEffect(() => {
         fetchCompanyData();
@@ -59,10 +63,10 @@ const CompanyAdminDashboard = () => {
         try {
             const response = await passengersAPI.getStats();
             setStats({
-                totalPassengers: response.data.totalPassengers || 0,
-                quota: response.data.quota || 100,
-                remaining: response.data.remaining || 100,
-                maktabCounts: response.data.maktabCounts || {
+                totalPassengers: response.data.totalPassengers ?? 0,
+                quota: response.data.quota ?? 100,
+                remaining: response.data.remaining ?? 0,
+                maktabCounts: response.data.maktabCounts ?? {
                     A: 0,
                     B: 0,
                     C: 0,
@@ -74,6 +78,37 @@ const CompanyAdminDashboard = () => {
             console.error('Error fetching stats:', error);
             // Keep the default state on error
         }
+    };
+
+    const fetchMaktabPassengers = async (maktab) => {
+        setLoadingPassengers(true);
+        try {
+            const response = await passengersAPI.getAll();
+            console.log('All passengers:', response.data);
+            console.log('Looking for maktab:', maktab);
+            console.log('Sample passenger group structure:', response.data[0]?.group);
+
+            const filtered = response.data.filter(passenger => {
+                console.log(`Passenger ${passenger.firstName}: group =`, passenger.group, 'maktab =', passenger.group?.maktab);
+                return maktab === 'unassigned'
+                    ? (!passenger.group || !passenger.group.maktab)
+                    : passenger.group?.maktab === maktab;
+            });
+
+            console.log('Filtered passengers:', filtered);
+            setMaktabPassengers(filtered);
+        } catch (error) {
+            console.error('Error fetching maktab passengers:', error);
+            setMaktabPassengers([]);
+        } finally {
+            setLoadingPassengers(false);
+        }
+    };
+
+    const handleMaktabClick = (maktab) => {
+        setSelectedMaktab(maktab);
+        setShowMaktabModal(true);
+        fetchMaktabPassengers(maktab);
     };
 
     if (loading) {
@@ -121,13 +156,6 @@ const CompanyAdminDashboard = () => {
                 >
                     <UserCheck size={20} />
                     <span>Passengers</span>
-                </button>
-                <button
-                    className="nav-item"
-                    onClick={() => navigate('/hotels')}
-                >
-                    <Building2 size={20} />
-                    <span>Hotels</span>
                 </button>
                 <button
                     className="nav-item"
@@ -212,7 +240,7 @@ const CompanyAdminDashboard = () => {
                 <div className="fade-in" style={{ marginTop: '2rem' }}>
                     <h3 className="section-title">Maktab Distribution</h3>
                     <div className="maktab-cards">
-                        <div className="maktab-card maktab-a">
+                        <div className="maktab-card maktab-a" onClick={() => handleMaktabClick('A')} style={{ cursor: 'pointer' }}>
                             <div className="maktab-label">Maktab A</div>
                             <div className="maktab-count">{stats.maktabCounts?.A ?? 0}</div>
                             <div className="maktab-progress">
@@ -223,7 +251,7 @@ const CompanyAdminDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="maktab-card maktab-b">
+                        <div className="maktab-card maktab-b" onClick={() => handleMaktabClick('B')} style={{ cursor: 'pointer' }}>
                             <div className="maktab-label">Maktab B</div>
                             <div className="maktab-count">{stats.maktabCounts?.B ?? 0}</div>
                             <div className="maktab-progress">
@@ -234,7 +262,7 @@ const CompanyAdminDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="maktab-card maktab-c">
+                        <div className="maktab-card maktab-c" onClick={() => handleMaktabClick('C')} style={{ cursor: 'pointer' }}>
                             <div className="maktab-label">Maktab C</div>
                             <div className="maktab-count">{stats.maktabCounts?.C ?? 0}</div>
                             <div className="maktab-progress">
@@ -245,7 +273,7 @@ const CompanyAdminDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="maktab-card maktab-d">
+                        <div className="maktab-card maktab-d" onClick={() => handleMaktabClick('D')} style={{ cursor: 'pointer' }}>
                             <div className="maktab-label">Maktab D</div>
                             <div className="maktab-count">{stats.maktabCounts?.D ?? 0}</div>
                             <div className="maktab-progress">
@@ -256,7 +284,7 @@ const CompanyAdminDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="maktab-card maktab-unassigned">
+                        <div className="maktab-card maktab-unassigned" onClick={() => handleMaktabClick('unassigned')} style={{ cursor: 'pointer' }}>
                             <div className="maktab-label">Unassigned</div>
                             <div className="maktab-count">{stats.maktabCounts?.unassigned ?? 0}</div>
                             <div className="maktab-progress">
@@ -335,6 +363,47 @@ const CompanyAdminDashboard = () => {
                     </div>
                 ) : (
                     <p>No company data available.</p>
+                )}
+            </Modal>
+
+            {/* Maktab Passengers Modal */}
+            <Modal
+                isOpen={showMaktabModal}
+                onClose={() => setShowMaktabModal(false)}
+                title={`Maktab ${selectedMaktab === 'unassigned' ? 'Unassigned' : selectedMaktab} - Passengers`}
+            >
+                {loadingPassengers ? (
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>Loading passengers...</div>
+                ) : maktabPassengers.length > 0 ? (
+                    <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                        <table className="data-table" style={{ width: '100%' }}>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Passport Number</th>
+                                    <th>Phone</th>
+                                    <th>Hotel</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {maktabPassengers.map((passenger) => (
+                                    <tr key={passenger._id}>
+                                        <td>{passenger.firstName} {passenger.lastName}</td>
+                                        <td>{passenger.passportNo}</td>
+                                        <td>{passenger.phone || '-'}</td>
+                                        <td>{passenger.group?.hotel?.name || '-'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <div style={{ marginTop: '1rem', textAlign: 'center', color: '#667eea', fontWeight: '600' }}>
+                            Total: {maktabPassengers.length} passenger{maktabPassengers.length !== 1 ? 's' : ''}
+                        </div>
+                    </div>
+                ) : (
+                    <p style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                        No passengers found in this maktab.
+                    </p>
                 )}
             </Modal>
         </div>

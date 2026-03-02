@@ -1,7 +1,14 @@
+@import './Dashboard.css';
+
 .passengers-page {
-    padding: 2rem;
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+.page-content {
     max-width: 1400px;
     margin: 0 auto;
+    padding: 2rem;
 }
 
 .passengers-header {
