@@ -1,0 +1,70 @@
+@import './Dashboard.css';
+
+.group-passengers-page {
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+.page-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.group-info-card {
+    margin-bottom: 1.5rem;
+}
+
+.group-info-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.group-info-header svg {
+    color: #667eea;
+    flex-shrink: 0;
+}
+
+.group-info-header h2 {
+    margin: 0 0 0.25rem 0;
+    color: #1a1a1a;
+    font-size: 1.5rem;
+}
+
+.group-meta {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.travel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.travel-detail {
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.travel-detail strong {
+    color: #1a1a1a;
+}
+
+@media (max-width: 768px) {
+    .group-passengers-page {
+        padding: 1rem;
+    }
+
+    .group-info-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

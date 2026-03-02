@@ -1,0 +1,104 @@
+@import './Dashboard.css';
+
+.group-form-page {
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+.page-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-section h3 {
+    margin: 0 0 1.25rem 0;
+    color: #1a1a1a;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.hotel-select-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.quick-add-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.select-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #1a1a1a;
+    background-color: white;
+    transition: all 0.2s;
+}
+
+.select-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.select-input option {
+    padding: 0.5rem;
+}
+
+.form-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #1a1a1a;
+    background-color: white;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-select option {
+    padding: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .hotel-select-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .quick-add-btn {
+        width: 100%;
+    }
+}
