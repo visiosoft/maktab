@@ -379,3 +379,195 @@ select.table-cell-input {
 .sample-download-link:active {
     transform: scale(0.98);
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .passengers-table-container {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .table-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+    .table-title {
+        font-size: 1.25rem;
+    }
+
+    .table-actions {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .table-actions>* {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .search-box {
+        min-width: 100%;
+    }
+
+    .group-filter {
+        min-width: 100%;
+    }
+
+    /* Make table scrollable on mobile */
+    .passengers-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -1rem;
+        padding: 0 1rem;
+    }
+
+    .passengers-table {
+        min-width: 900px;
+    }
+
+    .passengers-table th,
+    .passengers-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.813rem;
+    }
+
+    .passengers-table th:first-child,
+    .passengers-table td:first-child {
+        padding-left: 1rem;
+    }
+
+    .passengers-table th:last-child,
+    .passengers-table td:last-child {
+        padding-right: 1rem;
+    }
+
+    .table-cell-input {
+        padding: 0.5rem;
+        font-size: 0.813rem;
+    }
+
+    .row-actions {
+        gap: 0.25rem;
+    }
+
+    .action-icon-button {
+        padding: 0.4rem;
+    }
+
+    .action-icon-button svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .empty-state {
+        padding: 3rem 1.5rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.1rem;
+    }
+
+    .empty-state p {
+        font-size: 0.938rem;
+    }
+
+    .table-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.813rem;
+    }
+
+    .loading-spinner {
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .passengers-table-container {
+        padding: 0.75rem;
+    }
+
+    .table-header {
+        gap: 0.5rem;
+    }
+
+    .table-title {
+        font-size: 1.1rem;
+    }
+
+    .passengers-table {
+        min-width: 800px;
+    }
+
+    .passengers-table th,
+    .passengers-table td {
+        padding: 0.625rem 0.4rem;
+        font-size: 0.75rem;
+    }
+
+    .passengers-table th:first-child,
+    .passengers-table td:first-child {
+        padding-left: 0.75rem;
+    }
+
+    .passengers-table th:last-child,
+    .passengers-table td:last-child {
+        padding-right: 0.75rem;
+    }
+
+    .table-cell-input {
+        padding: 0.4rem;
+        font-size: 0.75rem;
+    }
+
+    .action-icon-button {
+        padding: 0.35rem;
+    }
+
+    .action-icon-button svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .search-box input {
+        padding: 0.5rem 0.875rem 0.5rem 2.25rem;
+        font-size: 0.813rem;
+    }
+
+    .search-icon {
+        left: 0.625rem;
+    }
+
+    .group-filter {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.813rem;
+    }
+
+    .group-badge {
+        font-size: 0.688rem;
+        padding: 0.2rem 0.6rem;
+    }
+
+    .empty-state {
+        padding: 2.5rem 1rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1rem;
+    }
+
+    .empty-state p {
+        font-size: 0.875rem;
+    }
+
+    .table-info {
+        font-size: 0.75rem;
+    }
+
+    .sample-download-link {
+        font-size: 0.688rem;
+    }
+}

@@ -71,3 +71,48 @@
     padding: 1rem 2rem;
     font-size: 1.125rem;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .button {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.938rem;
+        min-height: 44px;
+        /* Better touch target */
+    }
+
+    .button-small {
+        padding: 0.625rem 1rem;
+        font-size: 0.813rem;
+        min-height: 40px;
+    }
+
+    .button-large {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        min-height: 48px;
+    }
+}
+
+@media (max-width: 480px) {
+    .button {
+        padding: 0.875rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .button-small {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.75rem;
+    }
+
+    .button-large {
+        padding: 1rem 1.25rem;
+        font-size: 0.938rem;
+    }
+
+    /* Full width buttons on very small screens when in a flex container */
+    .card-footer .button,
+    .form-actions .button {
+        width: 100%;
+    }
+}

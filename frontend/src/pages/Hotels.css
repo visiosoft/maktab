@@ -146,3 +146,134 @@
     padding-top: 1.5rem;
     border-top: 1px solid #e5e7eb;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .page-content {
+        padding: 1rem;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .search-card {
+        margin-bottom: 1rem;
+    }
+
+    .search-box {
+        gap: 0.5rem;
+    }
+
+    /* Make table scrollable */
+    .hotels-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -1rem;
+        padding: 0 1rem;
+    }
+
+    .hotels-table table {
+        min-width: 600px;
+    }
+
+    .hotels-table th,
+    .hotels-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.813rem;
+    }
+
+    .action-buttons {
+        gap: 0.25rem;
+    }
+
+    .btn-icon {
+        padding: 0.4rem;
+    }
+
+    .btn-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .empty-state {
+        padding: 2.5rem 1.5rem;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        font-size: 0.875rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 1.25rem;
+        padding-top: 1.25rem;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-content {
+        padding: 0.75rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.25rem;
+    }
+
+    .page-header h1 svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .hotels-table table {
+        min-width: 550px;
+    }
+
+    .hotels-table th,
+    .hotels-table td {
+        padding: 0.625rem 0.4rem;
+        font-size: 0.75rem;
+    }
+
+    .btn-icon {
+        padding: 0.35rem;
+    }
+
+    .btn-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+
+    .empty-state p {
+        font-size: 0.938rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        font-size: 0.813rem;
+    }
+}

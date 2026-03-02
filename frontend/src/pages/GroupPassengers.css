@@ -59,13 +59,92 @@
 }
 
 @media (max-width: 768px) {
-    .group-passengers-page {
+    .page-content {
         padding: 1rem;
     }
 
     .group-info-header {
         flex-direction: column;
         align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .group-info-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .group-meta {
+        font-size: 0.813rem;
+    }
+
+    .travel-info {
+        padding: 0.875rem;
+    }
+
+    .travel-detail {
+        font-size: 0.813rem;
+    }
+
+    /* Make table scrollable */
+    .unassigned-passengers-table {
+        max-height: 350px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .unassigned-passengers-table table {
+        min-width: 600px;
+    }
+
+    .unassigned-passengers-table thead th,
+    .unassigned-passengers-table tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.813rem;
+    }
+
+    .unassigned-passengers-table input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-content {
+        padding: 0.75rem;
+    }
+
+    .group-info-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .group-meta {
+        font-size: 0.75rem;
+    }
+
+    .travel-info {
+        padding: 0.75rem;
+    }
+
+    .travel-detail {
+        font-size: 0.75rem;
+    }
+
+    .unassigned-passengers-table {
+        max-height: 300px;
+    }
+
+    .unassigned-passengers-table table {
+        min-width: 550px;
+    }
+
+    .unassigned-passengers-table thead th,
+    .unassigned-passengers-table tbody td {
+        padding: 0.625rem 0.4rem;
+        font-size: 0.75rem;
+    }
+
+    .unassigned-passengers-table input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
     }
 }
 

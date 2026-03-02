@@ -144,3 +144,63 @@ code {
 .gap-4 {
     gap: 2rem;
 }
+
+/* Mobile-Friendly Global Styles */
+html {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    touch-action: manipulation;
+}
+
+body {
+    overflow-x: hidden;
+    touch-action: pan-y;
+}
+
+/* Improve touch scrolling on mobile */
+* {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Make clickable elements more touch-friendly */
+button,
+a,
+input,
+select,
+textarea {
+    -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
+}
+
+/* Prevent zoom on input focus on iOS */
+@supports (-webkit-touch-callout: none) {
+
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* Mobile-specific utility classes */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+
+    .mobile-hidden {
+        display: none !important;
+    }
+
+    .mobile-full-width {
+        width: 100% !important;
+    }
+
+    .mobile-text-center {
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 0.75rem;
+    }
+}

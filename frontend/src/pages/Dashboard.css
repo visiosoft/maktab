@@ -728,3 +728,324 @@
     justify-content: flex-end;
     margin-top: 1.5rem;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+
+    /* Header */
+    .dashboard-header {
+        padding: 1rem;
+    }
+
+    .dashboard-header-content {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .dashboard-logo {
+        flex-direction: row;
+        gap: 0.75rem;
+    }
+
+    .dashboard-logo-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .dashboard-logo-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .dashboard-logo-text h1 {
+        font-size: 1.25rem;
+    }
+
+    .dashboard-logo-text p {
+        font-size: 0.75rem;
+    }
+
+    /* Navigation */
+    .dashboard-nav {
+        padding: 0 1rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 0.25rem;
+    }
+
+    .nav-item {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .nav-item svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Container */
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    /* Welcome */
+    .dashboard-welcome h2 {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-welcome p {
+        font-size: 0.9rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .stat-card {
+        padding: 1.25rem;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .stat-content h3 {
+        font-size: 1.75rem;
+    }
+
+    .stat-content p {
+        font-size: 0.813rem;
+    }
+
+    /* Quota Cards */
+    .quota-cards {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .quota-card {
+        padding: 1.25rem;
+    }
+
+    .quota-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .quota-card-body h2 {
+        font-size: 2rem;
+    }
+
+    /* Maktab Cards */
+    .maktab-cards {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .maktab-card {
+        padding: 1.25rem;
+    }
+
+    .maktab-count {
+        font-size: 1.5rem;
+    }
+
+    /* Companies Grid */
+    .companies-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .company-card {
+        padding: 1.25rem;
+    }
+
+    .company-info h4 {
+        font-size: 1.1rem;
+    }
+
+    .company-actions {
+        flex-wrap: wrap;
+    }
+
+    /* Tables */
+    .table-container {
+        padding: 1rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .companies-table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .companies-table,
+    .data-table {
+        min-width: 600px;
+    }
+
+    .companies-table thead th,
+    .data-table th {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .companies-table tbody td,
+    .data-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .nested-table-container {
+        padding: 1rem;
+    }
+
+    .nested-table thead th {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .nested-table tbody td {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    /* Buttons */
+    .action-buttons {
+        gap: 0.25rem;
+    }
+
+    .btn-icon {
+        padding: 0.4rem;
+    }
+
+    .btn-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+
+    /* Section Header */
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .section-header h3 {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-header {
+        padding: 0.75rem;
+    }
+
+    .dashboard-logo-text h1 {
+        font-size: 1.1rem;
+    }
+
+    .dashboard-logo-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .dashboard-logo-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .dashboard-container {
+        padding: 0.75rem;
+    }
+
+    .dashboard-welcome h2 {
+        font-size: 1.25rem;
+    }
+
+    .dashboard-welcome p {
+        font-size: 0.85rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+    }
+
+    .stat-content h3 {
+        font-size: 1.5rem;
+    }
+
+    .quota-card {
+        padding: 1rem;
+    }
+
+    .quota-card-body h2 {
+        font-size: 1.75rem;
+    }
+
+    .maktab-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .maktab-card {
+        padding: 1rem;
+    }
+
+    .company-card {
+        padding: 1rem;
+    }
+
+    .nav-item span {
+        font-size: 0.8rem;
+    }
+
+    .section-header h3 {
+        font-size: 1.1rem;
+    }
+}
+
+/* Tablet landscape */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .dashboard-container {
+        padding: 1.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .quota-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .companies-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    .maktab-cards {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}

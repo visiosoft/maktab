@@ -80,3 +80,57 @@ textarea.input-field {
 select.input-field {
     cursor: pointer;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .input-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .input-field {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.938rem;
+        min-height: 44px;
+        /* Better touch target */
+    }
+
+    .input-label {
+        font-size: 0.813rem;
+    }
+
+    .input-error-message {
+        font-size: 0.813rem;
+    }
+
+    textarea.input-field {
+        min-height: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .input-group {
+        margin-bottom: 1rem;
+    }
+
+    .input-field {
+        padding: 0.688rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .input-label {
+        font-size: 0.75rem;
+        margin-bottom: 0.375rem;
+    }
+
+    .input-error-message {
+        font-size: 0.75rem;
+    }
+
+    .input-icon .input-field {
+        padding-left: 2.5rem;
+    }
+
+    .input-icon-element {
+        left: 0.75rem;
+    }
+}

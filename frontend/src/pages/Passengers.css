@@ -35,3 +35,37 @@
     font-size: 1.2rem;
     color: #718096;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .page-content {
+        padding: 1rem;
+    }
+
+    .passengers-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .passengers-header p {
+        font-size: 0.9rem;
+    }
+
+    .loading {
+        min-height: 300px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-content {
+        padding: 0.75rem;
+    }
+
+    .passengers-header h1 {
+        font-size: 1.25rem;
+    }
+
+    .passengers-header p {
+        font-size: 0.85rem;
+    }
+}
