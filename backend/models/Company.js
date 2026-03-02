@@ -39,6 +39,11 @@ const CompanySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    passengerQuota: {
+        type: Number,
+        default: 100,
+        min: 0
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'SuperAdmin',

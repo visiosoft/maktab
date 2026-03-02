@@ -67,8 +67,9 @@ export const companiesAPI = {
 // Passengers API
 export const passengersAPI = {
     getAll: () => api.get('/passengers'),
+    getUnassigned: () => api.get('/passengers/unassigned'),
     create: (data) => api.post('/passengers', data),
-    bulkCreate: (passengers) => api.post('/passengers/bulk', { passengers }),
+    bulkImport: (passengers) => api.post('/passengers/bulk-import', { passengers }),
     update: (id, data) => api.put(`/passengers/${id}`, data),
     delete: (id) => api.delete(`/passengers/${id}`),
     getStats: () => api.get('/passengers/stats'),

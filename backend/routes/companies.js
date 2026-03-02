@@ -31,7 +31,7 @@ router.get('/', authMiddleware, async (req, res) => {
 // @access  Super Admin
 router.post('/', authMiddleware, isSuperAdmin, async (req, res) => {
     try {
-        const { name, email, phone, address, industry, website } = req.body;
+        const { name, email, phone, address, industry, website, passengerQuota } = req.body;
 
         if (!name || !email) {
             return res.status(400).json({ message: 'Company name and email are required' });
@@ -50,6 +50,7 @@ router.post('/', authMiddleware, isSuperAdmin, async (req, res) => {
             address,
             industry,
             website,
+            passengerQuota: passengerQuota !== undefined ? passengerQuota : 100,
             createdBy: req.user.id
         });
 
@@ -100,7 +101,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // @access  Super Admin
 router.put('/:id', authMiddleware, isSuperAdmin, async (req, res) => {
     try {
-        const { name, email, phone, address, industry, website, isActive } = req.body;
+        const { name, email, phone, address, industry, website, isActive, passengerQuota } = req.body;
 
         const company = await Company.findById(req.params.id);
 
@@ -123,6 +124,7 @@ router.put('/:id', authMiddleware, isSuperAdmin, async (req, res) => {
         if (industry !== undefined) company.industry = industry;
         if (website !== undefined) company.website = website;
         if (isActive !== undefined) company.isActive = isActive;
+        if (passengerQuota !== undefined) company.passengerQuota = passengerQuota;
 
         await company.save();
 

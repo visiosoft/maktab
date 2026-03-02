@@ -15,8 +15,11 @@ const GroupPassengers = () => {
     const { logout } = useAuth();
     const [group, setGroup] = useState(null);
     const [passengers, setPassengers] = useState([]);
+    const [unassignedPassengers, setUnassignedPassengers] = useState([]);
+    const [selectedPassengers, setSelectedPassengers] = useState([]);
     const [company, setCompany] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [assigning, setAssigning] = useState(false);
 
     const getAirportCity = (code) => {
         const airport = SAUDI_AIRPORTS.find(a => a.code === code);
@@ -26,6 +29,7 @@ const GroupPassengers = () => {
     useEffect(() => {
         fetchGroupData();
         fetchCompany();
+        fetchUnassignedPassengers();
     }, [id]);
 
     const fetchCompany = async () => {
@@ -51,6 +55,15 @@ const GroupPassengers = () => {
             alert('Failed to fetch group data');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchUnassignedPassengers = async () => {
+        try {
+            const response = await passengersAPI.getUnassigned();
+            setUnassignedPassengers(response.data);
+        } catch (error) {
+            console.error('Error fetching unassigned passengers:', error);
         }
     };
 
@@ -90,6 +103,51 @@ const GroupPassengers = () => {
         } catch (error) {
             console.error('Error deleting passenger:', error);
             throw error;
+        }
+    };
+
+    const handleSelectPassenger = (passengerId) => {
+        setSelectedPassengers(prev =>
+            prev.includes(passengerId)
+                ? prev.filter(id => id !== passengerId)
+                : [...prev, passengerId]
+        );
+    };
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedPassengers(unassignedPassengers.map(p => p._id));
+        } else {
+            setSelectedPassengers([]);
+        }
+    };
+
+    const handleAssignPassengers = async () => {
+        if (selectedPassengers.length === 0) {
+            alert('Please select at least one passenger');
+            return;
+        }
+
+        try {
+            setAssigning(true);
+            await groupsAPI.assignPassengers({
+                passengerIds: selectedPassengers,
+                groupId: id
+            });
+            
+            // Refresh data
+            await Promise.all([
+                fetchGroupData(),
+                fetchUnassignedPassengers()
+            ]);
+            
+            setSelectedPassengers([]);
+            alert(`${selectedPassengers.length} passenger(s) assigned to group successfully!`);
+        } catch (error) {
+            console.error('Error assigning passengers:', error);
+            alert(error.response?.data?.message || 'Failed to assign passengers');
+        } finally {
+            setAssigning(false);
         }
     };
 
@@ -196,7 +254,7 @@ const GroupPassengers = () => {
                 </Card>
 
                 <Card>
-                    <h3>Passengers</h3>
+                    <h3>Passengers in This Group</h3>
                     <PassengersTable
                         passengers={passengers}
                         onAdd={handleAddPassenger}
@@ -204,6 +262,62 @@ const GroupPassengers = () => {
                         onDelete={handleDeletePassenger}
                     />
                 </Card>
+
+                {unassignedPassengers.length > 0 && (
+                    <Card style={{ marginTop: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <h3>Available Passengers (No Group Assigned)</h3>
+                            <Button 
+                                variant="primary" 
+                                onClick={handleAssignPassengers}
+                                disabled={selectedPassengers.length === 0 || assigning}
+                            >
+                                {assigning ? 'Assigning...' : `Assign ${selectedPassengers.length > 0 ? selectedPassengers.length : ''} to Group`}
+                            </Button>
+                        </div>
+                        <div className="unassigned-passengers-table">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: '50px' }}>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={selectedPassengers.length === unassignedPassengers.length && unassignedPassengers.length > 0}
+                                                onChange={handleSelectAll}
+                                            />
+                                        </th>
+                                        <th>#</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Passport No.</th>
+                                        <th>Created Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {unassignedPassengers.map((passenger, index) => (
+                                        <tr key={passenger._id}>
+                                            <td>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={selectedPassengers.includes(passenger._id)}
+                                                    onChange={() => handleSelectPassenger(passenger._id)}
+                                                />
+                                            </td>
+                                            <td>{index + 1}</td>
+                                            <td>{passenger.firstName}</td>
+                                            <td>{passenger.lastName}</td>
+                                            <td>{passenger.passportNo}</td>
+                                            <td>{new Date(passenger.createdAt).toLocaleDateString()}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p style={{ marginTop: '1rem', color: '#666', fontSize: '0.875rem' }}>
+                            Select passengers from the list above and click "Assign to Group" to add them to {group?.groupName}.
+                        </p>
+                    </Card>
+                )}
             </div>
         </div>
     );

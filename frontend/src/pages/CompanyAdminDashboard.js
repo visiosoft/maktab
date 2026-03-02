@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { companiesAPI, passengersAPI, groupsAPI } from '../services/api';
+import { companiesAPI, passengersAPI } from '../services/api';
 import {
     Building2,
     LogOut,
@@ -11,11 +11,12 @@ import {
     Users,
     Home,
     UserCheck,
-    FileText
+    FileText,
+    TrendingUp,
+    TrendingDown,
+    CheckCircle2
 } from 'lucide-react';
 import Button from '../components/Button';
-import Card, { CardHeader, CardBody } from '../components/Card';
-import PassengersTable from '../components/PassengersTable';
 import Modal from '../components/Modal';
 import './Dashboard.css';
 
@@ -23,16 +24,24 @@ const CompanyAdminDashboard = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [company, setCompany] = useState(null);
-    const [passengers, setPassengers] = useState([]);
-    const [groups, setGroups] = useState([]);
+    const [stats, setStats] = useState({
+        totalPassengers: 0,
+        quota: 100,
+        remaining: 100,
+        maktabCounts: {
+            A: 0,
+            B: 0,
+            C: 0,
+            D: 0,
+            unassigned: 0
+        }
+    });
     const [loading, setLoading] = useState(true);
-    const [passengersLoading, setPassengersLoading] = useState(false);
     const [showCompanyModal, setShowCompanyModal] = useState(false);
 
     useEffect(() => {
         fetchCompanyData();
-        fetchPassengers();
-        fetchGroups();
+        fetchStats();
     }, []);
 
     const fetchCompanyData = async () => {
@@ -46,58 +55,12 @@ const CompanyAdminDashboard = () => {
         }
     };
 
-    const fetchPassengers = async () => {
-        setPassengersLoading(true);
+    const fetchStats = async () => {
         try {
-            const response = await passengersAPI.getAll();
-            setPassengers(response.data);
+            const response = await passengersAPI.getStats();
+            setStats(response.data);
         } catch (error) {
-            console.error('Error fetching passengers:', error);
-        } finally {
-            setPassengersLoading(false);
-        }
-    };
-
-    const fetchGroups = async () => {
-        try {
-            const response = await groupsAPI.getAll();
-            setGroups(response.data);
-        } catch (error) {
-            console.error('Error fetching groups:', error);
-        }
-    };
-
-    const handleAddPassenger = async (passengerData) => {
-        try {
-            await passengersAPI.create(passengerData);
-            fetchPassengers();
-        } catch (error) {
-            console.error('Error adding passenger:', error);
-            const errorMessage = error.response?.data?.message || 'Failed to add passenger';
-            alert(errorMessage);
-            throw error;
-        }
-    };
-
-    const handleUpdatePassenger = async (id, passengerData) => {
-        try {
-            await passengersAPI.update(id, passengerData);
-            fetchPassengers();
-        } catch (error) {
-            console.error('Error updating passenger:', error);
-            alert(error.response?.data?.message || 'Failed to update passenger');
-            throw error;
-        }
-    };
-
-    const handleDeletePassenger = async (id) => {
-        try {
-            await passengersAPI.delete(id);
-            fetchPassengers();
-        } catch (error) {
-            console.error('Error deleting passenger:', error);
-            alert('Failed to delete passenger');
-            throw error;
+            console.error('Error fetching stats:', error);
         }
     };
 
@@ -142,6 +105,13 @@ const CompanyAdminDashboard = () => {
                 </button>
                 <button
                     className="nav-item"
+                    onClick={() => navigate('/passengers')}
+                >
+                    <UserCheck size={20} />
+                    <span>Passengers</span>
+                </button>
+                <button
+                    className="nav-item"
                     onClick={() => navigate('/hotels')}
                 >
                     <Building2 size={20} />
@@ -167,48 +137,124 @@ const CompanyAdminDashboard = () => {
             <div className="dashboard-container">
                 <div className="dashboard-welcome fade-in">
                     <h2>Welcome, {user?.username}!</h2>
-                    <p>Manage your company from this dashboard.</p>
+                    <p>Monitor your passenger quota and allocations.</p>
                 </div>
 
-                {/* Quick Stats */}
+                {/* Quota Overview Cards */}
                 <div className="fade-in">
-                    <Card>
-                        <CardHeader title="Quick Stats" />
-                        <CardBody>
-                            <div className="stats-grid">
-                                <div className="stat-card">
-                                    <div className="stat-icon primary">
-                                        <Building2 />
-                                    </div>
-                                    <div className="stat-content">
-                                        <h3>1</h3>
-                                        <p>Company</p>
-                                    </div>
+                    <h3 className="section-title">Quota Overview</h3>
+                    <div className="quota-cards">
+                        <div className="quota-card primary-card">
+                            <div className="quota-card-header">
+                                <div className="quota-icon">
+                                    <CheckCircle2 size={32} />
                                 </div>
-                                <div className="stat-card">
-                                    <div className="stat-icon success">
-                                        <Users />
-                                    </div>
-                                    <div className="stat-content">
-                                        <h3>{passengers.length}</h3>
-                                        <p>Total Passengers</p>
-                                    </div>
+                                <div className="quota-trend">
+                                    <TrendingUp size={20} />
                                 </div>
                             </div>
-                        </CardBody>
-                    </Card>
+                            <div className="quota-card-body">
+                                <h2>{stats.quota}</h2>
+                                <p>Total Quota</p>
+                                <div className="quota-subtitle">Maximum passengers allowed</div>
+                            </div>
+                        </div>
+
+                        <div className="quota-card success-card">
+                            <div className="quota-card-header">
+                                <div className="quota-icon">
+                                    <Users size={32} />
+                                </div>
+                                <div className="quota-trend">
+                                    {stats.totalPassengers > 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+                                </div>
+                            </div>
+                            <div className="quota-card-body">
+                                <h2>{stats.totalPassengers}</h2>
+                                <p>Passengers Added</p>
+                                <div className="quota-subtitle">
+                                    {Math.round((stats.totalPassengers / stats.quota) * 100)}% of quota used
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="quota-card warning-card">
+                            <div className="quota-card-header">
+                                <div className="quota-icon">
+                                    <UserCheck size={32} />
+                                </div>
+                                <div className="quota-trend">
+                                    {stats.remaining > 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+                                </div>
+                            </div>
+                            <div className="quota-card-body">
+                                <h2>{stats.remaining}</h2>
+                                <p>Remaining Slots</p>
+                                <div className="quota-subtitle">Available for new passengers</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Passenger List */}
-                <div style={{ marginTop: '2rem' }} className="fade-in">
-                    <PassengersTable
-                        passengers={passengers}
-                        groups={groups}
-                        onAdd={handleAddPassenger}
-                        onUpdate={handleUpdatePassenger}
-                        onDelete={handleDeletePassenger}
-                        loading={passengersLoading}
-                    />
+                {/* Maktab Distribution */}
+                <div className="fade-in" style={{ marginTop: '2rem' }}>
+                    <h3 className="section-title">Maktab Distribution</h3>
+                    <div className="maktab-cards">
+                        <div className="maktab-card maktab-a">
+                            <div className="maktab-label">Maktab A</div>
+                            <div className="maktab-count">{stats.maktabCounts.A}</div>
+                            <div className="maktab-progress">
+                                <div 
+                                    className="maktab-progress-bar"
+                                    style={{ width: `${(stats.maktabCounts.A / Math.max(stats.totalPassengers, 1)) * 100}%` }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        <div className="maktab-card maktab-b">
+                            <div className="maktab-label">Maktab B</div>
+                            <div className="maktab-count">{stats.maktabCounts.B}</div>
+                            <div className="maktab-progress">
+                                <div 
+                                    className="maktab-progress-bar"
+                                    style={{ width: `${(stats.maktabCounts.B / Math.max(stats.totalPassengers, 1)) * 100}%` }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        <div className="maktab-card maktab-c">
+                            <div className="maktab-label">Maktab C</div>
+                            <div className="maktab-count">{stats.maktabCounts.C}</div>
+                            <div className="maktab-progress">
+                                <div 
+                                    className="maktab-progress-bar"
+                                    style={{ width: `${(stats.maktabCounts.C / Math.max(stats.totalPassengers, 1)) * 100}%` }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        <div className="maktab-card maktab-d">
+                            <div className="maktab-label">Maktab D</div>
+                            <div className="maktab-count">{stats.maktabCounts.D}</div>
+                            <div className="maktab-progress">
+                                <div 
+                                    className="maktab-progress-bar"
+                                    style={{ width: `${(stats.maktabCounts.D / Math.max(stats.totalPassengers, 1)) * 100}%` }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        <div className="maktab-card maktab-unassigned">
+                            <div className="maktab-label">Unassigned</div>
+                            <div className="maktab-count">{stats.maktabCounts.unassigned}</div>
+                            <div className="maktab-progress">
+                                <div 
+                                    className="maktab-progress-bar"
+                                    style={{ width: `${(stats.maktabCounts.unassigned / Math.max(stats.totalPassengers, 1)) * 100}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -258,6 +304,14 @@ const CompanyAdminDashboard = () => {
                                 </p>
                             </div>
                         )}
+                        <div>
+                            <strong style={{ color: '#667eea', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <Users size={16} /> Passenger Quota:
+                            </strong>
+                            <p style={{ margin: '0.5rem 0', fontSize: '1.125rem', fontWeight: '600' }}>
+                                {company.passengerQuota || 100} passengers
+                            </p>
+                        </div>
                         <div>
                             <strong style={{ color: '#667eea' }}>Status:</strong>
                             <p style={{ margin: '0.5rem 0' }}>

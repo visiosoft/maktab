@@ -113,3 +113,77 @@
     width: 100%;
     margin-top: 0.5rem;
 }
+
+/* View Toggle */
+.view-toggle {
+    display: flex;
+    gap: 0;
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 0.25rem;
+}
+
+.view-btn {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: #6b7280;
+}
+
+.view-btn:hover {
+    background: #e5e7eb;
+}
+
+.view-btn.active {
+    background: white;
+    color: #667eea;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Groups Table View */
+.groups-table-wrapper {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.groups-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.groups-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.groups-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+}
+
+.groups-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+}
+
+.groups-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.groups-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.groups-table tbody tr:last-child td {
+    border-bottom: none;
+}

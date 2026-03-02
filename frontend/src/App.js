@@ -9,6 +9,7 @@ import Groups from './pages/Groups';
 import GroupForm from './pages/GroupForm';
 import GroupPassengers from './pages/GroupPassengers';
 import Reports from './pages/Reports';
+import Passengers from './pages/Passengers';
 
 const PrivateRoute = ({ children, requiredRole }) => {
     const { user, loading } = useAuth();
@@ -58,6 +59,14 @@ function AppRoutes() {
                 element={
                     <PrivateRoute requiredRole="company_admin">
                         <Hotels />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/passengers"
+                element={
+                    <PrivateRoute requiredRole="company_admin">
+                        <Passengers />
                     </PrivateRoute>
                 }
             />

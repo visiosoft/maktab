@@ -30,7 +30,8 @@ const SuperAdminDashboard = () => {
         email: '',
         phone: '',
         industry: '',
-        website: ''
+        website: '',
+        passengerQuota: 100
     });
     const [adminFormData, setAdminFormData] = useState({
         username: '',
@@ -65,7 +66,7 @@ const SuperAdminDashboard = () => {
         try {
             await companiesAPI.create(formData);
             setShowCompanyModal(false);
-            setFormData({ name: '', email: '', phone: '', industry: '', website: '' });
+            setFormData({ name: '', email: '', phone: '', industry: '', website: '', passengerQuota: 100 });
             fetchDashboardData();
         } catch (error) {
             console.error('Error creating company:', error);
@@ -288,6 +289,15 @@ const SuperAdminDashboard = () => {
                         name="website"
                         value={formData.website}
                         onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    />
+                    <Input
+                        label="Passenger Quota"
+                        type="number"
+                        name="passengerQuota"
+                        value={formData.passengerQuota}
+                        onChange={(e) => setFormData({ ...formData, passengerQuota: parseInt(e.target.value) || 0 })}
+                        min="0"
+                        required
                     />
                 </form>
             </Modal>

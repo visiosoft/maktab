@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Plus,
     Save,
@@ -7,18 +7,22 @@ import {
     Trash2,
     Users,
     Loader,
-    Search
+    Search,
+    Upload,
+    Download
 } from 'lucide-react';
 import Button from './Button';
 import './PassengersTable.css';
 
-const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, loading }) => {
+const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, onImport, loading }) => {
     const [editingId, setEditingId] = useState(null);
     const [newRow, setNewRow] = useState(null);
     const [editData, setEditData] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
     const [groupFilter, setGroupFilter] = useState('');
     const [filteredPassengers, setFilteredPassengers] = useState(passengers);
+    const [importing, setImporting] = useState(false);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         let filtered = passengers;
@@ -121,6 +125,59 @@ const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, l
         setEditData({});
     };
 
+    const handleImportClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.name.endsWith('.csv')) {
+            alert('Please select a CSV file');
+            return;
+        }
+
+        setImporting(true);
+        try {
+            const result = await onImport(file);
+            alert(`Successfully imported ${result.success} passengers. ${result.failed > 0 ? `Failed: ${result.failed}` : ''}`);
+        } catch (error) {
+            console.error('Import error:', error);
+            alert(error.message || 'Failed to import CSV file');
+        } finally {
+            setImporting(false);
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
+    const handleDownloadSample = () => {
+        // Create sample CSV content
+        const sampleCSV = `firstName,lastName,passportNo,groupName
+Ahmad,Ahmed,A1234567,Group A
+Fatima,Hassan,B2345678,Group B
+Mohammed,Ali,C3456789,
+Sarah,Khan,D4567890,Group A
+Omar,Ibrahim,E5678901,`;
+
+        // Create blob and download
+        const blob = new Blob([sampleCSV], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'sample-passenger-import.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    };
+
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this passenger?')) {
             try {
@@ -179,6 +236,31 @@ const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, l
                     >
                         Add Passenger
                     </Button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-end' }}>
+                        <Button
+                            variant="secondary"
+                            icon={importing ? <Loader size={18} className="spin" /> : <Upload size={18} />}
+                            onClick={handleImportClick}
+                            disabled={importing || !!newRow || !!editingId}
+                        >
+                            {importing ? 'Importing...' : 'Import CSV'}
+                        </Button>
+                        <button
+                            onClick={handleDownloadSample}
+                            className="sample-download-link"
+                            type="button"
+                        >
+                            <Download size={12} />
+                            Download Sample CSV
+                        </button>
+                    </div>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".csv"
+                        onChange={handleFileChange}
+                        style={{ display: 'none' }}
+                    />
                 </div>
             </div>
 

@@ -357,3 +357,184 @@
 .data-table tr:hover {
     background: #f8f9fa;
 }
+
+/* Quota Cards */
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.quota-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.quota-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.quota-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.quota-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--card-color-1), var(--card-color-2));
+}
+
+.primary-card {
+    --card-color-1: #667eea;
+    --card-color-2: #764ba2;
+}
+
+.success-card {
+    --card-color-1: #48bb78;
+    --card-color-2: #38a169;
+}
+
+.warning-card {
+    --card-color-1: #f6ad55;
+    --card-color-2: #ed8936;
+}
+
+.quota-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.quota-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, var(--card-color-1), var(--card-color-2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.quota-trend {
+    color: var(--card-color-2);
+    opacity: 0.6;
+}
+
+.quota-card-body h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--card-color-1), var(--card-color-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    line-height: 1;
+}
+
+.quota-card-body p {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0.5rem 0 0.25rem 0;
+}
+
+.quota-subtitle {
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+/* Maktab Cards */
+.maktab-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+}
+
+.maktab-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.maktab-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+}
+
+.maktab-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--maktab-color);
+}
+
+.maktab-a {
+    --maktab-color: #667eea;
+}
+
+.maktab-b {
+    --maktab-color: #48bb78;
+}
+
+.maktab-c {
+    --maktab-color: #f6ad55;
+}
+
+.maktab-d {
+    --maktab-color: #ed64a6;
+}
+
+.maktab-unassigned {
+    --maktab-color: #cbd5e0;
+}
+
+.maktab-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #718096;
+    margin-bottom: 0.5rem;
+}
+
+.maktab-count {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--maktab-color);
+    margin-bottom: 0.75rem;
+}
+
+.maktab-progress {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.maktab-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--maktab-color), var(--maktab-color));
+    opacity: 0.8;
+    transition: width 0.5s ease;
+}

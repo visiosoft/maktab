@@ -15,11 +15,14 @@ const Reports = () => {
     const [loading, setLoading] = useState(true);
 
     // Report 1: Maktab & Date filter
-    const [selectedMaktab, setSelectedMaktab] = useState('A');
+    const [selectedMaktab, setSelectedMaktab] = useState('All');
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
     // Report 2: Date only filter
     const [travelDate, setTravelDate] = useState(new Date().toISOString().split('T')[0]);
+
+    // Report 3: Hotel Arrivals by Date
+    const [hotelArrivalDate, setHotelArrivalDate] = useState(new Date().toISOString().split('T')[0]);
 
     useEffect(() => {
         fetchGroups();
@@ -66,7 +69,8 @@ const Reports = () => {
     const getMaktabReport = () => {
         return groups.filter(group => {
             const arrivalDate = group.arrivalDate ? new Date(group.arrivalDate).toISOString().split('T')[0] : null;
-            return group.maktab === selectedMaktab && arrivalDate === selectedDate;
+            const matchesMaktab = selectedMaktab === 'All' || group.maktab === selectedMaktab;
+            return matchesMaktab && arrivalDate === selectedDate;
         });
     };
 
@@ -78,8 +82,39 @@ const Reports = () => {
         });
     };
 
+    // Report 3: Hotel Arrivals by Date
+    const getHotelArrivalsReport = () => {
+        const filteredGroups = groups.filter(group => {
+            const arrivalDate = group.arrivalDate ? new Date(group.arrivalDate).toISOString().split('T')[0] : null;
+            return arrivalDate === hotelArrivalDate && group.hotel;
+        });
+
+        // Group by hotel
+        const hotelMap = {};
+        filteredGroups.forEach(group => {
+            const hotelId = group.hotel._id;
+            const hotelName = group.hotel.name;
+
+            if (!hotelMap[hotelId]) {
+                hotelMap[hotelId] = {
+                    hotelId,
+                    hotelName,
+                    hotelAddress: group.hotel.address,
+                    groups: [],
+                    totalPassengers: 0
+                };
+            }
+
+            hotelMap[hotelId].groups.push(group);
+            hotelMap[hotelId].totalPassengers += group.passengers?.length || 0;
+        });
+
+        return Object.values(hotelMap).sort((a, b) => a.hotelName.localeCompare(b.hotelName));
+    };
+
     const maktabReportGroups = getMaktabReport();
     const dateReportGroups = getDateReport();
+    const hotelArrivalsData = getHotelArrivalsReport();
 
     const getTotalPassengers = (groupsList) => {
         return groupsList.reduce((sum, group) => sum + (group.passengers?.length || 0), 0);
@@ -175,7 +210,7 @@ const Reports = () => {
                     <div className="report-header">
                         <div>
                             <h2 className="report-title">Maktab Travel Report</h2>
-                            <p className="report-subtitle">View passengers traveling to specific Maktab on selected date</p>
+                            <p className="report-subtitle">View passengers traveling to Maktab(s) on selected date</p>
                         </div>
                         <Button
                             variant="secondary"
@@ -194,6 +229,7 @@ const Reports = () => {
                                 onChange={(e) => setSelectedMaktab(e.target.value)}
                                 className="report-select"
                             >
+                                <option value="All">All Maktabs</option>
                                 <option value="A">Maktab A</option>
                                 <option value="B">Maktab B</option>
                                 <option value="C">Maktab C</option>
@@ -213,7 +249,7 @@ const Reports = () => {
 
                     <div id="maktab-report" className="report-content">
                         <div className="report-print-header">
-                            <h1>Maktab {selectedMaktab} Travel Report</h1>
+                            <h1>{selectedMaktab === 'All' ? 'All Maktabs' : `Maktab ${selectedMaktab}`} Travel Report</h1>
                             <p>Date: {new Date(selectedDate).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',
@@ -229,12 +265,12 @@ const Reports = () => {
                         {maktabReportGroups.length === 0 ? (
                             <div className="empty-report">
                                 <FileText size={48} />
-                                <p>No groups found for Maktab {selectedMaktab} on {new Date(selectedDate).toLocaleDateString()}</p>
+                                <p>No groups found for {selectedMaktab === 'All' ? 'any Maktab' : `Maktab ${selectedMaktab}`} on {new Date(selectedDate).toLocaleDateString()}</p>
                             </div>
                         ) : (
                             maktabReportGroups.map(group => (
                                 <div key={group._id} className="report-group">
-                                    <h2>{group.groupName}</h2>
+                                    <h2>Maktab {group.maktab}</h2>
                                     <div className="group-info">
                                         <p><strong>Hotel:</strong> {group.hotel?.name || 'Not Assigned'}</p>
                                         <p><strong>Flight:</strong> {group.arrivalFlightNo || 'N/A'} {group.arrivalAirport && `(${group.arrivalAirport})`}</p>
@@ -360,6 +396,126 @@ const Reports = () => {
                                                 <tr>
                                                     <td colSpan="5" style={{ textAlign: 'center', color: '#999' }}>
                                                         No passengers added yet
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </Card>
+
+                {/* Report 3: Hotel Arrivals Report */}
+                <Card style={{ marginTop: '2rem' }}>
+                    <div className="report-header">
+                        <div>
+                            <h2 className="report-title">Hotel Arrivals Report</h2>
+                            <p className="report-subtitle">View which hotels are receiving passengers on selected date</p>
+                        </div>
+                        <Button
+                            variant="secondary"
+                            icon={<Download size={18} />}
+                            onClick={() => printReport('hotel-arrivals-report')}
+                        >
+                            Print Report
+                        </Button>
+                    </div>
+
+                    <div className="report-filters">
+                        <div className="filter-group">
+                            <label>Arrival Date</label>
+                            <input
+                                type="date"
+                                value={hotelArrivalDate}
+                                onChange={(e) => setHotelArrivalDate(e.target.value)}
+                                className="report-input"
+                            />
+                        </div>
+                    </div>
+
+                    <div id="hotel-arrivals-report" className="report-content">
+                        <div className="report-print-header">
+                            <h1>Hotel Arrivals Report</h1>
+                            <p>Date: {new Date(hotelArrivalDate).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            })}</p>
+                        </div>
+
+                        <div className="summary">
+                            <strong>Total Hotels:</strong> {hotelArrivalsData.length} |
+                            <strong> Total Passengers:</strong> {hotelArrivalsData.reduce((sum, hotel) => sum + hotel.totalPassengers, 0)}
+                        </div>
+
+                        {hotelArrivalsData.length === 0 ? (
+                            <div className="empty-report">
+                                <Building2 size={48} />
+                                <p>No hotel arrivals found for {new Date(hotelArrivalDate).toLocaleDateString()}</p>
+                            </div>
+                        ) : (
+                            hotelArrivalsData.map(hotel => (
+                                <div key={hotel.hotelId} className="report-group">
+                                    <h2>
+                                        <Building2 size={20} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+                                        {hotel.hotelName}
+                                    </h2>
+                                    <div className="group-info">
+                                        <p><strong>Address:</strong> {hotel.hotelAddress || 'N/A'}</p>
+                                        <p><strong>Total Arrivals:</strong> {hotel.totalPassengers} passengers</p>
+                                    </div>
+
+                                    {/* List of groups */}
+                                    <div style={{ marginBottom: '1rem' }}>
+                                        <h3 style={{ fontSize: '1rem', color: '#667eea', marginBottom: '0.5rem' }}>Groups:</h3>
+                                        {hotel.groups.map(group => (
+                                            <div key={group._id} style={{
+                                                background: '#f8f9fa',
+                                                padding: '0.75rem',
+                                                marginBottom: '0.5rem',
+                                                borderRadius: '8px',
+                                                borderLeft: '4px solid #667eea'
+                                            }}>
+                                                <strong></strong>Maktab {group.maktab} |
+                                                Flight: {group.arrivalFlightNo || 'N/A'} |
+                                                PAX: {group.passengers?.length || 0}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Detailed passenger list */}
+                                    <table className="passengers-report-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>First Name</th>
+                                                <th>Last Name</th>
+                                                <th>Passport No.</th>
+                                                <th>Maktab</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {hotel.groups.flatMap(group =>
+                                                (group.passengers || []).map((passenger, index) => ({
+                                                    ...passenger,
+                                                    groupName: group.groupName,
+                                                    maktab: group.maktab
+                                                }))
+                                            ).map((passenger, index) => (
+                                                <tr key={`${passenger._id}-${index}`}>
+                                                    <td>{index + 1}</td>
+                                                    <td>{passenger.firstName}</td>
+                                                    <td>{passenger.lastName}</td>
+                                                    <td>{passenger.passportNo}</td>
+                                                    <td>Maktab {passenger.maktab}</td>
+                                                </tr>
+                                            ))}
+                                            {hotel.totalPassengers === 0 && (
+                                                <tr>
+                                                    <td colSpan="5" style={{ textAlign: 'center', color: '#999' }}>
+                                                        No passengers assigned yet
                                                     </td>
                                                 </tr>
                                             )}

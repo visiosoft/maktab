@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Input from '../components/Input';
-import { Users, Plus, Edit2, Trash2, Search, Calendar, Plane, Home, Building2, LogOut, FileText } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, Search, Calendar, Plane, Home, Building2, LogOut, FileText, Grid, List } from 'lucide-react';
 import { SAUDI_AIRPORTS } from '../constants/airports';
 import './Groups.css';
 
@@ -16,6 +16,7 @@ const Groups = () => {
     const [company, setCompany] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
 
     useEffect(() => {
         fetchGroups();
@@ -132,10 +133,28 @@ const Groups = () => {
                         <Users size={32} />
                         Groups Management
                     </h1>
-                    <Button onClick={handleCreate}>
-                        <Plus size={18} />
-                        Create Group
-                    </Button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div className="view-toggle">
+                            <button
+                                className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                                onClick={() => setViewMode('grid')}
+                                title="Grid View"
+                            >
+                                <Grid size={18} />
+                            </button>
+                            <button
+                                className={`view-btn ${viewMode === 'table' ? 'active' : ''}`}
+                                onClick={() => setViewMode('table')}
+                                title="Table View"
+                            >
+                                <List size={18} />
+                            </button>
+                        </div>
+                        <Button onClick={handleCreate}>
+                            <Plus size={18} />
+                            Create Group
+                        </Button>
+                    </div>
                 </div>
 
                 <Card className="search-card">
@@ -160,6 +179,88 @@ const Groups = () => {
                                 <Plus size={18} />
                                 Create Your First Group
                             </Button>
+                        </div>
+                    ) : viewMode === 'table' ? (
+                        <div className="groups-table-wrapper">
+                            <table className="groups-table">
+                                <thead>
+                                    <tr>
+                                        <th>Group Name</th>
+                                        <th>Maktab</th>
+                                        <th>Hotel</th>
+                                        <th>PAX</th>
+                                        <th>Arrival Date</th>
+                                        <th>Arrival Flight</th>
+                                        <th>Departure Date</th>
+                                        <th>Departure Flight</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredGroups.map((group) => (
+                                        <tr key={group._id}>
+                                            <td><strong>{group.groupName}</strong></td>
+                                            <td>
+                                                {group.maktab && (
+                                                    <span className="maktab-badge">Maktab {group.maktab}</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                {group.hotel ? (
+                                                    <div>
+                                                        <div><strong>{group.hotel.name}</strong></div>
+                                                        {group.hotel.city && <div style={{ fontSize: '0.85rem', color: '#666' }}>{group.hotel.city}</div>}
+                                                    </div>
+                                                ) : '-'}
+                                            </td>
+                                            <td>{group.passengerCount || 0} / {group.numberOfPax || 0}</td>
+                                            <td>{formatDate(group.arrivalDate)}</td>
+                                            <td>
+                                                {group.arrivalFlightNo ? (
+                                                    <div>
+                                                        <div>{group.arrivalFlightNo}</div>
+                                                        {group.arrivalAirport && <div style={{ fontSize: '0.85rem', color: '#666' }}>({getAirportCity(group.arrivalAirport)})</div>}
+                                                    </div>
+                                                ) : '-'}
+                                            </td>
+                                            <td>{formatDate(group.departureDate)}</td>
+                                            <td>
+                                                {group.departureFlightNo ? (
+                                                    <div>
+                                                        <div>{group.departureFlightNo}</div>
+                                                        {group.departureAirport && <div style={{ fontSize: '0.85rem', color: '#666' }}>({getAirportCity(group.departureAirport)})</div>}
+                                                    </div>
+                                                ) : '-'}
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    <button
+                                                        className="btn-icon edit"
+                                                        onClick={() => handleViewPassengers(group._id)}
+                                                        title="Add/View Passengers"
+                                                    >
+                                                        <Users size={16} />
+                                                    </button>
+                                                    <button
+                                                        className="btn-icon edit"
+                                                        onClick={() => handleEdit(group._id)}
+                                                        title="Edit"
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button
+                                                        className="btn-icon delete"
+                                                        onClick={() => handleDelete(group._id)}
+                                                        title="Delete"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     ) : (
                         <div className="groups-grid">

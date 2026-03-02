@@ -160,6 +160,53 @@ router.post('/', async (req, res) => {
     }
 });
 
+// @route   PUT /api/groups/assign-passengers
+// @desc    Assign multiple passengers to a group
+// @access  Company Admin
+router.put('/assign-passengers', async (req, res) => {
+    try {
+        const { passengerIds, groupId } = req.body;
+
+        if (!passengerIds || !Array.isArray(passengerIds) || passengerIds.length === 0) {
+            return res.status(400).json({ message: 'Passenger IDs are required' });
+        }
+
+        const admin = await CompanyAdmin.findById(req.user.id);
+
+        if (!admin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+
+        // Validate group if provided
+        if (groupId) {
+            const group = await Group.findOne({
+                _id: groupId,
+                company: admin.company
+            });
+            if (!group) {
+                return res.status(400).json({ message: 'Invalid group selection' });
+            }
+        }
+
+        // Update passengers
+        const result = await Passenger.updateMany(
+            {
+                _id: { $in: passengerIds },
+                company: admin.company
+            },
+            groupId ? { group: groupId } : { $unset: { group: 1 } }
+        );
+
+        res.json({
+            message: `${result.modifiedCount} passenger(s) updated successfully`,
+            modifiedCount: result.modifiedCount
+        });
+    } catch (error) {
+        console.error('Assign passengers error:', error);
+        res.status(500).json({ message: 'Server error assigning passengers' });
+    }
+});
+
 // @route   PUT /api/groups/:id
 // @desc    Update a group
 // @access  Company Admin
@@ -301,53 +348,6 @@ router.get('/:id/passengers', async (req, res) => {
     } catch (error) {
         console.error('Get group passengers error:', error);
         res.status(500).json({ message: 'Server error fetching passengers' });
-    }
-});
-
-// @route   PUT /api/groups/assign-passengers
-// @desc    Assign multiple passengers to a group
-// @access  Company Admin
-router.put('/assign-passengers', async (req, res) => {
-    try {
-        const { passengerIds, groupId } = req.body;
-
-        if (!passengerIds || !Array.isArray(passengerIds) || passengerIds.length === 0) {
-            return res.status(400).json({ message: 'Passenger IDs are required' });
-        }
-
-        const admin = await CompanyAdmin.findById(req.user.id);
-
-        if (!admin) {
-            return res.status(404).json({ message: 'Admin not found' });
-        }
-
-        // Validate group if provided
-        if (groupId) {
-            const group = await Group.findOne({
-                _id: groupId,
-                company: admin.company
-            });
-            if (!group) {
-                return res.status(400).json({ message: 'Invalid group selection' });
-            }
-        }
-
-        // Update passengers
-        const result = await Passenger.updateMany(
-            {
-                _id: { $in: passengerIds },
-                company: admin.company
-            },
-            groupId ? { group: groupId } : { $unset: { group: 1 } }
-        );
-
-        res.json({
-            message: `${result.modifiedCount} passenger(s) updated successfully`,
-            modifiedCount: result.modifiedCount
-        });
-    } catch (error) {
-        console.error('Assign passengers error:', error);
-        res.status(500).json({ message: 'Server error assigning passengers' });
     }
 });
 
