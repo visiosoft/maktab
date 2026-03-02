@@ -58,9 +58,21 @@ const CompanyAdminDashboard = () => {
     const fetchStats = async () => {
         try {
             const response = await passengersAPI.getStats();
-            setStats(response.data);
+            setStats({
+                totalPassengers: response.data.totalPassengers || 0,
+                quota: response.data.quota || 100,
+                remaining: response.data.remaining || 100,
+                maktabCounts: response.data.maktabCounts || {
+                    A: 0,
+                    B: 0,
+                    C: 0,
+                    D: 0,
+                    unassigned: 0
+                }
+            });
         } catch (error) {
             console.error('Error fetching stats:', error);
+            // Keep the default state on error
         }
     };
 
@@ -202,55 +214,55 @@ const CompanyAdminDashboard = () => {
                     <div className="maktab-cards">
                         <div className="maktab-card maktab-a">
                             <div className="maktab-label">Maktab A</div>
-                            <div className="maktab-count">{stats.maktabCounts.A}</div>
+                            <div className="maktab-count">{stats.maktabCounts?.A ?? 0}</div>
                             <div className="maktab-progress">
-                                <div 
+                                <div
                                     className="maktab-progress-bar"
-                                    style={{ width: `${(stats.maktabCounts.A / Math.max(stats.totalPassengers, 1)) * 100}%` }}
+                                    style={{ width: `${((stats.maktabCounts?.A ?? 0) / Math.max(stats.totalPassengers, 1)) * 100}%` }}
                                 ></div>
                             </div>
                         </div>
 
                         <div className="maktab-card maktab-b">
                             <div className="maktab-label">Maktab B</div>
-                            <div className="maktab-count">{stats.maktabCounts.B}</div>
+                            <div className="maktab-count">{stats.maktabCounts?.B ?? 0}</div>
                             <div className="maktab-progress">
-                                <div 
+                                <div
                                     className="maktab-progress-bar"
-                                    style={{ width: `${(stats.maktabCounts.B / Math.max(stats.totalPassengers, 1)) * 100}%` }}
+                                    style={{ width: `${((stats.maktabCounts?.B ?? 0) / Math.max(stats.totalPassengers, 1)) * 100}%` }}
                                 ></div>
                             </div>
                         </div>
 
                         <div className="maktab-card maktab-c">
                             <div className="maktab-label">Maktab C</div>
-                            <div className="maktab-count">{stats.maktabCounts.C}</div>
+                            <div className="maktab-count">{stats.maktabCounts?.C ?? 0}</div>
                             <div className="maktab-progress">
-                                <div 
+                                <div
                                     className="maktab-progress-bar"
-                                    style={{ width: `${(stats.maktabCounts.C / Math.max(stats.totalPassengers, 1)) * 100}%` }}
+                                    style={{ width: `${((stats.maktabCounts?.C ?? 0) / Math.max(stats.totalPassengers, 1)) * 100}%` }}
                                 ></div>
                             </div>
                         </div>
 
                         <div className="maktab-card maktab-d">
                             <div className="maktab-label">Maktab D</div>
-                            <div className="maktab-count">{stats.maktabCounts.D}</div>
+                            <div className="maktab-count">{stats.maktabCounts?.D ?? 0}</div>
                             <div className="maktab-progress">
-                                <div 
+                                <div
                                     className="maktab-progress-bar"
-                                    style={{ width: `${(stats.maktabCounts.D / Math.max(stats.totalPassengers, 1)) * 100}%` }}
+                                    style={{ width: `${((stats.maktabCounts?.D ?? 0) / Math.max(stats.totalPassengers, 1)) * 100}%` }}
                                 ></div>
                             </div>
                         </div>
 
                         <div className="maktab-card maktab-unassigned">
                             <div className="maktab-label">Unassigned</div>
-                            <div className="maktab-count">{stats.maktabCounts.unassigned}</div>
+                            <div className="maktab-count">{stats.maktabCounts?.unassigned ?? 0}</div>
                             <div className="maktab-progress">
-                                <div 
+                                <div
                                     className="maktab-progress-bar"
-                                    style={{ width: `${(stats.maktabCounts.unassigned / Math.max(stats.totalPassengers, 1)) * 100}%` }}
+                                    style={{ width: `${((stats.maktabCounts?.unassigned ?? 0) / Math.max(stats.totalPassengers, 1)) * 100}%` }}
                                 ></div>
                             </div>
                         </div>
