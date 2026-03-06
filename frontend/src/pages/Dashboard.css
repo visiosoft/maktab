@@ -1608,3 +1608,35 @@
     font-size: 0.8rem;
     color: #666;
 }
+
+
+/* Super Admin Theme Overrides */
+.dashboard-header thead tr {
+    color: white;
+}
+
+.companies-table thead th {
+    color: white;
+}
+
+/* Section Titles */
+.section-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+/* Admin Badge Styles */
+.admin-badge {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letterSpacing: 0.5px;
+    display: inline-block;
+}
