@@ -24,14 +24,16 @@ const GroupForm = () => {
 
     const [formData, setFormData] = useState({
         groupName: '',
-        numberOfPax: '',
         arrivalDate: '',
         arrivalAirport: '',
         arrivalFlightNo: '',
+        arrivalCity: '',
         departureDate: '',
         departureAirport: '',
         departureFlightNo: '',
-        hotel: '',
+        departureCity: '',
+        arrivalHotel: '',
+        departureHotel: '',
         maktab: ''
     });
 
@@ -68,14 +70,16 @@ const GroupForm = () => {
             const group = response.data;
             setFormData({
                 groupName: group.groupName,
-                numberOfPax: group.numberOfPax || '',
                 arrivalDate: group.arrivalDate ? group.arrivalDate.split('T')[0] : '',
                 arrivalAirport: group.arrivalAirport || '',
                 arrivalFlightNo: group.arrivalFlightNo || '',
+                arrivalCity: group.arrivalCity || '',
                 departureDate: group.departureDate ? group.departureDate.split('T')[0] : '',
                 departureAirport: group.departureAirport || '',
                 departureFlightNo: group.departureFlightNo || '',
-                hotel: group.hotel?._id || '',
+                departureCity: group.departureCity || '',
+                arrivalHotel: group.arrivalHotel?._id || group.hotel?._id || '',
+                departureHotel: group.departureHotel?._id || group.hotel?._id || '',
                 maktab: group.maktab || ''
             });
         } catch (error) {
@@ -93,12 +97,24 @@ const GroupForm = () => {
         });
     };
 
+    // Filter hotels by arrival city
+    const getFilteredArrivalHotels = () => {
+        if (!formData.arrivalCity) return [];
+        return hotels.filter(hotel => hotel.city === formData.arrivalCity);
+    };
+
+    // Filter hotels by departure city
+    const getFilteredDepartureHotels = () => {
+        if (!formData.departureCity) return [];
+        return hotels.filter(hotel => hotel.city === formData.departureCity);
+    };
+
     const handleQuickAddHotel = async (e) => {
         e.preventDefault();
         try {
             const response = await hotelsAPI.create(newHotel);
             setHotels([...hotels, response.data.hotel]);
-            setFormData({ ...formData, hotel: response.data.hotel._id });
+            setFormData({ ...formData, arrivalHotel: response.data.hotel._id });
             setNewHotel({ name: '', city: '', address: '', phone: '' });
             setShowHotelModal(false);
         } catch (error) {
@@ -113,8 +129,8 @@ const GroupForm = () => {
             setLoading(true);
             const dataToSend = {
                 ...formData,
-                numberOfPax: formData.numberOfPax ? parseInt(formData.numberOfPax) : undefined,
-                hotel: formData.hotel || undefined
+                arrivalHotel: formData.arrivalHotel || undefined,
+                departureHotel: formData.departureHotel || undefined
             };
 
             if (isEdit) {
@@ -216,17 +232,6 @@ const GroupForm = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Number of PAX</label>
-                                    <Input
-                                        type="number"
-                                        name="numberOfPax"
-                                        value={formData.numberOfPax}
-                                        onChange={handleChange}
-                                        placeholder="Expected passengers"
-                                        min="0"
-                                    />
-                                </div>
-                                <div className="form-group">
                                     <label>Maktab *</label>
                                     <select
                                         name="maktab"
@@ -242,35 +247,6 @@ const GroupForm = () => {
                                         <option value="D">D</option>
                                     </select>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div className="form-section">
-                            <h3>Hotel</h3>
-                            <div className="hotel-select-row">
-                                <div className="form-group" style={{ flex: 1 }}>
-                                    <label>Select Hotel</label>
-                                    <select
-                                        name="hotel"
-                                        value={formData.hotel}
-                                        onChange={handleChange}
-                                        className="select-input"
-                                    >
-                                        <option value="">-- No Hotel --</option>
-                                        {hotels.map((hotel) => (
-                                            <option key={hotel._id} value={hotel._id}>
-                                                {hotel.name} {hotel.city && `(${hotel.city})`}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <Button
-                                    type="button"
-                                    onClick={() => setShowHotelModal(true)}
-                                >
-                                    <Plus size={18} />
-                                    Quick Add Hotel
-                                </Button>
                             </div>
                         </div>
 
@@ -313,6 +289,40 @@ const GroupForm = () => {
                                     />
                                 </div>
                             </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Arrival City *</label>
+                                    <select
+                                        name="arrivalCity"
+                                        value={formData.arrivalCity}
+                                        onChange={handleChange}
+                                        className="select-input"
+                                        required
+                                    >
+                                        <option value="">-- Select City --</option>
+                                        <option value="Makkah">Makkah</option>
+                                        <option value="Madinah">Madinah</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Arrival Hotel *</label>
+                                    <select
+                                        name="arrivalHotel"
+                                        value={formData.arrivalHotel}
+                                        onChange={handleChange}
+                                        className="select-input"
+                                        required
+                                        disabled={!formData.arrivalCity}
+                                    >
+                                        <option value="">{formData.arrivalCity ? '-- Select Hotel --' : '-- Select City First --'}</option>
+                                        {getFilteredArrivalHotels().map((hotel) => (
+                                            <option key={hotel._id} value={hotel._id}>
+                                                {hotel.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="form-section">
@@ -352,6 +362,40 @@ const GroupForm = () => {
                                         onChange={handleChange}
                                         placeholder="e.g., EK002"
                                     />
+                                </div>
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Departure City *</label>
+                                    <select
+                                        name="departureCity"
+                                        value={formData.departureCity}
+                                        onChange={handleChange}
+                                        className="select-input"
+                                        required
+                                    >
+                                        <option value="">-- Select City --</option>
+                                        <option value="Makkah">Makkah</option>
+                                        <option value="Madinah">Madinah</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Departure Hotel *</label>
+                                    <select
+                                        name="departureHotel"
+                                        value={formData.departureHotel}
+                                        onChange={handleChange}
+                                        className="select-input"
+                                        required
+                                        disabled={!formData.departureCity}
+                                    >
+                                        <option value="">{formData.departureCity ? '-- Select Hotel --' : '-- Select City First --'}</option>
+                                        {getFilteredDepartureHotels().map((hotel) => (
+                                            <option key={hotel._id} value={hotel._id}>
+                                                {hotel.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
                         </div>

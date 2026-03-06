@@ -86,6 +86,8 @@ const Groups = () => {
     const filteredGroups = groups.filter(group =>
         group.groupName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         group.hotel?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.arrivalHotel?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.departureHotel?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         group.maktab?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         group.arrivalFlightNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         group.departureFlightNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -194,7 +196,8 @@ const Groups = () => {
                                     <tr>
                                         <th>Group Name</th>
                                         <th>Maktab</th>
-                                        <th>Hotel</th>
+                                        <th>Arrival Hotel</th>
+                                        <th>Departure Hotel</th>
                                         <th>PAX</th>
                                         <th>Arrival Date</th>
                                         <th>Arrival Flight</th>
@@ -213,10 +216,18 @@ const Groups = () => {
                                                 )}
                                             </td>
                                             <td>
-                                                {group.hotel ? (
+                                                {(group.arrivalHotel || group.hotel) ? (
                                                     <div>
-                                                        <div><strong>{group.hotel.name}</strong></div>
-                                                        {group.hotel.city && <div style={{ fontSize: '0.85rem', color: '#666' }}>{group.hotel.city}</div>}
+                                                        <div><strong>{(group.arrivalHotel || group.hotel).name}</strong></div>
+                                                        {(group.arrivalHotel || group.hotel).city && <div style={{ fontSize: '0.85rem', color: '#666' }}>{(group.arrivalHotel || group.hotel).city}</div>}
+                                                    </div>
+                                                ) : '-'}
+                                            </td>
+                                            <td>
+                                                {(group.departureHotel || group.hotel) ? (
+                                                    <div>
+                                                        <div><strong>{(group.departureHotel || group.hotel).name}</strong></div>
+                                                        {(group.departureHotel || group.hotel).city && <div style={{ fontSize: '0.85rem', color: '#666' }}>{(group.departureHotel || group.hotel).city}</div>}
                                                     </div>
                                                 ) : '-'}
                                             </td>
@@ -303,10 +314,16 @@ const Groups = () => {
                                                 <span className="maktab-badge">Maktab {group.maktab}</span>
                                             </div>
                                         )}
-                                        {group.hotel && (
+                                        {(group.arrivalHotel || group.hotel) && (
                                             <div className="stat">
-                                                <span className="hotel-badge">{group.hotel.name}</span>
-                                                {group.hotel.city && <span className="city-text">{group.hotel.city}</span>}
+                                                <span className="hotel-badge">📍 {(group.arrivalHotel || group.hotel).name}</span>
+                                                {(group.arrivalHotel || group.hotel).city && <span className="city-text">{(group.arrivalHotel || group.hotel).city}</span>}
+                                            </div>
+                                        )}
+                                        {(group.departureHotel || group.hotel) && (
+                                            <div className="stat">
+                                                <span className="hotel-badge">🛫 {(group.departureHotel || group.hotel).name}</span>
+                                                {(group.departureHotel || group.hotel).city && <span className="city-text">{(group.departureHotel || group.hotel).city}</span>}
                                             </div>
                                         )}
                                     </div>

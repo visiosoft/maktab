@@ -6,11 +6,6 @@ const GroupSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    numberOfPax: {
-        type: Number,
-        required: true,
-        min: 1
-    },
     arrivalDate: {
         type: Date,
         required: true
@@ -24,6 +19,11 @@ const GroupSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true
+    },
+    arrivalCity: {
+        type: String,
+        enum: ['Makkah', 'Madinah'],
+        required: true
     },
     departureDate: {
         type: Date,
@@ -39,7 +39,17 @@ const GroupSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    hotel: {
+    departureCity: {
+        type: String,
+        enum: ['Makkah', 'Madinah'],
+        required: true
+    },
+    arrivalHotel: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Hotel',
+        required: true
+    },
+    departureHotel: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Hotel',
         required: true
@@ -74,6 +84,15 @@ GroupSchema.pre('save', function (next) {
     this.updatedAt = Date.now();
     next();
 });
+
+// Virtual field for backward compatibility - 'hotel' maps to 'arrivalHotel'
+GroupSchema.virtual('hotel').get(function () {
+    return this.arrivalHotel;
+});
+
+// Ensure virtuals are included in JSON
+GroupSchema.set('toJSON', { virtuals: true });
+GroupSchema.set('toObject', { virtuals: true });
 
 // Index for faster searches
 GroupSchema.index({ company: 1, groupName: 1 });

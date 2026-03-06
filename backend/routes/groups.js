@@ -22,7 +22,8 @@ router.get('/', async (req, res) => {
         }
 
         const groups = await Group.find({ company: admin.company })
-            .populate('hotel', 'name city')
+            .populate('arrivalHotel', 'name city')
+            .populate('departureHotel', 'name city')
             .populate('createdBy', 'username email')
             .sort({ createdAt: -1 });
 
@@ -59,7 +60,8 @@ router.get('/:id', async (req, res) => {
         }
 
         const group = await Group.findById(req.params.id)
-            .populate('hotel', 'name city address phone')
+            .populate('arrivalHotel', 'name city address phone')
+            .populate('departureHotel', 'name city address phone')
             .populate('createdBy', 'username email');
 
         if (!group) {
@@ -93,14 +95,17 @@ router.post('/', async (req, res) => {
     try {
         const {
             groupName,
-            numberOfPax,
             arrivalDate,
             arrivalAirport,
             arrivalFlightNo,
+            arrivalCity,
             departureDate,
             departureAirport,
             departureFlightNo,
+            departureCity,
             hotel,
+            arrivalHotel,
+            departureHotel,
             maktab
         } = req.body;
 
@@ -118,24 +123,38 @@ router.post('/', async (req, res) => {
             return res.status(404).json({ message: 'Admin not found' });
         }
 
-        // Validate hotel if provided
-        if (hotel) {
-            const hotelExists = await Hotel.findById(hotel);
+        // Use arrivalHotel and departureHotel, or fall back to hotel for backward compatibility
+        const finalArrivalHotel = arrivalHotel || hotel;
+        const finalDepartureHotel = departureHotel || hotel;
+
+        // Validate arrivalHotel if provided
+        if (finalArrivalHotel) {
+            const hotelExists = await Hotel.findById(finalArrivalHotel);
             if (!hotelExists) {
-                return res.status(400).json({ message: 'Invalid hotel selection' });
+                return res.status(400).json({ message: 'Invalid arrival hotel selection' });
+            }
+        }
+
+        // Validate departureHotel if provided
+        if (finalDepartureHotel) {
+            const hotelExists = await Hotel.findById(finalDepartureHotel);
+            if (!hotelExists) {
+                return res.status(400).json({ message: 'Invalid departure hotel selection' });
             }
         }
 
         const group = new Group({
             groupName,
-            numberOfPax,
             arrivalDate,
             arrivalAirport,
             arrivalFlightNo,
+            arrivalCity,
             departureDate,
             departureAirport,
             departureFlightNo,
-            hotel,
+            departureCity,
+            arrivalHotel: finalArrivalHotel,
+            departureHotel: finalDepartureHotel,
             maktab,
             company: admin.company,
             createdBy: req.user.id
@@ -144,7 +163,8 @@ router.post('/', async (req, res) => {
         await group.save();
 
         const populatedGroup = await Group.findById(group._id)
-            .populate('hotel', 'name city address phone')
+            .populate('arrivalHotel', 'name city address phone')
+            .populate('departureHotel', 'name city address phone')
             .populate('createdBy', 'username email');
 
         res.status(201).json({
@@ -211,14 +231,17 @@ router.put('/:id', async (req, res) => {
     try {
         const {
             groupName,
-            numberOfPax,
             arrivalDate,
             arrivalAirport,
             arrivalFlightNo,
+            arrivalCity,
             departureDate,
             departureAirport,
             departureFlightNo,
+            departureCity,
             hotel,
+            arrivalHotel,
+            departureHotel,
             maktab
         } = req.body;
 
@@ -239,29 +262,50 @@ router.put('/:id', async (req, res) => {
             return res.status(403).json({ message: 'Access denied' });
         }
 
-        // Validate hotel if provided
-        if (hotel) {
+        // Validate arrivalHotel if provided
+        if (arrivalHotel) {
+            const hotelExists = await Hotel.findById(arrivalHotel);
+            if (!hotelExists) {
+                return res.status(400).json({ message: 'Invalid arrival hotel selection' });
+            }
+        }
+
+        // Validate departureHotel if provided
+        if (departureHotel) {
+            const hotelExists = await Hotel.findById(departureHotel);
+            if (!hotelExists) {
+                return res.status(400).json({ message: 'Invalid departure hotel selection' });
+            }
+        }
+
+        // Backward compatibility: if hotel is provided, use it for both
+        if (hotel && !arrivalHotel && !departureHotel) {
             const hotelExists = await Hotel.findById(hotel);
             if (!hotelExists) {
                 return res.status(400).json({ message: 'Invalid hotel selection' });
             }
+            group.arrivalHotel = hotel;
+            group.departureHotel = hotel;
         }
 
         if (groupName !== undefined) group.groupName = groupName;
-        if (numberOfPax !== undefined) group.numberOfPax = numberOfPax;
         if (arrivalDate !== undefined) group.arrivalDate = arrivalDate;
         if (arrivalAirport !== undefined) group.arrivalAirport = arrivalAirport;
         if (arrivalFlightNo !== undefined) group.arrivalFlightNo = arrivalFlightNo;
+        if (arrivalCity !== undefined) group.arrivalCity = arrivalCity;
         if (departureDate !== undefined) group.departureDate = departureDate;
         if (departureAirport !== undefined) group.departureAirport = departureAirport;
         if (departureFlightNo !== undefined) group.departureFlightNo = departureFlightNo;
-        if (hotel !== undefined) group.hotel = hotel;
+        if (departureCity !== undefined) group.departureCity = departureCity;
+        if (arrivalHotel !== undefined) group.arrivalHotel = arrivalHotel;
+        if (departureHotel !== undefined) group.departureHotel = departureHotel;
         if (maktab !== undefined) group.maktab = maktab;
 
         await group.save();
 
         const updatedGroup = await Group.findById(group._id)
-            .populate('hotel', 'name city address phone')
+            .populate('arrivalHotel', 'name city address phone')
+            .populate('departureHotel', 'name city address phone')
             .populate('createdBy', 'username email');
 
         res.json({

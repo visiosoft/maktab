@@ -194,11 +194,17 @@ router.get('/', async (req, res) => {
             .populate('createdBy', 'username email')
             .populate({
                 path: 'group',
-                select: 'groupName maktab hotel',
-                populate: {
-                    path: 'hotel',
-                    select: 'name'
-                }
+                select: 'groupName maktab arrivalHotel departureHotel',
+                populate: [
+                    {
+                        path: 'arrivalHotel',
+                        select: 'name'
+                    },
+                    {
+                        path: 'departureHotel',
+                        select: 'name'
+                    }
+                ]
             })
             .sort({ createdAt: -1 });
 

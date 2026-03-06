@@ -219,11 +219,22 @@ const Hotels = () => {
                         </div>
                         <div className="form-group">
                             <label>City</label>
-                            <Input
+                            <select
                                 value={formData.city}
                                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                                placeholder="Enter city"
-                            />
+                                required
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #ddd',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                <option value="">Select City</option>
+                                <option value="Makkah">Makkah</option>
+                                <option value="Madinah">Madinah</option>
+                            </select>
                         </div>
                         <div className="form-group">
                             <label>Address</label>

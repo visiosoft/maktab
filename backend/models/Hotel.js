@@ -12,7 +12,8 @@ const HotelSchema = new mongoose.Schema({
     },
     city: {
         type: String,
-        trim: true
+        enum: ['Makkah', 'Madinah'],
+        required: true
     },
     phone: {
         type: String,

@@ -231,7 +231,8 @@ const GroupPassengers = () => {
                             <p className="group-meta">
                                 {passengers.length} / {group?.numberOfPax || 0} passengers
                                 {group?.maktab && ` • Maktab ${group.maktab}`}
-                                {group?.hotel && ` • ${group.hotel.name}`}
+                                {(group?.arrivalHotel || group?.hotel) && ` • Arrival: ${(group?.arrivalHotel || group?.hotel).name}`}
+                                {(group?.departureHotel || group?.hotel) && ` • Departure: ${(group?.departureHotel || group?.hotel).name}`}
                             </p>
                         </div>
                     </div>
