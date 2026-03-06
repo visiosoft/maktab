@@ -1049,3 +1049,562 @@
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     }
 }
+/* Footer Styles */
+.reports-footer {
+    margin-top: 4rem;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    border-radius: 12px;
+}
+
+.reports-footer .company-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.reports-footer .contact-info {
+    font-size: 0.875rem;
+    opacity: 0.95;
+}
+
+.reports-footer a {
+    color: white;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    transition: border-color 0.2s;
+}
+
+.reports-footer a:hover {
+    border-bottom-color: white;
+}
+
+
+/* Quick Stats Grid */
+.quick-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #333;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Activity List */
+.activity-list {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-item:hover {
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.arrival-icon {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.departure-icon {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 700;
+    color: #333;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.activity-meta {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.activity-detail {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #999;
+}
+
+.empty-state svg {
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* Quota Progress */
+.quota-progress-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.quota-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.quota-progress-label {
+    font-size: 1rem;
+    color: #666;
+}
+
+.quota-progress-label strong {
+    color: #333;
+    font-size: 1.125rem;
+}
+
+.quota-progress-percentage {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #667eea;
+}
+
+.quota-progress-bar-wrapper {
+    height: 24px;
+    background: #f0f0f0;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.quota-progress-bar-fill {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.3s ease, background 0.3s ease;
+    position: relative;
+}
+
+.quota-progress-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+}
+
+.quota-progress-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+}
+
+.quota-progress-info svg {
+    color: #4facfe;
+}
+
+.quota-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #f5576c;
+    font-weight: 600;
+}
+
+.quota-warning svg {
+    color: #f5576c;
+}
+
+
+/* Quota Analytics Section */
+.quota-analytics-section {
+    margin-top: 2rem;
+}
+
+.quota-analytics-table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.quota-analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.quota-analytics-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.quota-analytics-table thead th {
+    padding: 1rem;
+    text-align: left;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.quota-analytics-table tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease;
+}
+
+.quota-analytics-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.quota-analytics-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.quota-analytics-table td {
+    padding: 1rem;
+    color: #333;
+}
+
+.quota-progress-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.quota-progress-bar-mini-wrapper {
+    flex: 1;
+    height: 12px;
+    background: #f0f0f0;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.quota-progress-bar-mini-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.3s ease;
+}
+
+.quota-percentage-label {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: #333;
+    min-width: 45px;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+
+/* Quick Actions Grid */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.action-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.action-content {
+    flex: 1;
+}
+
+.action-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.action-subtitle {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.action-card svg:last-child {
+    color: #999;
+    flex-shrink: 0;
+}
+
+.action-card:hover svg:last-child {
+    color: #667eea;
+    transform: translateX(4px);
+    transition: all 0.3s ease;
+}
+
+/* Schedule Cards */
+.schedule-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.schedule-header {
+    padding: 1rem 1.5rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.schedule-count {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 700;
+}
+
+.schedule-body {
+    padding: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.schedule-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    transition: background 0.2s ease;
+}
+
+.schedule-item:last-child {
+    margin-bottom: 0;
+}
+
+.schedule-item:hover {
+    background: #e9ecef;
+}
+
+.schedule-time {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #667eea;
+    min-width: 60px;
+}
+
+.schedule-details {
+    flex: 1;
+}
+
+.schedule-flight {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.schedule-meta {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.schedule-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #999;
+    font-size: 0.875rem;
+}
+
+/* Report Cards */
+.report-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.report-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease;
+}
+
+.report-item:last-child {
+    border-bottom: none;
+}
+
+.report-item:hover {
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.report-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.report-content {
+    flex: 1;
+}
+
+.report-title {
+    font-weight: 700;
+    color: #333;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.report-meta {
+    font-size: 0.8rem;
+    color: #666;
+}

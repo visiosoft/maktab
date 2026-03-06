@@ -14,7 +14,7 @@ import {
 import Button from './Button';
 import './PassengersTable.css';
 
-const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, onImport, loading }) => {
+const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, onImport, loading, deleteLabel = 'delete' }) => {
     const [editingId, setEditingId] = useState(null);
     const [newRow, setNewRow] = useState(null);
     const [editData, setEditData] = useState({});
@@ -179,11 +179,11 @@ Omar,Ibrahim,E5678901,`;
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this passenger?')) {
+        if (window.confirm(`Are you sure you want to ${deleteLabel} this passenger?`)) {
             try {
                 await onDelete(id);
             } catch (error) {
-                console.error('Error deleting passenger:', error);
+                console.error(`Error ${deleteLabel.replace(' ', '-')}ing passenger:`, error);
             }
         }
     };
@@ -471,7 +471,7 @@ Omar,Ibrahim,E5678901,`;
                                                         <button
                                                             className="action-icon-button delete"
                                                             onClick={() => handleDelete(passenger._id)}
-                                                            title="Delete"
+                                                            title={deleteLabel.charAt(0).toUpperCase() + deleteLabel.slice(1)}
                                                             disabled={!!newRow || !!editingId}
                                                         >
                                                             <Trash2 size={18} />

@@ -264,27 +264,285 @@ const Reports = () => {
 
     const printReport = (reportId) => {
         const printContent = document.getElementById(reportId);
-        const winPrint = window.open('', '', 'left=0,top=0,width=800,height=600,toolbar=0,scrollbars=0,status=0');
+        const companyName = company?.name || 'Maktab Travel Management';
+        const printDate = new Date().toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        const winPrint = window.open('', '', 'left=0,top=0,width=1024,height=768,toolbar=0,scrollbars=1,status=0');
         winPrint.document.write(`
       <html>
         <head>
-          <title>Report</title>
+          <title>${companyName} - Report</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            h1 { color: #333; margin-bottom: 10px; }
-            h2 { color: #666; font-size: 1.2rem; margin: 20px 0 10px 0; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #667eea; color: white; }
-            .summary { background: #f0f0f0; padding: 10px; margin-bottom: 20px; border-radius: 8px; }
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            
+            @page {
+              margin: 1.5cm;
+              size: A4;
+            }
+            
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              font-size: 11pt;
+              color: #333;
+              line-height: 1.6;
+              background: white;
+            }
+            
+            .print-header {
+              border-bottom: 3px solid #667eea;
+              padding-bottom: 15px;
+              margin-bottom: 25px;
+            }
+            
+            .print-header h1 {
+              font-size: 24pt;
+              color: #667eea;
+              font-weight: 700;
+              margin-bottom: 5px;
+            }
+            
+            .print-header .subtitle {
+              font-size: 10pt;
+              color: #666;
+              font-style: italic;
+            }
+            
+            .report-print-header h1 {
+              color: #333;
+              font-size: 18pt;
+              margin: 20px 0 10px 0;
+              font-weight: 600;
+            }
+            
+            .report-print-header p {
+              color: #666;
+              font-size: 10pt;
+              margin-bottom: 15px;
+            }
+            
+            h2 { 
+              color: #444;
+              font-size: 14pt;
+              margin: 20px 0 12px 0;
+              font-weight: 600;
+              page-break-after: avoid;
+            }
+            
+            h3 {
+              color: #667eea;
+              font-size: 11pt;
+              margin: 15px 0 8px 0;
+              font-weight: 600;
+            }
+            
+            .summary { 
+              background: #f8f9fa;
+              border-left: 4px solid #667eea;
+              padding: 12px 15px;
+              margin-bottom: 20px;
+              font-size: 11pt;
+              font-weight: 600;
+              page-break-inside: avoid;
+            }
+            
+            .summary strong {
+              color: #667eea;
+            }
+            
+            /* Gradient cards for print */
+            [style*="linear-gradient"] {
+              background: #f0f0f5 !important;
+              border: 2px solid #667eea !important;
+              page-break-inside: avoid;
+            }
+            
+            [style*="linear-gradient"] [style*="border-bottom"] {
+              border-bottom: 1px solid #ccc !important;
+              color: #333 !important;
+            }
+            
+            [style*="linear-gradient"] span {
+              color: #333 !important;
+            }
+            
+            .group-info {
+              display: flex;
+              gap: 20px;
+              margin-bottom: 12px;
+              padding: 10px 15px;
+              background: #f8f9fa;
+              border-radius: 6px;
+              font-size: 10pt;
+              page-break-inside: avoid;
+            }
+            
+            .group-info p {
+              margin: 0;
+            }
+            
+            .group-info strong {
+              color: #333;
+              font-weight: 600;
+            }
+            
+            .report-group {
+              margin-bottom: 30px;
+              page-break-inside: avoid;
+            }
+            
+            table { 
+              width: 100%;
+              border-collapse: collapse;
+              margin: 15px 0 25px 0;
+              font-size: 10pt;
+              page-break-inside: avoid;
+            }
+            
+            thead {
+              display: table-header-group;
+            }
+            
+            th {
+              background-color: #667eea !important;
+              color: white !important;
+              padding: 10px 8px;
+              text-align: left;
+              font-weight: 600;
+              border: 1px solid #5568d3;
+              font-size: 10pt;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            
+            td { 
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+            }
+            
+            tbody tr:nth-child(even) {
+              background-color: #f9f9f9;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            
+            tbody tr:first-child td {
+              border-top: 2px solid #667eea;
+            }
+            
+            .empty-report {
+              text-align: center;
+              padding: 40px;
+              color: #999;
+              font-style: italic;
+            }
+            
+            .print-footer {
+              position: fixed;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              text-align: center;
+              font-size: 7pt;
+              color: #666;
+              padding: 4px 0;
+              border-top: 1px solid #ccc;
+              background: white;
+            }
+            
+            .print-footer .company-name {
+              font-weight: 600;
+              color: #667eea;
+              font-size: 7.5pt;
+            }
+            
+            .print-footer .contact-info {
+              margin-top: 2px;
+              font-size: 6.5pt;
+              color: #999;
+            }
+            
+            .print-footer a {
+              color: #667eea;
+              text-decoration: none;
+            }
+            
+            @page {
+              margin-bottom: 1.5cm;
+            }
+            
+            /* Hide interactive elements */
+            button, input, select, svg, .filter-group {
+              display: none !important;
+            }
+            
             @media print {
-              button { display: none; }
+              body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+                padding-bottom: 60px;
+              }
+              
+              .print-footer {
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              
+              .report-group {
+                page-break-inside: avoid;
+              }
+              
+              h2, h3 {
+                page-break-after: avoid;
+              }
+              
+              table {
+                page-break-inside: auto;
+              }
+              
+              tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+              }
+              
+              thead {
+                display: table-header-group;
+              }
             }
           </style>
         </head>
         <body>
+          <div class="print-header">
+            <h1>${companyName}</h1>
+            <div class="subtitle">Travel Management System - Report Generated on ${printDate}</div>
+          </div>
           ${printContent.innerHTML}
-          <script>window.print(); window.close();</script>
+          <div class="print-footer">
+            <div class="company-name">Innovative Layer</div>
+            <div class="contact-info">
+              Phone: +92 333 3775889 | Website: <a href="https://www.innovativelayer.com">www.innovativelayer.com</a>
+            </div>
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              // Close after print dialog is closed
+              setTimeout(function() { window.close(); }, 100);
+            };
+          </script>
         </body>
       </html>
     `);
@@ -924,6 +1182,14 @@ const Reports = () => {
                         )}
                     </div>
                 </Card>
+
+                {/* Footer */}
+                <div className="reports-footer">
+                    <div className="company-name">Innovative Layer</div>
+                    <div className="contact-info">
+                        Phone: +92 333 3775889 | Website: <a href="https://www.innovativelayer.com" target="_blank" rel="noopener noreferrer">www.innovativelayer.com</a>
+                    </div>
+                </div>
             </div>
         </div>
     );

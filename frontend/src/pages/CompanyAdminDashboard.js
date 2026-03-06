@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { companiesAPI, passengersAPI } from '../services/api';
+import { companiesAPI, passengersAPI, groupsAPI } from '../services/api';
 import {
     Building2,
     LogOut,
@@ -14,7 +14,16 @@ import {
     FileText,
     TrendingUp,
     TrendingDown,
-    CheckCircle2
+    CheckCircle2,
+    Hotel,
+    Plane,
+    Calendar,
+    AlertCircle,
+    PlusCircle,
+    BarChart3,
+    ArrowRight,
+    Clock,
+    MapPin
 } from 'lucide-react';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
@@ -42,10 +51,19 @@ const CompanyAdminDashboard = () => {
     const [selectedMaktab, setSelectedMaktab] = useState(null);
     const [maktabPassengers, setMaktabPassengers] = useState([]);
     const [loadingPassengers, setLoadingPassengers] = useState(false);
+    const [groups, setGroups] = useState([]);
+    const [upcomingArrivals, setUpcomingArrivals] = useState([]);
+    const [upcomingDepartures, setUpcomingDepartures] = useState([]);
+    const [hotelStats, setHotelStats] = useState({});
+    const [todayArrivals, setTodayArrivals] = useState([]);
+    const [todayDepartures, setTodayDepartures] = useState([]);
+    const [recentGroups, setRecentGroups] = useState([]);
+    const [flightStats, setFlightStats] = useState({ totalFlights: 0, uniqueRoutes: 0 });
 
     useEffect(() => {
         fetchCompanyData();
         fetchStats();
+        fetchGroups();
     }, []);
 
     const fetchCompanyData = async () => {
@@ -77,6 +95,87 @@ const CompanyAdminDashboard = () => {
         } catch (error) {
             console.error('Error fetching stats:', error);
             // Keep the default state on error
+        }
+    };
+
+    const fetchGroups = async () => {
+        try {
+            const response = await groupsAPI.getAll();
+            const groupsData = response.data;
+            setGroups(groupsData);
+
+            // Calculate upcoming arrivals (next 7 days)
+            const now = new Date();
+            const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+            const arrivals = groupsData.filter(group => {
+                const arrivalDate = new Date(group.arrivalDate);
+                return arrivalDate >= now && arrivalDate <= sevenDaysFromNow;
+            }).sort((a, b) => new Date(a.arrivalDate) - new Date(b.arrivalDate));
+
+            const departures = groupsData.filter(group => {
+                const departureDate = new Date(group.departureDate);
+                return departureDate >= now && departureDate <= sevenDaysFromNow;
+            }).sort((a, b) => new Date(a.departureDate) - new Date(b.departureDate));
+
+            setUpcomingArrivals(arrivals);
+            setUpcomingDepartures(departures);
+
+            // Calculate today's arrivals and departures
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const arrivalsToday = groupsData.filter(group => {
+                const arrivalDate = new Date(group.arrivalDate);
+                arrivalDate.setHours(0, 0, 0, 0);
+                return arrivalDate.getTime() === today.getTime();
+            });
+
+            const departuresToday = groupsData.filter(group => {
+                const departureDate = new Date(group.departureDate);
+                departureDate.setHours(0, 0, 0, 0);
+                return departureDate.getTime() === today.getTime();
+            });
+
+            setTodayArrivals(arrivalsToday);
+            setTodayDepartures(departuresToday);
+
+            // Recent groups (last 5)
+            const recent = [...groupsData]
+                .sort((a, b) => new Date(b.createdAt || b.arrivalDate) - new Date(a.createdAt || a.arrivalDate))
+                .slice(0, 5);
+            setRecentGroups(recent);
+
+            // Calculate hotel usage stats
+            const hotels = {};
+            groupsData.forEach(group => {
+                const arrivalHotel = group.arrivalHotel || group.hotel;
+                const departureHotel = group.departureHotel;
+
+                if (arrivalHotel) {
+                    const hotelId = arrivalHotel._id || arrivalHotel;
+                    const hotelName = arrivalHotel.name || 'Unknown Hotel';
+                    if (!hotels[hotelId]) {
+                        hotels[hotelId] = { name: hotelName, count: 0 };
+                    }
+                    hotels[hotelId].count += group.passengerCount || 0;
+                }
+            });
+
+            setHotelStats(hotels);
+
+            // Calculate flight statistics
+            const uniqueArrivalFlights = new Set(groupsData.map(g => g.arrivalFlightNo).filter(Boolean));
+            const uniqueDepartureFlights = new Set(groupsData.map(g => g.departureFlightNo).filter(Boolean));
+            const allFlights = new Set([...uniqueArrivalFlights, ...uniqueDepartureFlights]);
+            setFlightStats({
+                totalFlights: allFlights.size,
+                uniqueRoutes: uniqueArrivalFlights.size
+            });
+        } catch (error) {
+            console.error('Error fetching groups:', error);
         }
     };
 
@@ -295,6 +394,338 @@ const CompanyAdminDashboard = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Quick Actions Card */}
+                <div className="fade-in" style={{ marginTop: '2rem' }}>
+                    <h3 className="section-title">Quick Actions</h3>
+                    <div className="quick-actions-grid">
+                        <button className="action-card" onClick={() => navigate('/groups')}>
+                            <div className="action-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                                <Users size={24} />
+                            </div>
+                            <div className="action-content">
+                                <div className="action-title">Create Group</div>
+                                <div className="action-subtitle">Add new travel group</div>
+                            </div>
+                            <ArrowRight size={20} />
+                        </button>
+
+                        <button className="action-card" onClick={() => navigate('/passengers')}>
+                            <div className="action-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                                <UserCheck size={24} />
+                            </div>
+                            <div className="action-content">
+                                <div className="action-title">Add Passenger</div>
+                                <div className="action-subtitle">Register new traveler</div>
+                            </div>
+                            <ArrowRight size={20} />
+                        </button>
+
+                        <button className="action-card" onClick={() => navigate('/reports')}>
+                            <div className="action-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+                                <FileText size={24} />
+                            </div>
+                            <div className="action-content">
+                                <div className="action-title">View Reports</div>
+                                <div className="action-subtitle">Generate travel reports</div>
+                            </div>
+                            <ArrowRight size={20} />
+                        </button>
+
+                        <button className="action-card" onClick={() => navigate('/groups')}>
+                            <div className="action-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
+                                <BarChart3 size={24} />
+                            </div>
+                            <div className="action-content">
+                                <div className="action-title">Manage Groups</div>
+                                <div className="action-subtitle">View & edit groups</div>
+                            </div>
+                            <ArrowRight size={20} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Quick Insights Grid */}
+                <div className="fade-in" style={{ marginTop: '2rem' }}>
+                    <h3 className="section-title">Quick Insights</h3>
+                    <div className="quick-stats-grid">
+                        <div className="stat-card">
+                            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                                <Users size={24} />
+                            </div>
+                            <div className="stat-content">
+                                <div className="stat-value">{groups.length}</div>
+                                <div className="stat-label">Total Groups</div>
+                            </div>
+                        </div>
+
+                        <div className="stat-card">
+                            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
+                                <Hotel size={24} />
+                            </div>
+                            <div className="stat-content">
+                                <div className="stat-value">{Object.keys(hotelStats).length}</div>
+                                <div className="stat-label">Hotels Used</div>
+                            </div>
+                        </div>
+
+                        <div className="stat-card">
+                            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                                <Plane size={24} />
+                            </div>
+                            <div className="stat-content">
+                                <div className="stat-value">{upcomingArrivals.length}</div>
+                                <div className="stat-label">Coming Soon</div>
+                            </div>
+                        </div>
+
+                        <div className="stat-card">
+                            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+                                <Calendar size={24} />
+                            </div>
+                            <div className="stat-content">
+                                <div className="stat-value">{upcomingDepartures.length}</div>
+                                <div className="stat-label">Departing Soon</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Today's Schedule */}
+                <div className="fade-in" style={{ marginTop: '2rem' }}>
+                    <h3 className="section-title">
+                        <Clock size={20} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+                        Today's Schedule
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                        <div className="schedule-card">
+                            <div className="schedule-header" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                                <Plane size={20} />
+                                <span>Arrivals Today</span>
+                                <span className="schedule-count">{todayArrivals.length}</span>
+                            </div>
+                            <div className="schedule-body">
+                                {todayArrivals.length > 0 ? (
+                                    todayArrivals.map(group => (
+                                        <div key={group._id} className="schedule-item">
+                                            <div className="schedule-time">{new Date(group.arrivalDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                            <div className="schedule-details">
+                                                <div className="schedule-flight">Flight {group.arrivalFlightNo}</div>
+                                                <div className="schedule-meta">Maktab {group.maktab} • {group.passengerCount || 0} pax</div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="schedule-empty">No arrivals scheduled for today</div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="schedule-card">
+                            <div className="schedule-header" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+                                <Plane size={20} style={{ transform: 'rotate(45deg)' }} />
+                                <span>Departures Today</span>
+                                <span className="schedule-count">{todayDepartures.length}</span>
+                            </div>
+                            <div className="schedule-body">
+                                {todayDepartures.length > 0 ? (
+                                    todayDepartures.map(group => (
+                                        <div key={group._id} className="schedule-item">
+                                            <div className="schedule-time">{new Date(group.departureDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                            <div className="schedule-details">
+                                                <div className="schedule-flight">Flight {group.departureFlightNo}</div>
+                                                <div className="schedule-meta">Maktab {group.maktab} • {group.passengerCount || 0} pax</div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="schedule-empty">No departures scheduled for today</div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Recent Groups & Top Hotels */}
+                <div className="fade-in" style={{ marginTop: '2rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                        {/* Recent Groups */}
+                        <div>
+                            <h3 className="section-title">Recent Groups</h3>
+                            <div className="report-card">
+                                {recentGroups.length > 0 ? (
+                                    recentGroups.map(group => (
+                                        <div key={group._id} className="report-item">
+                                            <div className="report-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                                                <Users size={16} />
+                                            </div>
+                                            <div className="report-content">
+                                                <div className="report-title">Maktab {group.maktab} • {group.arrivalCity || 'N/A'}</div>
+                                                <div className="report-meta">
+                                                    Arrival: {new Date(group.arrivalDate).toLocaleDateString()} • {group.passengerCount || 0} passengers
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="empty-state">
+                                        <AlertCircle size={32} />
+                                        <p>No groups created yet</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Top Hotels */}
+                        <div>
+                            <h3 className="section-title">Top Hotels</h3>
+                            <div className="report-card">
+                                {Object.keys(hotelStats).length > 0 ? (
+                                    Object.entries(hotelStats)
+                                        .sort((a, b) => b[1].count - a[1].count)
+                                        .slice(0, 5)
+                                        .map(([hotelId, data]) => (
+                                            <div key={hotelId} className="report-item">
+                                                <div className="report-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
+                                                    <Hotel size={16} />
+                                                </div>
+                                                <div className="report-content">
+                                                    <div className="report-title">{data.name}</div>
+                                                    <div className="report-meta">{data.count} passengers booked</div>
+                                                </div>
+                                            </div>
+                                        ))
+                                ) : (
+                                    <div className="empty-state">
+                                        <Hotel size={32} />
+                                        <p>No hotel bookings yet</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Upcoming Arrivals & Departures */}
+                <div className="fade-in" style={{ marginTop: '2rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
+                        {/* Upcoming Arrivals */}
+                        <div>
+                            <h3 className="section-title">
+                                <Plane size={20} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+                                Upcoming Arrivals (Next 7 Days)
+                            </h3>
+                            <div className="activity-list">
+                                {upcomingArrivals.length > 0 ? (
+                                    upcomingArrivals.slice(0, 5).map(group => (
+                                        <div key={group._id} className="activity-item">
+                                            <div className="activity-icon arrival-icon">
+                                                <Plane size={16} />
+                                            </div>
+                                            <div className="activity-content">
+                                                <div className="activity-title">Maktab {group.maktab}</div>
+                                                <div className="activity-meta">
+                                                    {new Date(group.arrivalDate).toLocaleDateString()} • Flight {group.arrivalFlightNo} • Maktab {group.maktab}
+                                                </div>
+                                                <div className="activity-detail">
+                                                    {group.passengerCount || 0} passengers → {(group.arrivalHotel || group.hotel)?.name || 'Hotel TBD'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="empty-state">
+                                        <AlertCircle size={32} />
+                                        <p>No arrivals scheduled for the next 7 days</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Upcoming Departures */}
+                        <div>
+                            <h3 className="section-title">
+                                <Plane size={20} style={{ verticalAlign: 'middle', marginRight: '0.5rem', transform: 'rotate(45deg)' }} />
+                                Upcoming Departures (Next 7 Days)
+                            </h3>
+                            <div className="activity-list">
+                                {upcomingDepartures.length > 0 ? (
+                                    upcomingDepartures.slice(0, 5).map(group => (
+                                        <div key={group._id} className="activity-item">
+                                            <div className="activity-icon departure-icon">
+                                                <Plane size={16} style={{ transform: 'rotate(45deg)' }} />
+                                            </div>
+                                            <div className="activity-content">
+                                                <div className="activity-title">Maktab {group.maktab}</div>
+                                                <div className="activity-meta">
+                                                    {new Date(group.departureDate).toLocaleDateString()} • Flight {group.departureFlightNo} • Maktab {group.maktab}
+                                                </div>
+                                                <div className="activity-detail">
+                                                    {group.passengerCount || 0} passengers from {group.departureHotel?.name || (group.arrivalHotel || group.hotel)?.name || 'Hotel TBD'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="empty-state">
+                                        <AlertCircle size={32} />
+                                        <p>No departures scheduled for the next 7 days</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Quota Progress Bar */}
+                <div className="fade-in" style={{ marginTop: '2rem' }}>
+                    <h3 className="section-title">Quota Usage</h3>
+                    <div className="quota-progress-container">
+                        <div className="quota-progress-header">
+                            <span className="quota-progress-label">
+                                <strong>{stats.totalPassengers}</strong> of <strong>{stats.quota}</strong> passengers
+                            </span>
+                            <span className="quota-progress-percentage">
+                                {stats.quota > 0 ? Math.round((stats.totalPassengers / stats.quota) * 100) : 0}%
+                            </span>
+                        </div>
+                        <div className="quota-progress-bar-wrapper">
+                            <div
+                                className="quota-progress-bar-fill"
+                                style={{
+                                    width: `${stats.quota > 0 ? (stats.totalPassengers / stats.quota) * 100 : 0}%`,
+                                    background: stats.totalPassengers > stats.quota * 0.9
+                                        ? 'linear-gradient(90deg, #f5576c 0%, #f093fb 100%)'
+                                        : stats.totalPassengers > stats.quota * 0.7
+                                            ? 'linear-gradient(90deg, #fee140 0%, #fa709a 100%)'
+                                            : 'linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)'
+                                }}
+                            ></div>
+                        </div>
+                        <div className="quota-progress-footer">
+                            <span className="quota-progress-info">
+                                {stats.remaining > 0 ? (
+                                    <><CheckCircle2 size={16} /> {stats.remaining} slots available</>
+                                ) : (
+                                    <><AlertCircle size={16} /> Quota reached</>
+                                )}
+                            </span>
+                            {stats.totalPassengers > stats.quota && (
+                                <span className="quota-warning">
+                                    <AlertCircle size={16} /> {stats.totalPassengers - stats.quota} over limit
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div className="reports-footer">
+                <div className="company-name">Innovative Layer</div>
+                <div className="contact-info">
+                    Phone: +92 333 3775889 | Website: <a href="https://www.innovativelayer.com" target="_blank" rel="noopener noreferrer">www.innovativelayer.com</a>
                 </div>
             </div>
 

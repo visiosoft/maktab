@@ -98,10 +98,13 @@ const GroupPassengers = () => {
 
     const handleDeletePassenger = async (passengerId) => {
         try {
-            await passengersAPI.delete(passengerId);
+            // Instead of deleting, unassign the passenger from the group
+            await passengersAPI.update(passengerId, { group: null });
             setPassengers(passengers.filter(p => p._id !== passengerId));
+            // Refresh unassigned passengers to show the newly unassigned passenger
+            await fetchUnassignedPassengers();
         } catch (error) {
-            console.error('Error deleting passenger:', error);
+            console.error('Error unassigning passenger:', error);
             throw error;
         }
     };
@@ -261,6 +264,7 @@ const GroupPassengers = () => {
                         onAdd={handleAddPassenger}
                         onUpdate={handleUpdatePassenger}
                         onDelete={handleDeletePassenger}
+                        deleteLabel="remove from group"
                     />
                 </Card>
 

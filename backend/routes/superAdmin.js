@@ -4,6 +4,8 @@ const { authMiddleware, isSuperAdmin } = require('../middleware/auth');
 const SuperAdmin = require('../models/SuperAdmin');
 const Company = require('../models/Company');
 const CompanyAdmin = require('../models/CompanyAdmin');
+const Passenger = require('../models/Passenger');
+const Group = require('../models/Group');
 
 // All routes require authentication and super admin role
 router.use(authMiddleware);
@@ -48,6 +50,74 @@ router.get('/profile', async (req, res) => {
         res.json(admin);
     } catch (error) {
         res.status(500).json({ message: 'Server error fetching profile' });
+    }
+});
+
+// @route   GET /api/super-admin/passenger-counts
+// @desc    Get passenger counts per company
+// @access  Super Admin
+router.get('/passenger-counts', async (req, res) => {
+    try {
+        const passengers = await Passenger.find().select('company');
+
+        // Count passengers per company
+        const counts = {};
+        passengers.forEach(passenger => {
+            if (passenger.company) {
+                const companyId = passenger.company.toString();
+                counts[companyId] = (counts[companyId] || 0) + 1;
+            }
+        });
+
+        res.json(counts);
+    } catch (error) {
+        console.error('Error fetching passenger counts:', error);
+        res.status(500).json({ message: 'Server error fetching passenger counts' });
+    }
+});
+
+// @route   GET /api/super-admin/groups
+// @desc    Get all groups across all companies
+// @access  Super Admin
+router.get('/groups', async (req, res) => {
+    try {
+        const groups = await Group.find()
+            .populate('company', 'name')
+            .populate('arrivalHotel', 'name')
+            .populate('departureHotel', 'name')
+            .populate('hotel', 'name')
+            .sort({ arrivalDate: -1 });
+
+        res.json(groups);
+    } catch (error) {
+        console.error('Error fetching groups:', error);
+        res.status(500).json({ message: 'Server error fetching groups' });
+    }
+});
+
+// @route   GET /api/super-admin/unassigned-counts
+// @desc    Get unassigned passenger counts per company
+// @access  Super Admin
+router.get('/unassigned-counts', async (req, res) => {
+    try {
+        const passengers = await Passenger.find().select('company group').populate('group', 'maktab');
+
+        // Count unassigned passengers per company
+        const counts = {};
+        passengers.forEach(passenger => {
+            if (passenger.company) {
+                const companyId = passenger.company.toString();
+                // Count as unassigned if no group or no maktab
+                if (!passenger.group || !passenger.group.maktab) {
+                    counts[companyId] = (counts[companyId] || 0) + 1;
+                }
+            }
+        });
+
+        res.json(counts);
+    } catch (error) {
+        console.error('Error fetching unassigned counts:', error);
+        res.status(500).json({ message: 'Server error fetching unassigned counts' });
     }
 });
 

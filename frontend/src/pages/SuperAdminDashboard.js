@@ -16,7 +16,11 @@ import {
     Home,
     ChevronDown,
     ChevronRight,
-    Key
+    Key,
+    TrendingUp,
+    AlertCircle,
+    Plane,
+    Clock
 } from 'lucide-react';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
@@ -30,6 +34,11 @@ const SuperAdminDashboard = () => {
     const [companies, setCompanies] = useState([]);
     const [companyAdmins, setCompanyAdmins] = useState({});
     const [expandedRows, setExpandedRows] = useState({});
+    const [passengerCounts, setPassengerCounts] = useState({});
+    const [unassignedCounts, setUnassignedCounts] = useState({});
+    const [groups, setGroups] = useState([]);
+    const [todayArrivals, setTodayArrivals] = useState([]);
+    const [todayDepartures, setTodayDepartures] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showCompanyModal, setShowCompanyModal] = useState(false);
     const [showAdminModal, setShowAdminModal] = useState(false);
@@ -56,20 +65,56 @@ const SuperAdminDashboard = () => {
 
     useEffect(() => {
         fetchDashboardData();
+        fetchGroups();
     }, []);
 
     const fetchDashboardData = async () => {
         try {
-            const [dashboardRes, companiesRes] = await Promise.all([
+            const [dashboardRes, companiesRes, countsRes, unassignedRes] = await Promise.all([
                 superAdminAPI.getDashboard(),
-                companiesAPI.getAll()
+                companiesAPI.getAll(),
+                superAdminAPI.getPassengerCounts(),
+                superAdminAPI.getUnassignedCounts()
             ]);
             setStats(dashboardRes.data.stats);
             setCompanies(companiesRes.data);
+            setPassengerCounts(countsRes.data);
+            setUnassignedCounts(unassignedRes.data);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchGroups = async () => {
+        try {
+            const response = await superAdminAPI.getGroups();
+            const groupsData = response.data;
+            setGroups(groupsData);
+
+            // Calculate today's arrivals and departures
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const arrivalsToday = groupsData.filter(group => {
+                const arrivalDate = new Date(group.arrivalDate);
+                arrivalDate.setHours(0, 0, 0, 0);
+                return arrivalDate.getTime() === today.getTime();
+            });
+
+            const departuresToday = groupsData.filter(group => {
+                const departureDate = new Date(group.departureDate);
+                departureDate.setHours(0, 0, 0, 0);
+                return departureDate.getTime() === today.getTime();
+            });
+
+            setTodayArrivals(arrivalsToday);
+            setTodayDepartures(departuresToday);
+        } catch (error) {
+            console.error('Error fetching groups:', error);
         }
     };
 
@@ -286,6 +331,61 @@ const SuperAdminDashboard = () => {
                     </div>
                 </div>
 
+                {/* Today's Schedule */}
+                <div className="fade-in" style={{ marginTop: '2rem' }}>
+                    <h3 className="section-title">
+                        <Clock size={20} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+                        Today's Schedule - All Companies
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                        <div className="schedule-card">
+                            <div className="schedule-header" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                                <Plane size={20} />
+                                <span>Arrivals Today</span>
+                                <span className="schedule-count">{todayArrivals.length}</span>
+                            </div>
+                            <div className="schedule-body">
+                                {todayArrivals.length > 0 ? (
+                                    todayArrivals.map(group => (
+                                        <div key={group._id} className="schedule-item">
+                                            <div className="schedule-time">{new Date(group.arrivalDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                            <div className="schedule-details">
+                                                <div className="schedule-flight">Flight {group.arrivalFlightNo}</div>
+                                                <div className="schedule-meta">{group.company?.name} • Maktab {group.maktab} • {group.passengerCount || 0} pax</div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="schedule-empty">No arrivals scheduled for today</div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="schedule-card">
+                            <div className="schedule-header" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+                                <Plane size={20} style={{ transform: 'rotate(45deg)' }} />
+                                <span>Departures Today</span>
+                                <span className="schedule-count">{todayDepartures.length}</span>
+                            </div>
+                            <div className="schedule-body">
+                                {todayDepartures.length > 0 ? (
+                                    todayDepartures.map(group => (
+                                        <div key={group._id} className="schedule-item">
+                                            <div className="schedule-time">{new Date(group.departureDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                            <div className="schedule-details">
+                                                <div className="schedule-flight">Flight {group.departureFlightNo}</div>
+                                                <div className="schedule-meta">{group.company?.name} • Maktab {group.maktab} • {group.passengerCount || 0} pax</div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="schedule-empty">No departures scheduled for today</div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Companies Section */}
                 <div className="companies-section fade-in">
                     <div className="section-header">
@@ -314,6 +414,7 @@ const SuperAdminDashboard = () => {
                                         <th>Email</th>
                                         <th>Industry</th>
                                         <th>Quota</th>
+                                        <th>Arrival Incomplete</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -337,7 +438,59 @@ const SuperAdminDashboard = () => {
                                                 <td><strong>{company.name}</strong></td>
                                                 <td>{company.email}</td>
                                                 <td>{company.industry || '-'}</td>
-                                                <td>{company.passengerQuota}</td>
+                                                <td>
+                                                    {(() => {
+                                                        const used = passengerCounts[company._id] || 0;
+                                                        const total = company.passengerQuota;
+                                                        const percentage = total > 0 ? Math.round((used / total) * 100) : 0;
+                                                        const isNearLimit = percentage >= 70 && percentage < 90;
+                                                        const isOverLimit = percentage >= 90;
+
+                                                        let barColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                                                        if (isOverLimit) {
+                                                            barColor = 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)';
+                                                        } else if (isNearLimit) {
+                                                            barColor = 'linear-gradient(135deg, #f5af19 0%, #f12711 100%)';
+                                                        }
+
+                                                        return (
+                                                            <div className="quota-progress-mini">
+                                                                <div className="quota-progress-bar-mini-wrapper">
+                                                                    <div
+                                                                        className="quota-progress-bar-mini-fill"
+                                                                        style={{
+                                                                            width: `${Math.min(percentage, 100)}%`,
+                                                                            background: barColor
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                                <div className="quota-percentage-label">
+                                                                    {percentage}%
+                                                                </div>
+                                                                <div style={{ fontSize: '0.75rem', color: '#666', whiteSpace: 'nowrap' }}>
+                                                                    {used}/{total}
+                                                                </div>
+                                                                {isOverLimit && (
+                                                                    <AlertCircle size={16} style={{ color: '#f5576c', flexShrink: 0 }} />
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <span style={{
+                                                            fontWeight: 700,
+                                                            fontSize: '1rem',
+                                                            color: (unassignedCounts[company._id] || 0) > 0 ? '#f5576c' : '#666'
+                                                        }}>
+                                                            {unassignedCounts[company._id] || 0}
+                                                        </span>
+                                                        {(unassignedCounts[company._id] || 0) > 0 && (
+                                                            <AlertCircle size={16} style={{ color: '#f5576c' }} />
+                                                        )}
+                                                    </div>
+                                                </td>
                                                 <td>
                                                     <span className={`status-badge ${company.isActive ? 'active' : 'inactive'}`}>
                                                         {company.isActive ? 'Active' : 'Inactive'}
@@ -430,6 +583,14 @@ const SuperAdminDashboard = () => {
                             </table>
                         </div>
                     )}
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div className="reports-footer">
+                <div className="company-name">Innovative Layer</div>
+                <div className="contact-info">
+                    Phone: +92 333 3775889 | Website: <a href="https://www.innovativelayer.com" target="_blank" rel="noopener noreferrer">www.innovativelayer.com</a>
                 </div>
             </div>
 

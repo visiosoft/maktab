@@ -47,6 +47,9 @@ export const authAPI = {
 export const superAdminAPI = {
     getDashboard: () => api.get('/super-admin/dashboard'),
     getProfile: () => api.get('/super-admin/profile'),
+    getPassengerCounts: () => api.get('/super-admin/passenger-counts'),
+    getGroups: () => api.get('/super-admin/groups'),
+    getUnassignedCounts: () => api.get('/super-admin/unassigned-counts'),
 };
 
 // Companies API
