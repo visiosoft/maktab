@@ -85,13 +85,96 @@ router.get('/groups', async (req, res) => {
             .populate('company', 'name')
             .populate('arrivalHotel', 'name')
             .populate('departureHotel', 'name')
-            .populate('hotel', 'name')
             .sort({ arrivalDate: -1 });
 
-        res.json(groups);
+        // Get passenger count for each group
+        const groupsWithStats = await Promise.all(
+            groups.map(async (group) => {
+                const passengerCount = await Passenger.countDocuments({
+                    group: group._id
+                });
+                return {
+                    ...group.toObject(),
+                    passengerCount
+                };
+            })
+        );
+
+        res.json(groupsWithStats);
     } catch (error) {
         console.error('Error fetching groups:', error);
         res.status(500).json({ message: 'Server error fetching groups' });
+    }
+});
+
+// @route   GET /api/super-admin/reports
+// @desc    Get report data for a specific company
+// @access  Super Admin
+router.get('/reports', async (req, res) => {
+    try {
+        const { companyId } = req.query;
+        console.log('[Super Admin Reports] Request received for companyId:', companyId);
+
+        if (!companyId) {
+            return res.status(400).json({ message: 'companyId is required' });
+        }
+
+        const company = await Company.findById(companyId).select('name email');
+        console.log('[Super Admin Reports] Company found:', company);
+
+        if (!company) {
+            return res.status(404).json({ message: 'Company not found' });
+        }
+
+        const groups = await Group.find({ company: companyId })
+            .populate('company', 'name')
+            .populate('arrivalHotel', 'name city address')
+            .populate('departureHotel', 'name city address')
+            .sort({ arrivalDate: -1 });
+
+        console.log('[Super Admin Reports] Groups found:', groups.length);
+
+        const groupIds = groups.map((group) => group._id);
+        const passengers = groupIds.length
+            ? await Passenger.find({
+                company: companyId,
+                group: { $in: groupIds }
+            })
+                .select('firstName lastName passportNo group')
+                .sort({ createdAt: 1 })
+            : [];
+
+        console.log('[Super Admin Reports] Passengers found:', passengers.length);
+
+        const passengersByGroup = passengers.reduce((accumulator, passenger) => {
+            const groupId = passenger.group?.toString();
+
+            if (!groupId) {
+                return accumulator;
+            }
+
+            if (!accumulator[groupId]) {
+                accumulator[groupId] = [];
+            }
+
+            accumulator[groupId].push(passenger);
+            return accumulator;
+        }, {});
+
+        const groupsWithPassengers = groups.map((group) => ({
+            ...group.toObject(),
+            passengers: passengersByGroup[group._id.toString()] || []
+        }));
+
+        console.log('[Super Admin Reports] Response data - company:', company.name, 'groups:', groupsWithPassengers.length);
+
+        res.json({
+            company,
+            groups: groupsWithPassengers
+        });
+    } catch (error) {
+        console.error('Error fetching report data:', error);
+        res.status(500).json({ message: 'Server error fetching report data' });
     }
 });
 
