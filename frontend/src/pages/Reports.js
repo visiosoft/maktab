@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { groupsAPI, companiesAPI } from '../services/api';
+import { groupsAPI, companiesAPI, superAdminAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -9,9 +9,11 @@ import './Reports.css';
 
 const Reports = () => {
     const navigate = useNavigate();
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
     const [groups, setGroups] = useState([]);
     const [company, setCompany] = useState(null);
+    const [companies, setCompanies] = useState([]);
+    const [selectedCompanyId, setSelectedCompanyId] = useState('');
     const [loading, setLoading] = useState(true);
 
     // Report 1: Maktab & Date filter
@@ -27,28 +29,78 @@ const Reports = () => {
     // Report 4: Hotel Arrivals by Date
     const [hotelArrivalDate, setHotelArrivalDate] = useState(new Date().toISOString().split('T')[0]);
 
-    useEffect(() => {
-        fetchGroups();
-        fetchCompany();
-    }, []);
+    const isSuperAdmin = user?.role === 'super_admin';
 
-    const fetchCompany = async () => {
+    useEffect(() => {
+        if (!user?.role) {
+            return;
+        }
+
+        if (isSuperAdmin) {
+            fetchCompanies();
+            return;
+        }
+
+        fetchCompanyAdminReports();
+    }, [user?.role]);
+
+    useEffect(() => {
+        if (!isSuperAdmin || !selectedCompanyId) {
+            console.log('Skipping fetchSuperAdminReports - isSuperAdmin:', isSuperAdmin, 'selectedCompanyId:', selectedCompanyId);
+            return;
+        }
+
+        console.log('Triggering fetchSuperAdminReports for company:', selectedCompanyId);
+        fetchSuperAdminReports(selectedCompanyId);
+    }, [isSuperAdmin, selectedCompanyId]);
+
+    const fetchCompanies = async () => {
         try {
+            setLoading(true);
+            console.log('Fetching companies for super admin...');
             const response = await companiesAPI.getAll();
-            setCompany(response.data);
+            const companyList = Array.isArray(response.data) ? response.data : [];
+            console.log('Companies fetched:', companyList.length, companyList);
+
+            setCompanies(companyList);
+
+            if (companyList.length === 0) {
+                setCompany(null);
+                setGroups([]);
+                setSelectedCompanyId('');
+                return;
+            }
+
+            setSelectedCompanyId((currentCompanyId) => {
+                if (currentCompanyId && companyList.some((item) => item._id === currentCompanyId)) {
+                    console.log('Keeping current company:', currentCompanyId);
+                    return currentCompanyId;
+                }
+
+                console.log('Setting default company:', companyList[0]._id);
+                return companyList[0]._id;
+            });
         } catch (error) {
-            console.error('Error fetching company:', error);
+            console.error('Error fetching companies:', error);
+            alert('Failed to fetch companies');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const fetchGroups = async () => {
+    const fetchCompanyAdminReports = async () => {
         try {
             setLoading(true);
-            const response = await groupsAPI.getAll();
+            const [groupsResponse, companyResponse] = await Promise.all([
+                groupsAPI.getAll(),
+                companiesAPI.getAll()
+            ]);
+
+            setCompany(companyResponse.data);
 
             // Fetch passengers for each group
             const groupsWithPassengers = await Promise.all(
-                response.data.map(async (group) => {
+                groupsResponse.data.map(async (group) => {
                     try {
                         const passengersResponse = await groupsAPI.getPassengers(group._id);
                         return { ...group, passengers: passengersResponse.data };
@@ -63,6 +115,24 @@ const Reports = () => {
         } catch (error) {
             console.error('Error fetching groups:', error);
             alert('Failed to fetch groups data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchSuperAdminReports = async (companyId) => {
+        try {
+            setLoading(true);
+            console.log('Fetching reports for company:', companyId);
+            const response = await superAdminAPI.getReports(companyId);
+            console.log('Super admin reports response:', response.data);
+            setCompany(response.data.company);
+            setGroups(response.data.groups || []);
+            console.log('Groups set:', response.data.groups?.length || 0);
+        } catch (error) {
+            console.error('Error fetching report data:', error);
+            alert('Failed to fetch report data');
+            setGroups([]);
         } finally {
             setLoading(false);
         }
@@ -575,7 +645,7 @@ const Reports = () => {
                         </div>
                         <div className="dashboard-logo-text">
                             <h1>{company?.name || 'Maktab'}</h1>
-                            <p>Travel Reports & Analytics</p>
+                            <p>{isSuperAdmin ? 'Super Admin Travel Reports' : 'Travel Reports & Analytics'}</p>
                         </div>
                     </div>
                     <Button variant="danger" size="small" onClick={logout}>
@@ -586,18 +656,29 @@ const Reports = () => {
             </div>
 
             <div className="dashboard-nav">
-                <button className="nav-item" onClick={() => navigate('/company-admin/dashboard')}>
+                <button className="nav-item" onClick={() => navigate(isSuperAdmin ? '/super-admin/dashboard' : '/company-admin/dashboard')}>
                     <Home size={20} />
                     <span>Dashboard</span>
                 </button>
-                <button className="nav-item" onClick={() => navigate('/passengers')}>
-                    <UserCheck size={20} />
-                    <span>Passengers</span>
-                </button>
-                <button className="nav-item" onClick={() => navigate('/groups')}>
-                    <Users size={20} />
-                    <span>Groups</span>
-                </button>
+                {isSuperAdmin ? (
+                    <>
+                        <button className="nav-item" onClick={() => navigate('/hotels')}>
+                            <Building2 size={20} />
+                            <span>Hotels</span>
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <button className="nav-item" onClick={() => navigate('/passengers')}>
+                            <UserCheck size={20} />
+                            <span>Passengers</span>
+                        </button>
+                        <button className="nav-item" onClick={() => navigate('/groups')}>
+                            <Users size={20} />
+                            <span>Groups</span>
+                        </button>
+                    </>
+                )}
                 <button className="nav-item active" onClick={() => navigate('/reports')}>
                     <FileText size={20} />
                     <span>Reports</span>
@@ -605,583 +686,625 @@ const Reports = () => {
             </div>
 
             <div className="page-content">
-                {/* Report 1: Maktab & Date Report */}
-                <Card>
-                    <div className="report-header">
-                        <div>
-                            <h2 className="report-title">Maktab Travel Report</h2>
-                            <p className="report-subtitle">View passengers traveling to Maktab(s) on selected date</p>
-                        </div>
-                        <Button
-                            variant="secondary"
-                            icon={<Download size={18} />}
-                            onClick={() => printReport('maktab-report')}
-                        >
-                            Print Report
-                        </Button>
-                    </div>
-
-                    <div className="report-filters">
-                        <div className="filter-group">
-                            <label>Maktab</label>
-                            <select
-                                value={selectedMaktab}
-                                onChange={(e) => setSelectedMaktab(e.target.value)}
-                                className="report-select"
-                            >
-                                <option value="All">All Maktabs</option>
-                                <option value="A">Maktab A</option>
-                                <option value="B">Maktab B</option>
-                                <option value="C">Maktab C</option>
-                                <option value="D">Maktab D</option>
-                            </select>
-                        </div>
-                        <div className="filter-group">
-                            <label>Travel Date</label>
-                            <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={(e) => setSelectedDate(e.target.value)}
-                                className="report-input"
-                            />
-                        </div>
-                    </div>
-
-                    <div id="maktab-report" className="report-content">
-                        <div className="report-print-header">
-                            <h1>{selectedMaktab === 'All' ? 'All Maktabs' : `Maktab ${selectedMaktab}`} Travel Report</h1>
-                            <p>Date: {new Date(selectedDate).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            })}</p>
-                        </div>
-
-                        <div className="summary">
-                            <strong>Total Arrivals:</strong> {getTotalPassengers(maktabReportGroups)} passengers
-                        </div>
-
-                        {maktabReportGroups.length > 0 && (() => {
-                            const summary = getSummaryByMaktabAndHotel(maktabReportGroups);
-                            return (
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#667eea' }}>📊 Arrivals by Maktab & Hotel</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                                        {Object.entries(summary).sort(([a], [b]) => a.localeCompare(b)).map(([maktab, data]) => (
-                                            <div key={maktab} style={{
-                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                color: 'white',
-                                                padding: '1rem',
-                                                borderRadius: '10px',
-                                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                                            }}>
-                                                <div style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '0.5rem' }}>
-                                                    Maktab {maktab}
-                                                    <span style={{ float: 'right', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.9rem' }}>
-                                                        {data.total}
-                                                    </span>
-                                                </div>
-                                                <div style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
-                                                    {Object.entries(data.hotels).sort(([a], [b]) => a.localeCompare(b)).map(([hotel, count]) => (
-                                                        <div key={hotel} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0' }}>
-                                                            <span style={{ opacity: 0.95 }}>📍 {hotel}</span>
-                                                            <span style={{ fontWeight: 'bold' }}>{count}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })()}
-
-                        {maktabReportGroups.length === 0 ? (
-                            <div className="empty-report">
-                                <FileText size={48} />
-                                <p>No groups found for {selectedMaktab === 'All' ? 'any Maktab' : `Maktab ${selectedMaktab}`} on {new Date(selectedDate).toLocaleDateString()}</p>
+                {isSuperAdmin && (
+                    <Card>
+                        <div className="report-header">
+                            <div>
+                                <h2 className="report-title">Company Reports</h2>
+                                <p className="report-subtitle">Select a company to view the same report set available to company admins</p>
                             </div>
-                        ) : (
-                            maktabReportGroups.map((item, idx) => (
-                                <div key={`${item.maktab}-${item.arrivalFlightNo}-${idx}`} className="report-group">
-                                    <h2>Maktab {item.maktab} - Flight {item.arrivalFlightNo || 'N/A'}</h2>
-                                    <div className="group-info">
-                                        <p><strong>Airport:</strong> {item.arrivalAirport || 'N/A'}</p>
-                                        <p><strong>City:</strong> {item.arrivalCity || 'N/A'}</p>
-                                        <p><strong>Hotel:</strong> {item.hotel?.name || 'Not Assigned'}{item.hotel?.city && ` (${item.hotel.city})`}</p>
-                                        <p><strong>PAX:</strong> {item.passengers?.length || 0}</p>
-                                    </div>
+                        </div>
 
-                                    <table className="passengers-report-table">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>First Name</th>
-                                                <th>Last Name</th>
-                                                <th>Passport No.</th>
-                                                <th>Hotel</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {item.passengers && item.passengers.length > 0 ? (
-                                                item.passengers.map((passenger, index) => (
-                                                    <tr key={passenger._id}>
-                                                        <td>{index + 1}</td>
-                                                        <td>{passenger.firstName}</td>
-                                                        <td>{passenger.lastName}</td>
-                                                        <td>{passenger.passportNo}</td>
-                                                        <td>{item.hotel?.name || 'Not Assigned'}</td>
+                        <div className="report-filters">
+                            <div className="filter-group">
+                                <label>Company</label>
+                                <select
+                                    value={selectedCompanyId}
+                                    onChange={(e) => setSelectedCompanyId(e.target.value)}
+                                    className="report-select"
+                                >
+                                    {companies.length === 0 ? (
+                                        <option value="">No companies available</option>
+                                    ) : (
+                                        companies.map((item) => (
+                                            <option key={item._id} value={item._id}>
+                                                {item.name}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                            </div>
+                        </div>
+                    </Card>
+                )}
+
+                {isSuperAdmin && !selectedCompanyId ? (
+                    <Card>
+                        <div className="empty-report">
+                            <p>Select a company to view reports.</p>
+                        </div>
+                    </Card>
+                ) : (
+                    <>
+                        {/* Report 1: Maktab & Date Report */}
+                        <Card>
+                            <div className="report-header">
+                                <div>
+                                    <h2 className="report-title">Maktab Travel Report</h2>
+                                    <p className="report-subtitle">View passengers traveling to Maktab(s) on selected date</p>
+                                </div>
+                                <Button
+                                    variant="secondary"
+                                    icon={<Download size={18} />}
+                                    onClick={() => printReport('maktab-report')}
+                                >
+                                    Print Report
+                                </Button>
+                            </div>
+
+                            <div className="report-filters">
+                                <div className="filter-group">
+                                    <label>Maktab</label>
+                                    <select
+                                        value={selectedMaktab}
+                                        onChange={(e) => setSelectedMaktab(e.target.value)}
+                                        className="report-select"
+                                    >
+                                        <option value="All">All Maktabs</option>
+                                        <option value="A">Maktab A</option>
+                                        <option value="B">Maktab B</option>
+                                        <option value="C">Maktab C</option>
+                                        <option value="D">Maktab D</option>
+                                    </select>
+                                </div>
+                                <div className="filter-group">
+                                    <label>Travel Date</label>
+                                    <input
+                                        type="date"
+                                        value={selectedDate}
+                                        onChange={(e) => setSelectedDate(e.target.value)}
+                                        className="report-input"
+                                    />
+                                </div>
+                            </div>
+
+                            <div id="maktab-report" className="report-content">
+                                <div className="report-print-header">
+                                    <h1>{selectedMaktab === 'All' ? 'All Maktabs' : `Maktab ${selectedMaktab}`} Travel Report</h1>
+                                    <p>Date: {new Date(selectedDate).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}</p>
+                                </div>
+
+                                <div className="summary">
+                                    <strong>Total Arrivals:</strong> {getTotalPassengers(maktabReportGroups)} passengers
+                                </div>
+
+                                {maktabReportGroups.length > 0 && (() => {
+                                    const summary = getSummaryByMaktabAndHotel(maktabReportGroups);
+                                    return (
+                                        <div style={{ marginBottom: '1.5rem' }}>
+                                            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#667eea' }}>📊 Arrivals by Maktab & Hotel</h3>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                                                {Object.entries(summary).sort(([a], [b]) => a.localeCompare(b)).map(([maktab, data]) => (
+                                                    <div key={maktab} style={{
+                                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                        color: 'white',
+                                                        padding: '1rem',
+                                                        borderRadius: '10px',
+                                                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                                                    }}>
+                                                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '0.5rem' }}>
+                                                            Maktab {maktab}
+                                                            <span style={{ float: 'right', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.9rem' }}>
+                                                                {data.total}
+                                                            </span>
+                                                        </div>
+                                                        <div style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
+                                                            {Object.entries(data.hotels).sort(([a], [b]) => a.localeCompare(b)).map(([hotel, count]) => (
+                                                                <div key={hotel} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0' }}>
+                                                                    <span style={{ opacity: 0.95 }}>📍 {hotel}</span>
+                                                                    <span style={{ fontWeight: 'bold' }}>{count}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
+                                {maktabReportGroups.length === 0 ? (
+                                    <div className="empty-report">
+                                        <FileText size={48} />
+                                        <p>No groups found for {selectedMaktab === 'All' ? 'any Maktab' : `Maktab ${selectedMaktab}`} on {new Date(selectedDate).toLocaleDateString()}</p>
+                                    </div>
+                                ) : (
+                                    maktabReportGroups.map((item, idx) => (
+                                        <div key={`${item.maktab}-${item.arrivalFlightNo}-${idx}`} className="report-group">
+                                            <h2>Maktab {item.maktab} - Flight {item.arrivalFlightNo || 'N/A'}</h2>
+                                            <div className="group-info">
+                                                <p><strong>Airport:</strong> {item.arrivalAirport || 'N/A'}</p>
+                                                <p><strong>City:</strong> {item.arrivalCity || 'N/A'}</p>
+                                                <p><strong>Hotel:</strong> {item.hotel?.name || 'Not Assigned'}{item.hotel?.city && ` (${item.hotel.city})`}</p>
+                                                <p><strong>PAX:</strong> {item.passengers?.length || 0}</p>
+                                            </div>
+
+                                            <table className="passengers-report-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>First Name</th>
+                                                        <th>Last Name</th>
+                                                        <th>Passport No.</th>
+                                                        <th>Hotel</th>
                                                     </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan="5" style={{ textAlign: 'center', color: '#999' }}>
-                                                        No passengers added yet
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </Card>
-
-                {/* Report 2: Date Report */}
-                <Card style={{ marginTop: '2rem' }}>
-                    <div className="report-header">
-                        <div>
-                            <h2 className="report-title">Arrival Travel Report</h2>
-                            <p className="report-subtitle">View all passengers arriving on selected date with hotel information</p>
-                        </div>
-                        <Button
-                            variant="secondary"
-                            icon={<Download size={18} />}
-                            onClick={() => printReport('date-report')}
-                        >
-                            Print Report
-                        </Button>
-                    </div>
-
-                    <div className="report-filters">
-                        <div className="filter-group">
-                            <label>Arrival Date</label>
-                            <input
-                                type="date"
-                                value={travelDate}
-                                onChange={(e) => setTravelDate(e.target.value)}
-                                className="report-input"
-                            />
-                        </div>
-                    </div>
-
-                    <div id="date-report" className="report-content">
-                        <div className="report-print-header">
-                            <h1>Arrival Travel Report</h1>
-                            <p>Date: {new Date(travelDate).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            })}</p>
-                        </div>
-
-                        <div className="summary">
-                            <strong>Total Arrivals:</strong> {getTotalPassengers(dateReportGroups)} passengers
-                        </div>
-
-                        {dateReportGroups.length > 0 && (() => {
-                            const summary = getSummaryByMaktabAndHotel(dateReportGroups);
-                            return (
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#667eea' }}>📊 Arrivals by Maktab & Hotel</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                                        {Object.entries(summary).sort(([a], [b]) => a.localeCompare(b)).map(([maktab, data]) => (
-                                            <div key={maktab} style={{
-                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                color: 'white',
-                                                padding: '1rem',
-                                                borderRadius: '10px',
-                                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                                            }}>
-                                                <div style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '0.5rem' }}>
-                                                    Maktab {maktab}
-                                                    <span style={{ float: 'right', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.9rem' }}>
-                                                        {data.total}
-                                                    </span>
-                                                </div>
-                                                <div style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
-                                                    {Object.entries(data.hotels).sort(([a], [b]) => a.localeCompare(b)).map(([hotel, count]) => (
-                                                        <div key={hotel} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0' }}>
-                                                            <span style={{ opacity: 0.95 }}>📍 {hotel}</span>
-                                                            <span style={{ fontWeight: 'bold' }}>{count}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })()}
-
-                        {dateReportGroups.length === 0 ? (
-                            <div className="empty-report">
-                                <Calendar size={48} />
-                                <p>No groups arriving on {new Date(travelDate).toLocaleDateString()}</p>
+                                                </thead>
+                                                <tbody>
+                                                    {item.passengers && item.passengers.length > 0 ? (
+                                                        item.passengers.map((passenger, index) => (
+                                                            <tr key={passenger._id}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{passenger.firstName}</td>
+                                                                <td>{passenger.lastName}</td>
+                                                                <td>{passenger.passportNo}</td>
+                                                                <td>{item.hotel?.name || 'Not Assigned'}</td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="5" style={{ textAlign: 'center', color: '#999' }}>
+                                                                No passengers added yet
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ))
+                                )}
                             </div>
-                        ) : (
-                            dateReportGroups.map((item, idx) => (
-                                <div key={`${item.maktab}-${item.arrivalFlightNo}-${idx}`} className="report-group">
-                                    <h2>Maktab {item.maktab} - Flight {item.arrivalFlightNo || 'N/A'}</h2>
-                                    <div className="group-info">
-                                        <p><strong>Airport:</strong> {item.arrivalAirport || 'N/A'}</p>
-                                        <p><strong>City:</strong> {item.arrivalCity || 'N/A'}</p>
-                                        <p><strong>Hotel:</strong> {item.hotel?.name || 'Not Assigned'}{item.hotel?.city && ` (${item.hotel.city})`}</p>
-                                        <p><strong>PAX:</strong> {item.passengers?.length || 0}</p>
-                                    </div>
+                        </Card>
 
-                                    <table className="passengers-report-table">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>First Name</th>
-                                                <th>Last Name</th>
-                                                <th>Passport No.</th>
-                                                <th>Hotel</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {item.passengers && item.passengers.length > 0 ? (
-                                                item.passengers.map((passenger, index) => (
-                                                    <tr key={passenger._id}>
-                                                        <td>{index + 1}</td>
-                                                        <td>{passenger.firstName}</td>
-                                                        <td>{passenger.lastName}</td>
-                                                        <td>{passenger.passportNo}</td>
-                                                        <td>{item.hotel?.name || 'Not Assigned'}</td>
+                        {/* Report 2: Date Report */}
+                        <Card style={{ marginTop: '2rem' }}>
+                            <div className="report-header">
+                                <div>
+                                    <h2 className="report-title">Arrival Travel Report</h2>
+                                    <p className="report-subtitle">View all passengers arriving on selected date with hotel information</p>
+                                </div>
+                                <Button
+                                    variant="secondary"
+                                    icon={<Download size={18} />}
+                                    onClick={() => printReport('date-report')}
+                                >
+                                    Print Report
+                                </Button>
+                            </div>
+
+                            <div className="report-filters">
+                                <div className="filter-group">
+                                    <label>Arrival Date</label>
+                                    <input
+                                        type="date"
+                                        value={travelDate}
+                                        onChange={(e) => setTravelDate(e.target.value)}
+                                        className="report-input"
+                                    />
+                                </div>
+                            </div>
+
+                            <div id="date-report" className="report-content">
+                                <div className="report-print-header">
+                                    <h1>Arrival Travel Report</h1>
+                                    <p>Date: {new Date(travelDate).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}</p>
+                                </div>
+
+                                <div className="summary">
+                                    <strong>Total Arrivals:</strong> {getTotalPassengers(dateReportGroups)} passengers
+                                </div>
+
+                                {dateReportGroups.length > 0 && (() => {
+                                    const summary = getSummaryByMaktabAndHotel(dateReportGroups);
+                                    return (
+                                        <div style={{ marginBottom: '1.5rem' }}>
+                                            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#667eea' }}>📊 Arrivals by Maktab & Hotel</h3>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                                                {Object.entries(summary).sort(([a], [b]) => a.localeCompare(b)).map(([maktab, data]) => (
+                                                    <div key={maktab} style={{
+                                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                        color: 'white',
+                                                        padding: '1rem',
+                                                        borderRadius: '10px',
+                                                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                                                    }}>
+                                                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '0.5rem' }}>
+                                                            Maktab {maktab}
+                                                            <span style={{ float: 'right', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.9rem' }}>
+                                                                {data.total}
+                                                            </span>
+                                                        </div>
+                                                        <div style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
+                                                            {Object.entries(data.hotels).sort(([a], [b]) => a.localeCompare(b)).map(([hotel, count]) => (
+                                                                <div key={hotel} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0' }}>
+                                                                    <span style={{ opacity: 0.95 }}>📍 {hotel}</span>
+                                                                    <span style={{ fontWeight: 'bold' }}>{count}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
+                                {dateReportGroups.length === 0 ? (
+                                    <div className="empty-report">
+                                        <Calendar size={48} />
+                                        <p>No groups arriving on {new Date(travelDate).toLocaleDateString()}</p>
+                                    </div>
+                                ) : (
+                                    dateReportGroups.map((item, idx) => (
+                                        <div key={`${item.maktab}-${item.arrivalFlightNo}-${idx}`} className="report-group">
+                                            <h2>Maktab {item.maktab} - Flight {item.arrivalFlightNo || 'N/A'}</h2>
+                                            <div className="group-info">
+                                                <p><strong>Airport:</strong> {item.arrivalAirport || 'N/A'}</p>
+                                                <p><strong>City:</strong> {item.arrivalCity || 'N/A'}</p>
+                                                <p><strong>Hotel:</strong> {item.hotel?.name || 'Not Assigned'}{item.hotel?.city && ` (${item.hotel.city})`}</p>
+                                                <p><strong>PAX:</strong> {item.passengers?.length || 0}</p>
+                                            </div>
+
+                                            <table className="passengers-report-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>First Name</th>
+                                                        <th>Last Name</th>
+                                                        <th>Passport No.</th>
+                                                        <th>Hotel</th>
                                                     </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan="5" style={{ textAlign: 'center', color: '#999' }}>
-                                                        No passengers added yet
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </Card>
-
-                {/* Report 3: Departure Travel Report */}
-                <Card style={{ marginTop: '2rem' }}>
-                    <div className="report-header">
-                        <div>
-                            <h2 className="report-title">Departure Travel Report</h2>
-                            <p className="report-subtitle">View all passengers departing on selected date with hotel information</p>
-                        </div>
-                        <Button
-                            variant="secondary"
-                            icon={<Download size={18} />}
-                            onClick={() => printReport('departure-report')}
-                        >
-                            Print Report
-                        </Button>
-                    </div>
-
-                    <div className="report-filters">
-                        <div className="filter-group">
-                            <label>Departure Date</label>
-                            <input
-                                type="date"
-                                value={departureDate}
-                                onChange={(e) => setDepartureDate(e.target.value)}
-                                className="report-input"
-                            />
-                        </div>
-                    </div>
-
-                    <div id="departure-report" className="report-content">
-                        <div className="report-print-header">
-                            <h1>Departure Travel Report</h1>
-                            <p>Date: {new Date(departureDate).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            })}</p>
-                        </div>
-
-                        <div className="summary">
-                            <strong>Total Departures:</strong> {getTotalPassengers(departureReportGroups)} passengers
-                        </div>
-
-                        {departureReportGroups.length > 0 && (() => {
-                            const summary = getSummaryByMaktabAndHotel(departureReportGroups);
-                            return (
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#667eea' }}>📊 Departures by Maktab & Hotel</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                                        {Object.entries(summary).sort(([a], [b]) => a.localeCompare(b)).map(([maktab, data]) => (
-                                            <div key={maktab} style={{
-                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                color: 'white',
-                                                padding: '1rem',
-                                                borderRadius: '10px',
-                                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                                            }}>
-                                                <div style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '0.5rem' }}>
-                                                    Maktab {maktab}
-                                                    <span style={{ float: 'right', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.9rem' }}>
-                                                        {data.total}
-                                                    </span>
-                                                </div>
-                                                <div style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
-                                                    {Object.entries(data.hotels).sort(([a], [b]) => a.localeCompare(b)).map(([hotel, count]) => (
-                                                        <div key={hotel} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0' }}>
-                                                            <span style={{ opacity: 0.95 }}>📍 {hotel}</span>
-                                                            <span style={{ fontWeight: 'bold' }}>{count}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })()}
-
-                        {departureReportGroups.length === 0 ? (
-                            <div className="empty-report">
-                                <Calendar size={48} />
-                                <p>No groups departing on {new Date(departureDate).toLocaleDateString()}</p>
+                                                </thead>
+                                                <tbody>
+                                                    {item.passengers && item.passengers.length > 0 ? (
+                                                        item.passengers.map((passenger, index) => (
+                                                            <tr key={passenger._id}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{passenger.firstName}</td>
+                                                                <td>{passenger.lastName}</td>
+                                                                <td>{passenger.passportNo}</td>
+                                                                <td>{item.hotel?.name || 'Not Assigned'}</td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="5" style={{ textAlign: 'center', color: '#999' }}>
+                                                                No passengers added yet
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ))
+                                )}
                             </div>
-                        ) : (
-                            departureReportGroups.map((item, idx) => (
-                                <div key={`${item.maktab}-${item.departureFlightNo}-${idx}`} className="report-group">
-                                    <h2>Maktab {item.maktab} - Flight {item.departureFlightNo || 'N/A'}</h2>
-                                    <div className="group-info">
-                                        <p><strong>Airport:</strong> {item.departureAirport || 'N/A'}</p>
-                                        <p><strong>City:</strong> {item.departureCity || 'N/A'}</p>
-                                        <p><strong>Hotel:</strong> {item.hotel?.name || 'Not Assigned'}{item.hotel?.city && ` (${item.hotel.city})`}</p>
-                                        <p><strong>PAX:</strong> {item.passengers?.length || 0}</p>
-                                    </div>
+                        </Card>
 
-                                    <table className="passengers-report-table">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>First Name</th>
-                                                <th>Last Name</th>
-                                                <th>Passport No.</th>
-                                                <th>Hotel</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {item.passengers && item.passengers.length > 0 ? (
-                                                item.passengers.map((passenger, index) => (
-                                                    <tr key={passenger._id}>
-                                                        <td>{index + 1}</td>
-                                                        <td>{passenger.firstName}</td>
-                                                        <td>{passenger.lastName}</td>
-                                                        <td>{passenger.passportNo}</td>
-                                                        <td>{item.hotel?.name || 'Not Assigned'}</td>
+                        {/* Report 3: Departure Travel Report */}
+                        <Card style={{ marginTop: '2rem' }}>
+                            <div className="report-header">
+                                <div>
+                                    <h2 className="report-title">Departure Travel Report</h2>
+                                    <p className="report-subtitle">View all passengers departing on selected date with hotel information</p>
+                                </div>
+                                <Button
+                                    variant="secondary"
+                                    icon={<Download size={18} />}
+                                    onClick={() => printReport('departure-report')}
+                                >
+                                    Print Report
+                                </Button>
+                            </div>
+
+                            <div className="report-filters">
+                                <div className="filter-group">
+                                    <label>Departure Date</label>
+                                    <input
+                                        type="date"
+                                        value={departureDate}
+                                        onChange={(e) => setDepartureDate(e.target.value)}
+                                        className="report-input"
+                                    />
+                                </div>
+                            </div>
+
+                            <div id="departure-report" className="report-content">
+                                <div className="report-print-header">
+                                    <h1>Departure Travel Report</h1>
+                                    <p>Date: {new Date(departureDate).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}</p>
+                                </div>
+
+                                <div className="summary">
+                                    <strong>Total Departures:</strong> {getTotalPassengers(departureReportGroups)} passengers
+                                </div>
+
+                                {departureReportGroups.length > 0 && (() => {
+                                    const summary = getSummaryByMaktabAndHotel(departureReportGroups);
+                                    return (
+                                        <div style={{ marginBottom: '1.5rem' }}>
+                                            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#667eea' }}>📊 Departures by Maktab & Hotel</h3>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                                                {Object.entries(summary).sort(([a], [b]) => a.localeCompare(b)).map(([maktab, data]) => (
+                                                    <div key={maktab} style={{
+                                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                        color: 'white',
+                                                        padding: '1rem',
+                                                        borderRadius: '10px',
+                                                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                                                    }}>
+                                                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '0.5rem' }}>
+                                                            Maktab {maktab}
+                                                            <span style={{ float: 'right', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.9rem' }}>
+                                                                {data.total}
+                                                            </span>
+                                                        </div>
+                                                        <div style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
+                                                            {Object.entries(data.hotels).sort(([a], [b]) => a.localeCompare(b)).map(([hotel, count]) => (
+                                                                <div key={hotel} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0' }}>
+                                                                    <span style={{ opacity: 0.95 }}>📍 {hotel}</span>
+                                                                    <span style={{ fontWeight: 'bold' }}>{count}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
+                                {departureReportGroups.length === 0 ? (
+                                    <div className="empty-report">
+                                        <Calendar size={48} />
+                                        <p>No groups departing on {new Date(departureDate).toLocaleDateString()}</p>
+                                    </div>
+                                ) : (
+                                    departureReportGroups.map((item, idx) => (
+                                        <div key={`${item.maktab}-${item.departureFlightNo}-${idx}`} className="report-group">
+                                            <h2>Maktab {item.maktab} - Flight {item.departureFlightNo || 'N/A'}</h2>
+                                            <div className="group-info">
+                                                <p><strong>Airport:</strong> {item.departureAirport || 'N/A'}</p>
+                                                <p><strong>City:</strong> {item.departureCity || 'N/A'}</p>
+                                                <p><strong>Hotel:</strong> {item.hotel?.name || 'Not Assigned'}{item.hotel?.city && ` (${item.hotel.city})`}</p>
+                                                <p><strong>PAX:</strong> {item.passengers?.length || 0}</p>
+                                            </div>
+
+                                            <table className="passengers-report-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>First Name</th>
+                                                        <th>Last Name</th>
+                                                        <th>Passport No.</th>
+                                                        <th>Hotel</th>
                                                     </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan="5" style={{ textAlign: 'center', color: '#999' }}>
-                                                        No passengers added yet
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </Card>
-
-                {/* Report 4: Hotel Arrivals Report */}
-                <Card style={{ marginTop: '2rem' }}>
-                    <div className="report-header">
-                        <div>
-                            <h2 className="report-title">Hotel Arrivals Report</h2>
-                            <p className="report-subtitle">View which hotels are receiving passengers on selected date</p>
-                        </div>
-                        <Button
-                            variant="secondary"
-                            icon={<Download size={18} />}
-                            onClick={() => printReport('hotel-arrivals-report')}
-                        >
-                            Print Report
-                        </Button>
-                    </div>
-
-                    <div className="report-filters">
-                        <div className="filter-group">
-                            <label>Arrival Date</label>
-                            <input
-                                type="date"
-                                value={hotelArrivalDate}
-                                onChange={(e) => setHotelArrivalDate(e.target.value)}
-                                className="report-input"
-                            />
-                        </div>
-                    </div>
-
-                    <div id="hotel-arrivals-report" className="report-content">
-                        <div className="report-print-header">
-                            <h1>Hotel Arrivals Report</h1>
-                            <p>Date: {new Date(hotelArrivalDate).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            })}</p>
-                        </div>
-
-                        <div className="summary">
-                            <strong>Total Arrivals:</strong> {hotelArrivalsData.reduce((sum, hotel) => sum + hotel.totalPassengers, 0)} passengers
-                        </div>
-
-                        {hotelArrivalsData.length > 0 && (() => {
-                            // Create maktab summary from hotel data
-                            const maktabSummary = {};
-                            hotelArrivalsData.forEach(hotel => {
-                                hotel.maktabFlightGroups.forEach(mfGroup => {
-                                    const maktab = mfGroup.maktab;
-                                    const hotelName = hotel.hotelName;
-                                    const passengerCount = mfGroup.passengers?.length || 0;
-
-                                    if (!maktabSummary[maktab]) {
-                                        maktabSummary[maktab] = { total: 0, hotels: {} };
-                                    }
-
-                                    maktabSummary[maktab].total += passengerCount;
-
-                                    if (!maktabSummary[maktab].hotels[hotelName]) {
-                                        maktabSummary[maktab].hotels[hotelName] = 0;
-                                    }
-                                    maktabSummary[maktab].hotels[hotelName] += passengerCount;
-                                });
-                            });
-
-                            return (
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#667eea' }}>📊 Arrivals by Maktab & Hotel</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                                        {Object.entries(maktabSummary).sort(([a], [b]) => a.localeCompare(b)).map(([maktab, data]) => (
-                                            <div key={maktab} style={{
-                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                color: 'white',
-                                                padding: '1rem',
-                                                borderRadius: '10px',
-                                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                                            }}>
-                                                <div style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '0.5rem' }}>
-                                                    Maktab {maktab}
-                                                    <span style={{ float: 'right', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.9rem' }}>
-                                                        {data.total}
-                                                    </span>
-                                                </div>
-                                                <div style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
-                                                    {Object.entries(data.hotels).sort(([a], [b]) => a.localeCompare(b)).map(([hotel, count]) => (
-                                                        <div key={hotel} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0' }}>
-                                                            <span style={{ opacity: 0.95 }}>📍 {hotel}</span>
-                                                            <span style={{ fontWeight: 'bold' }}>{count}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })()}
-
-                        {hotelArrivalsData.length === 0 ? (
-                            <div className="empty-report">
-                                <Building2 size={48} />
-                                <p>No hotel arrivals found for {new Date(hotelArrivalDate).toLocaleDateString()}</p>
+                                                </thead>
+                                                <tbody>
+                                                    {item.passengers && item.passengers.length > 0 ? (
+                                                        item.passengers.map((passenger, index) => (
+                                                            <tr key={passenger._id}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{passenger.firstName}</td>
+                                                                <td>{passenger.lastName}</td>
+                                                                <td>{passenger.passportNo}</td>
+                                                                <td>{item.hotel?.name || 'Not Assigned'}</td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="5" style={{ textAlign: 'center', color: '#999' }}>
+                                                                No passengers added yet
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ))
+                                )}
                             </div>
-                        ) : (
-                            hotelArrivalsData.map(hotel => (
-                                <div key={hotel.hotelId} className="report-group">
-                                    <h2>
-                                        <Building2 size={20} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-                                        {hotel.hotelName}{hotel.hotelCity && ` (${hotel.hotelCity})`}
-                                    </h2>
-                                    <div className="group-info">
-                                        <p><strong>City:</strong> {hotel.hotelCity || 'N/A'}</p>
-                                        <p><strong>Address:</strong> {hotel.hotelAddress || 'N/A'}</p>
-                                        <p><strong>Total Arrivals:</strong> {hotel.totalPassengers} passengers</p>
-                                    </div>
+                        </Card>
 
-                                    {/* List of maktab-flight groups */}
-                                    <div style={{ marginBottom: '1rem' }}>
-                                        <h3 style={{ fontSize: '1rem', color: '#667eea', marginBottom: '0.5rem' }}>Arrivals by Maktab & Flight:</h3>
-                                        {hotel.maktabFlightGroups.map((mfGroup, idx) => (
-                                            <div key={`${mfGroup.maktab}-${mfGroup.arrivalFlightNo}-${idx}`} style={{
-                                                background: '#f8f9fa',
-                                                padding: '0.75rem',
-                                                marginBottom: '0.5rem',
-                                                borderRadius: '8px',
-                                                borderLeft: '4px solid #667eea'
-                                            }}>
-                                                <strong>Maktab {mfGroup.maktab}</strong> |
-                                                Flight: {mfGroup.arrivalFlightNo || 'N/A'} ({mfGroup.arrivalAirport || 'N/A'}) |
-                                                PAX: {mfGroup.passengers?.length || 0}
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Detailed passenger list */}
-                                    <table className="passengers-report-table">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>First Name</th>
-                                                <th>Last Name</th>
-                                                <th>Passport No.</th>
-                                                <th>Maktab</th>
-                                                <th>Flight</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {hotel.maktabFlightGroups.flatMap(mfGroup =>
-                                                (mfGroup.passengers || []).map(passenger => ({
-                                                    ...passenger,
-                                                    maktab: mfGroup.maktab,
-                                                    flight: mfGroup.arrivalFlightNo
-                                                }))
-                                            ).map((passenger, index) => (
-                                                <tr key={`${passenger._id}-${index}`}>
-                                                    <td>{index + 1}</td>
-                                                    <td>{passenger.firstName}</td>
-                                                    <td>{passenger.lastName}</td>
-                                                    <td>{passenger.passportNo}</td>
-                                                    <td>Maktab {passenger.maktab}</td>
-                                                    <td>{passenger.flight || 'N/A'}</td>
-                                                </tr>
-                                            ))}
-                                            {hotel.totalPassengers === 0 && (
-                                                <tr>
-                                                    <td colSpan="6" style={{ textAlign: 'center', color: '#999' }}>
-                                                        No passengers assigned yet
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
+                        {/* Report 4: Hotel Arrivals Report */}
+                        <Card style={{ marginTop: '2rem' }}>
+                            <div className="report-header">
+                                <div>
+                                    <h2 className="report-title">Hotel Arrivals Report</h2>
+                                    <p className="report-subtitle">View which hotels are receiving passengers on selected date</p>
                                 </div>
-                            ))
-                        )}
-                    </div>
-                </Card>
+                                <Button
+                                    variant="secondary"
+                                    icon={<Download size={18} />}
+                                    onClick={() => printReport('hotel-arrivals-report')}
+                                >
+                                    Print Report
+                                </Button>
+                            </div>
+
+                            <div className="report-filters">
+                                <div className="filter-group">
+                                    <label>Arrival Date</label>
+                                    <input
+                                        type="date"
+                                        value={hotelArrivalDate}
+                                        onChange={(e) => setHotelArrivalDate(e.target.value)}
+                                        className="report-input"
+                                    />
+                                </div>
+                            </div>
+
+                            <div id="hotel-arrivals-report" className="report-content">
+                                <div className="report-print-header">
+                                    <h1>Hotel Arrivals Report</h1>
+                                    <p>Date: {new Date(hotelArrivalDate).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}</p>
+                                </div>
+
+                                <div className="summary">
+                                    <strong>Total Arrivals:</strong> {hotelArrivalsData.reduce((sum, hotel) => sum + hotel.totalPassengers, 0)} passengers
+                                </div>
+
+                                {hotelArrivalsData.length > 0 && (() => {
+                                    // Create maktab summary from hotel data
+                                    const maktabSummary = {};
+                                    hotelArrivalsData.forEach(hotel => {
+                                        hotel.maktabFlightGroups.forEach(mfGroup => {
+                                            const maktab = mfGroup.maktab;
+                                            const hotelName = hotel.hotelName;
+                                            const passengerCount = mfGroup.passengers?.length || 0;
+
+                                            if (!maktabSummary[maktab]) {
+                                                maktabSummary[maktab] = { total: 0, hotels: {} };
+                                            }
+
+                                            maktabSummary[maktab].total += passengerCount;
+
+                                            if (!maktabSummary[maktab].hotels[hotelName]) {
+                                                maktabSummary[maktab].hotels[hotelName] = 0;
+                                            }
+                                            maktabSummary[maktab].hotels[hotelName] += passengerCount;
+                                        });
+                                    });
+
+                                    return (
+                                        <div style={{ marginBottom: '1.5rem' }}>
+                                            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#667eea' }}>📊 Arrivals by Maktab & Hotel</h3>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                                                {Object.entries(maktabSummary).sort(([a], [b]) => a.localeCompare(b)).map(([maktab, data]) => (
+                                                    <div key={maktab} style={{
+                                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                        color: 'white',
+                                                        padding: '1rem',
+                                                        borderRadius: '10px',
+                                                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                                                    }}>
+                                                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '0.5rem' }}>
+                                                            Maktab {maktab}
+                                                            <span style={{ float: 'right', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.9rem' }}>
+                                                                {data.total}
+                                                            </span>
+                                                        </div>
+                                                        <div style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
+                                                            {Object.entries(data.hotels).sort(([a], [b]) => a.localeCompare(b)).map(([hotel, count]) => (
+                                                                <div key={hotel} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0' }}>
+                                                                    <span style={{ opacity: 0.95 }}>📍 {hotel}</span>
+                                                                    <span style={{ fontWeight: 'bold' }}>{count}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
+                                {hotelArrivalsData.length === 0 ? (
+                                    <div className="empty-report">
+                                        <Building2 size={48} />
+                                        <p>No hotel arrivals found for {new Date(hotelArrivalDate).toLocaleDateString()}</p>
+                                    </div>
+                                ) : (
+                                    hotelArrivalsData.map(hotel => (
+                                        <div key={hotel.hotelId} className="report-group">
+                                            <h2>
+                                                <Building2 size={20} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+                                                {hotel.hotelName}{hotel.hotelCity && ` (${hotel.hotelCity})`}
+                                            </h2>
+                                            <div className="group-info">
+                                                <p><strong>City:</strong> {hotel.hotelCity || 'N/A'}</p>
+                                                <p><strong>Address:</strong> {hotel.hotelAddress || 'N/A'}</p>
+                                                <p><strong>Total Arrivals:</strong> {hotel.totalPassengers} passengers</p>
+                                            </div>
+
+                                            {/* List of maktab-flight groups */}
+                                            <div style={{ marginBottom: '1rem' }}>
+                                                <h3 style={{ fontSize: '1rem', color: '#667eea', marginBottom: '0.5rem' }}>Arrivals by Maktab & Flight:</h3>
+                                                {hotel.maktabFlightGroups.map((mfGroup, idx) => (
+                                                    <div key={`${mfGroup.maktab}-${mfGroup.arrivalFlightNo}-${idx}`} style={{
+                                                        background: '#f8f9fa',
+                                                        padding: '0.75rem',
+                                                        marginBottom: '0.5rem',
+                                                        borderRadius: '8px',
+                                                        borderLeft: '4px solid #667eea'
+                                                    }}>
+                                                        <strong>Maktab {mfGroup.maktab}</strong> |
+                                                        Flight: {mfGroup.arrivalFlightNo || 'N/A'} ({mfGroup.arrivalAirport || 'N/A'}) |
+                                                        PAX: {mfGroup.passengers?.length || 0}
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* Detailed passenger list */}
+                                            <table className="passengers-report-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>First Name</th>
+                                                        <th>Last Name</th>
+                                                        <th>Passport No.</th>
+                                                        <th>Maktab</th>
+                                                        <th>Flight</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {hotel.maktabFlightGroups.flatMap(mfGroup =>
+                                                        (mfGroup.passengers || []).map(passenger => ({
+                                                            ...passenger,
+                                                            maktab: mfGroup.maktab,
+                                                            flight: mfGroup.arrivalFlightNo
+                                                        }))
+                                                    ).map((passenger, index) => (
+                                                        <tr key={`${passenger._id}-${index}`}>
+                                                            <td>{index + 1}</td>
+                                                            <td>{passenger.firstName}</td>
+                                                            <td>{passenger.lastName}</td>
+                                                            <td>{passenger.passportNo}</td>
+                                                            <td>Maktab {passenger.maktab}</td>
+                                                            <td>{passenger.flight || 'N/A'}</td>
+                                                        </tr>
+                                                    ))}
+                                                    {hotel.totalPassengers === 0 && (
+                                                        <tr>
+                                                            <td colSpan="6" style={{ textAlign: 'center', color: '#999' }}>
+                                                                No passengers assigned yet
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </Card>
+                    </>
+                )}
 
                 {/* Footer */}
                 <div className="reports-footer">

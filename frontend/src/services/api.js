@@ -49,6 +49,7 @@ export const superAdminAPI = {
     getProfile: () => api.get('/super-admin/profile'),
     getPassengerCounts: () => api.get('/super-admin/passenger-counts'),
     getGroups: () => api.get('/super-admin/groups'),
+    getReports: (companyId) => api.get(`/super-admin/reports?companyId=${companyId}`),
     getUnassignedCounts: () => api.get('/super-admin/unassigned-counts'),
 };
 
