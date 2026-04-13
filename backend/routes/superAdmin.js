@@ -76,6 +76,31 @@ router.get('/passenger-counts', async (req, res) => {
     }
 });
 
+// @route   GET /api/super-admin/passengers
+// @desc    Get all passengers across all companies
+// @access  Super Admin
+router.get('/passengers', async (req, res) => {
+    try {
+        const passengers = await Passenger.find()
+            .populate('company', 'name')
+            .populate('createdBy', 'username email')
+            .populate({
+                path: 'group',
+                select: 'groupName maktab company',
+                populate: {
+                    path: 'company',
+                    select: 'name'
+                }
+            })
+            .sort({ createdAt: -1 });
+
+        res.json(passengers);
+    } catch (error) {
+        console.error('Error fetching passengers:', error);
+        res.status(500).json({ message: 'Server error fetching passengers' });
+    }
+});
+
 // @route   GET /api/super-admin/groups
 // @desc    Get all groups across all companies
 // @access  Super Admin
