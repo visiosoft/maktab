@@ -220,9 +220,9 @@ router.get('/', async (req, res) => {
 // @access  Company Admin
 router.post('/', async (req, res) => {
     try {
-        const { firstName, lastName, passportNo, group } = req.body;
+        const { firstName, lastName, passportNo, visaNumber, mofaApplicationNo, group } = req.body;
 
-        console.log('Received passenger data:', { firstName, lastName, passportNo, group });
+        console.log('Received passenger data:', { firstName, lastName, passportNo, visaNumber, mofaApplicationNo, group });
 
         if (!firstName || !lastName || !passportNo) {
             console.log('Validation failed - missing fields');
@@ -267,6 +267,9 @@ router.post('/', async (req, res) => {
             createdBy: req.user.id
         };
 
+        if (visaNumber) passengerData.visaNumber = visaNumber;
+        if (mofaApplicationNo) passengerData.mofaApplicationNo = mofaApplicationNo;
+
         // Add group if provided
         if (group) {
             passengerData.group = group;
@@ -296,7 +299,7 @@ router.post('/', async (req, res) => {
 // @access  Company Admin
 router.put('/:id', async (req, res) => {
     try {
-        const { firstName, lastName, passportNo, group } = req.body;
+        const { firstName, lastName, passportNo, visaNumber, mofaApplicationNo, group } = req.body;
 
         const admin = await CompanyAdmin.findById(req.user.id);
 
@@ -331,6 +334,8 @@ router.put('/:id', async (req, res) => {
         if (firstName) passenger.firstName = firstName;
         if (lastName) passenger.lastName = lastName;
         if (passportNo) passenger.passportNo = passportNo.toUpperCase();
+        if (visaNumber !== undefined) passenger.visaNumber = visaNumber || null;
+        if (mofaApplicationNo !== undefined) passenger.mofaApplicationNo = mofaApplicationNo || null;
         if (group !== undefined) passenger.group = group || null;
 
         await passenger.save();

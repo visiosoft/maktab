@@ -17,6 +17,14 @@ const PassengerSchema = new mongoose.Schema({
         trim: true,
         uppercase: true
     },
+    visaNumber: {
+        type: String,
+        trim: true
+    },
+    mofaApplicationNo: {
+        type: String,
+        trim: true
+    },
     group: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Group'

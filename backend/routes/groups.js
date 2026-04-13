@@ -98,15 +98,20 @@ router.post('/', async (req, res) => {
             arrivalDate,
             arrivalAirport,
             arrivalFlightNo,
+            arrivalTime,
             arrivalCity,
             departureDate,
             departureAirport,
             departureFlightNo,
+            departureTime,
+            returnAirport,
+            returnCity,
             departureCity,
             hotel,
             arrivalHotel,
             departureHotel,
-            maktab
+            maktab,
+            remarks
         } = req.body;
 
         if (!groupName) {
@@ -148,14 +153,19 @@ router.post('/', async (req, res) => {
             arrivalDate,
             arrivalAirport,
             arrivalFlightNo,
+            arrivalTime,
             arrivalCity,
             departureDate,
             departureAirport,
             departureFlightNo,
+            departureTime,
+            returnAirport,
+            returnCity,
             departureCity,
             arrivalHotel: finalArrivalHotel,
             departureHotel: finalDepartureHotel,
             maktab,
+            remarks,
             company: admin.company,
             createdBy: req.user.id
         });
@@ -234,15 +244,20 @@ router.put('/:id', async (req, res) => {
             arrivalDate,
             arrivalAirport,
             arrivalFlightNo,
+            arrivalTime,
             arrivalCity,
             departureDate,
             departureAirport,
             departureFlightNo,
+            departureTime,
+            returnAirport,
+            returnCity,
             departureCity,
             hotel,
             arrivalHotel,
             departureHotel,
-            maktab
+            maktab,
+            remarks
         } = req.body;
 
         const admin = await CompanyAdmin.findById(req.user.id);
@@ -292,14 +307,19 @@ router.put('/:id', async (req, res) => {
         if (arrivalDate !== undefined) group.arrivalDate = arrivalDate;
         if (arrivalAirport !== undefined) group.arrivalAirport = arrivalAirport;
         if (arrivalFlightNo !== undefined) group.arrivalFlightNo = arrivalFlightNo;
+        if (arrivalTime !== undefined) group.arrivalTime = arrivalTime;
         if (arrivalCity !== undefined) group.arrivalCity = arrivalCity;
         if (departureDate !== undefined) group.departureDate = departureDate;
         if (departureAirport !== undefined) group.departureAirport = departureAirport;
         if (departureFlightNo !== undefined) group.departureFlightNo = departureFlightNo;
+        if (departureTime !== undefined) group.departureTime = departureTime;
+        if (returnAirport !== undefined) group.returnAirport = returnAirport;
+        if (returnCity !== undefined) group.returnCity = returnCity;
         if (departureCity !== undefined) group.departureCity = departureCity;
         if (arrivalHotel !== undefined) group.arrivalHotel = arrivalHotel;
         if (departureHotel !== undefined) group.departureHotel = departureHotel;
         if (maktab !== undefined) group.maktab = maktab;
+        if (remarks !== undefined) group.remarks = remarks;
 
         await group.save();
 

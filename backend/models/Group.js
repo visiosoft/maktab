@@ -20,6 +20,10 @@ const GroupSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    arrivalTime: {
+        type: String,
+        trim: true
+    },
     arrivalCity: {
         type: String,
         enum: ['Makkah', 'Madinah'],
@@ -39,6 +43,18 @@ const GroupSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    departureTime: {
+        type: String,
+        trim: true
+    },
+    returnAirport: {
+        type: String,
+        trim: true
+    },
+    returnCity: {
+        type: String,
+        trim: true
+    },
     departureCity: {
         type: String,
         enum: ['Makkah', 'Madinah'],
@@ -53,6 +69,10 @@ const GroupSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Hotel',
         required: true
+    },
+    remarks: {
+        type: String,
+        trim: true
     },
     maktab: {
         type: String,

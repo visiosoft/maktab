@@ -109,6 +109,12 @@ router.put('/:id', authMiddleware, isSuperAdmin, async (req, res) => {
             return res.status(404).json({ message: 'Company not found' });
         }
 
+        // Older company records may not have createdBy populated.
+        // Backfill it on first update so validation can succeed.
+        if (!company.createdBy) {
+            company.createdBy = req.user.id;
+        }
+
         // Check if email is being changed and if it already exists
         if (email && email !== company.email) {
             const existingCompany = await Company.findOne({ email });
@@ -117,10 +123,18 @@ router.put('/:id', authMiddleware, isSuperAdmin, async (req, res) => {
             }
         }
 
-        if (name) company.name = name;
-        if (email) company.email = email;
+        if (name !== undefined) company.name = name;
+        if (email !== undefined) company.email = email.trim().toLowerCase();
         if (phone !== undefined) company.phone = phone;
-        if (address) company.address = { ...company.address, ...address };
+        if (address !== undefined) {
+            company.address = {
+                street: address?.street ?? company.address?.street ?? '',
+                city: address?.city ?? company.address?.city ?? '',
+                state: address?.state ?? company.address?.state ?? '',
+                zipCode: address?.zipCode ?? company.address?.zipCode ?? '',
+                country: address?.country ?? company.address?.country ?? ''
+            };
+        }
         if (industry !== undefined) company.industry = industry;
         if (website !== undefined) company.website = website;
         if (isActive !== undefined) company.isActive = isActive;
