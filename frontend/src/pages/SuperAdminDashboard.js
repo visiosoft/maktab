@@ -62,7 +62,15 @@ const SuperAdminDashboard = () => {
         phone: '',
         industry: '',
         website: '',
-        passengerQuota: 100
+        passengerQuota: 100,
+        isActive: true,
+        address: {
+            street: '',
+            city: '',
+            state: '',
+            zipCode: '',
+            country: ''
+        }
     });
     const [adminFormData, setAdminFormData] = useState({
         username: '',
@@ -77,6 +85,23 @@ const SuperAdminDashboard = () => {
         fetchDashboardData();
         fetchGroups();
     }, []);
+
+    const getEmptyCompanyForm = () => ({
+        name: '',
+        email: '',
+        phone: '',
+        industry: '',
+        website: '',
+        passengerQuota: 100,
+        isActive: true,
+        address: {
+            street: '',
+            city: '',
+            state: '',
+            zipCode: '',
+            country: ''
+        }
+    });
 
     const fetchDashboardData = async () => {
         try {
@@ -154,17 +179,66 @@ const SuperAdminDashboard = () => {
         }
     };
 
-    const handleCreateCompany = async (e) => {
+    const handleSaveCompany = async (e) => {
         e.preventDefault();
         try {
-            await companiesAPI.create(formData);
+            if (selectedCompany) {
+                await companiesAPI.update(selectedCompany._id, formData);
+            } else {
+                await companiesAPI.create(formData);
+            }
             setShowCompanyModal(false);
-            setFormData({ name: '', email: '', phone: '', industry: '', website: '', passengerQuota: 100 });
+            setSelectedCompany(null);
+            setFormData(getEmptyCompanyForm());
             fetchDashboardData();
         } catch (error) {
-            console.error('Error creating company:', error);
-            alert(error.response?.data?.message || 'Failed to create company');
+            console.error('Error saving company:', error);
+            alert(error.response?.data?.message || 'Failed to save company');
         }
+    };
+
+    const openCreateCompanyModal = () => {
+        setSelectedCompany(null);
+        setFormData(getEmptyCompanyForm());
+        setShowCompanyModal(true);
+    };
+
+    const openEditCompanyModal = (company) => {
+        setSelectedCompany(company);
+        setFormData({
+            name: company.name || '',
+            email: company.email || '',
+            phone: company.phone || '',
+            industry: company.industry || '',
+            website: company.website || '',
+            passengerQuota: company.passengerQuota || 0,
+            isActive: company.isActive !== false,
+            address: {
+                street: company.address?.street || '',
+                city: company.address?.city || '',
+                state: company.address?.state || '',
+                zipCode: company.address?.zipCode || '',
+                country: company.address?.country || ''
+            }
+        });
+        setShowCompanyModal(true);
+    };
+
+    const handleCompanyFieldChange = (field, value) => {
+        setFormData((previous) => ({
+            ...previous,
+            [field]: value
+        }));
+    };
+
+    const handleCompanyAddressChange = (field, value) => {
+        setFormData((previous) => ({
+            ...previous,
+            address: {
+                ...previous.address,
+                [field]: value
+            }
+        }));
     };
 
     const handleDeleteCompany = async (id) => {
@@ -310,6 +384,13 @@ const SuperAdminDashboard = () => {
                 >
                     <Home size={20} />
                     <span>Dashboard</span>
+                </button>
+                <button
+                    className="nav-item"
+                    onClick={() => navigate('/super-admin/companies')}
+                >
+                    <Building2 size={20} />
+                    <span>Companies</span>
                 </button>
                 <button
                     className="nav-item"
@@ -472,13 +553,13 @@ const SuperAdminDashboard = () => {
                 <div className="fade-in" style={{ marginTop: '2rem' }}>
                     <h3 className="section-title">Quick Actions</h3>
                     <div className="quick-actions-grid">
-                        <button className="action-card" onClick={() => setShowCompanyModal(true)}>
+                        <button className="action-card" onClick={() => navigate('/super-admin/companies')}>
                             <div className="action-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
                                 <Building2 size={24} />
                             </div>
                             <div className="action-content">
-                                <div className="action-title">Add Company</div>
-                                <div className="action-subtitle">Register new company</div>
+                                <div className="action-title">Manage Companies</div>
+                                <div className="action-subtitle">Open company management</div>
                             </div>
                             <ArrowRight size={20} />
                         </button>
@@ -505,13 +586,13 @@ const SuperAdminDashboard = () => {
                             <ArrowRight size={20} />
                         </button>
 
-                        <button className="action-card" onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}>
+                        <button className="action-card" onClick={() => navigate('/super-admin/passengers')}>
                             <div className="action-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
-                                <Users size={24} />
+                                <UserCheck size={24} />
                             </div>
                             <div className="action-content">
-                                <div className="action-title">View Companies</div>
-                                <div className="action-subtitle">Manage all companies</div>
+                                <div className="action-title">View Passengers</div>
+                                <div className="action-subtitle">Inspect passenger records</div>
                             </div>
                             <ArrowRight size={20} />
                         </button>
@@ -710,203 +791,20 @@ const SuperAdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* Companies Section */}
-                <div className="companies-section fade-in">
-                    <div className="section-header">
-                        <h3>All Companies</h3>
-                        <Button
-                            variant="primary"
-                            icon={<Plus size={20} />}
-                            onClick={() => setShowCompanyModal(true)}
-                        >
-                            Add Company
-                        </Button>
+                <div className="fade-in" style={{ marginTop: '2rem' }}>
+                    <div className="report-card">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                            <div>
+                                <h3 className="section-title" style={{ marginBottom: '0.5rem' }}>Company Management</h3>
+                                <p style={{ margin: 0, color: '#666' }}>
+                                    Company setup, quota changes, and company admins are now managed from the dedicated Companies page.
+                                </p>
+                            </div>
+                            <Button variant="primary" onClick={() => navigate('/super-admin/companies')}>
+                                Open Companies
+                            </Button>
+                        </div>
                     </div>
-
-                    {companies.length === 0 ? (
-                        <div className="empty-state">
-                            <Building2 size={48} />
-                            <p>No companies yet. Create your first company!</p>
-                        </div>
-                    ) : (
-                        <div className="companies-table-container">
-                            <table className="companies-table">
-                                <thead>
-                                    <tr>
-                                        <th style={{ width: '40px' }}></th>
-                                        <th>Company Name</th>
-                                        <th>Email</th>
-                                        <th>Industry</th>
-                                        <th>Quota</th>
-                                        <th>Arrival Incomplete</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {companies.map((company) => (
-                                        <React.Fragment key={company._id}>
-                                            <tr className="company-row">
-                                                <td>
-                                                    <button
-                                                        className="expand-btn"
-                                                        onClick={() => toggleRowExpansion(company._id)}
-                                                    >
-                                                        {expandedRows[company._id] ? (
-                                                            <ChevronDown size={18} />
-                                                        ) : (
-                                                            <ChevronRight size={18} />
-                                                        )}
-                                                    </button>
-                                                </td>
-                                                <td><strong>{company.name}</strong></td>
-                                                <td>{company.email}</td>
-                                                <td>{company.industry || '-'}</td>
-                                                <td>
-                                                    {(() => {
-                                                        const used = passengerCounts[company._id] || 0;
-                                                        const total = company.passengerQuota;
-                                                        const percentage = total > 0 ? Math.round((used / total) * 100) : 0;
-                                                        const isNearLimit = percentage >= 70 && percentage < 90;
-                                                        const isOverLimit = percentage >= 90;
-
-                                                        let barColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                                                        if (isOverLimit) {
-                                                            barColor = 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)';
-                                                        } else if (isNearLimit) {
-                                                            barColor = 'linear-gradient(135deg, #f5af19 0%, #f12711 100%)';
-                                                        }
-
-                                                        return (
-                                                            <div className="quota-progress-mini">
-                                                                <div className="quota-progress-bar-mini-wrapper">
-                                                                    <div
-                                                                        className="quota-progress-bar-mini-fill"
-                                                                        style={{
-                                                                            width: `${Math.min(percentage, 100)}%`,
-                                                                            background: barColor
-                                                                        }}
-                                                                    />
-                                                                </div>
-                                                                <div className="quota-percentage-label">
-                                                                    {percentage}%
-                                                                </div>
-                                                                <div style={{ fontSize: '0.75rem', color: '#666', whiteSpace: 'nowrap' }}>
-                                                                    {used}/{total}
-                                                                </div>
-                                                                {isOverLimit && (
-                                                                    <AlertCircle size={16} style={{ color: '#f5576c', flexShrink: 0 }} />
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })()}
-                                                </td>
-                                                <td>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                        <span style={{
-                                                            fontWeight: 700,
-                                                            fontSize: '1rem',
-                                                            color: (unassignedCounts[company._id] || 0) > 0 ? '#f5576c' : '#666'
-                                                        }}>
-                                                            {unassignedCounts[company._id] || 0}
-                                                        </span>
-                                                        {(unassignedCounts[company._id] || 0) > 0 && (
-                                                            <AlertCircle size={16} style={{ color: '#f5576c' }} />
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span className={`status-badge ${company.isActive ? 'active' : 'inactive'}`}>
-                                                        {company.isActive ? 'Active' : 'Inactive'}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div className="action-buttons">
-                                                        <button
-                                                            className="btn-icon success"
-                                                            title="Add Admin"
-                                                            onClick={() => openAdminModal(company)}
-                                                        >
-                                                            <UserPlus size={18} />
-                                                        </button>
-                                                        <button
-                                                            className="btn-icon danger"
-                                                            title="Delete"
-                                                            onClick={() => handleDeleteCompany(company._id)}
-                                                        >
-                                                            <Trash2 size={18} />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            {expandedRows[company._id] && (
-                                                <tr className="nested-row">
-                                                    <td colSpan="7">
-                                                        <div className="nested-table-container">
-                                                            <h4>Company Admins</h4>
-                                                            {companyAdmins[company._id]?.length === 0 ? (
-                                                                <p className="no-admins">No admins for this company</p>
-                                                            ) : (
-                                                                <table className="nested-table">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th>Username</th>
-                                                                            <th>Email</th>
-                                                                            <th>Full Name</th>
-                                                                            <th>Phone</th>
-                                                                            <th>Status</th>
-                                                                            <th>Actions</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        {companyAdmins[company._id]?.map((admin) => (
-                                                                            <tr key={admin._id}>
-                                                                                <td>{admin.username}</td>
-                                                                                <td>{admin.email}</td>
-                                                                                <td>
-                                                                                    {admin.firstName || admin.lastName
-                                                                                        ? `${admin.firstName || ''} ${admin.lastName || ''}`.trim()
-                                                                                        : '-'}
-                                                                                </td>
-                                                                                <td>{admin.phone || '-'}</td>
-                                                                                <td>
-                                                                                    <span className={`status-badge ${admin.isActive ? 'active' : 'inactive'}`}>
-                                                                                        {admin.isActive ? 'Active' : 'Inactive'}
-                                                                                    </span>
-                                                                                </td>
-                                                                                <td>
-                                                                                    <div className="action-buttons">
-                                                                                        <button
-                                                                                            className="btn-icon primary"
-                                                                                            title="Reset Password"
-                                                                                            onClick={() => openResetPasswordModal(company, admin)}
-                                                                                        >
-                                                                                            <Key size={16} />
-                                                                                        </button>
-                                                                                        <button
-                                                                                            className="btn-icon danger"
-                                                                                            title="Delete Admin"
-                                                                                            onClick={() => handleDeleteAdmin(company._id, admin._id)}
-                                                                                        >
-                                                                                            <Trash2 size={16} />
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                        ))}
-                                                                    </tbody>
-                                                                </table>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
                 </div>
             </div>
 
@@ -921,25 +819,33 @@ const SuperAdminDashboard = () => {
             {/* Create Company Modal */}
             <Modal
                 isOpen={showCompanyModal}
-                onClose={() => setShowCompanyModal(false)}
-                title="Create New Company"
+                onClose={() => {
+                    setShowCompanyModal(false);
+                    setSelectedCompany(null);
+                    setFormData(getEmptyCompanyForm());
+                }}
+                title={selectedCompany ? `Edit ${selectedCompany.name}` : 'Create New Company'}
                 footer={
                     <>
-                        <Button variant="secondary" onClick={() => setShowCompanyModal(false)}>
+                        <Button variant="secondary" onClick={() => {
+                            setShowCompanyModal(false);
+                            setSelectedCompany(null);
+                            setFormData(getEmptyCompanyForm());
+                        }}>
                             Cancel
                         </Button>
-                        <Button variant="primary" onClick={handleCreateCompany}>
-                            Create Company
+                        <Button variant="primary" onClick={handleSaveCompany}>
+                            {selectedCompany ? 'Save Changes' : 'Create Company'}
                         </Button>
                     </>
                 }
             >
-                <form onSubmit={handleCreateCompany}>
+                <form onSubmit={handleSaveCompany}>
                     <Input
                         label="Company Name"
                         name="name"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) => handleCompanyFieldChange('name', e.target.value)}
                         required
                     />
                     <Input
@@ -947,36 +853,79 @@ const SuperAdminDashboard = () => {
                         type="email"
                         name="email"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onChange={(e) => handleCompanyFieldChange('email', e.target.value)}
                         required
                     />
                     <Input
                         label="Phone"
                         name="phone"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(e) => handleCompanyFieldChange('phone', e.target.value)}
                     />
                     <Input
                         label="Industry"
                         name="industry"
                         value={formData.industry}
-                        onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                        onChange={(e) => handleCompanyFieldChange('industry', e.target.value)}
                     />
                     <Input
                         label="Website"
                         name="website"
                         value={formData.website}
-                        onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                        onChange={(e) => handleCompanyFieldChange('website', e.target.value)}
                     />
                     <Input
                         label="Passenger Quota"
                         type="number"
                         name="passengerQuota"
                         value={formData.passengerQuota}
-                        onChange={(e) => setFormData({ ...formData, passengerQuota: parseInt(e.target.value) || 0 })}
+                        onChange={(e) => handleCompanyFieldChange('passengerQuota', parseInt(e.target.value, 10) || 0)}
                         min="0"
                         required
                     />
+                    <Input
+                        label="Street Address"
+                        name="street"
+                        value={formData.address.street}
+                        onChange={(e) => handleCompanyAddressChange('street', e.target.value)}
+                    />
+                    <Input
+                        label="City"
+                        name="city"
+                        value={formData.address.city}
+                        onChange={(e) => handleCompanyAddressChange('city', e.target.value)}
+                    />
+                    <Input
+                        label="State / Province"
+                        name="state"
+                        value={formData.address.state}
+                        onChange={(e) => handleCompanyAddressChange('state', e.target.value)}
+                    />
+                    <Input
+                        label="Zip / Postal Code"
+                        name="zipCode"
+                        value={formData.address.zipCode}
+                        onChange={(e) => handleCompanyAddressChange('zipCode', e.target.value)}
+                    />
+                    <Input
+                        label="Country"
+                        name="country"
+                        value={formData.address.country}
+                        onChange={(e) => handleCompanyAddressChange('country', e.target.value)}
+                    />
+                    <div className="input-group">
+                        <label className="input-label" htmlFor="isActive">Status</label>
+                        <select
+                            id="isActive"
+                            name="isActive"
+                            value={formData.isActive ? 'active' : 'inactive'}
+                            onChange={(e) => handleCompanyFieldChange('isActive', e.target.value === 'active')}
+                            className="input-field"
+                        >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
                 </form>
             </Modal>
 

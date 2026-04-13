@@ -27,14 +27,19 @@ const GroupForm = () => {
         arrivalDate: '',
         arrivalAirport: '',
         arrivalFlightNo: '',
+        arrivalTime: '',
         arrivalCity: '',
         departureDate: '',
         departureAirport: '',
         departureFlightNo: '',
+        departureTime: '',
+        returnAirport: '',
+        returnCity: '',
         departureCity: '',
         arrivalHotel: '',
         departureHotel: '',
-        maktab: ''
+        maktab: '',
+        remarks: ''
     });
 
     useEffect(() => {
@@ -73,14 +78,19 @@ const GroupForm = () => {
                 arrivalDate: group.arrivalDate ? group.arrivalDate.split('T')[0] : '',
                 arrivalAirport: group.arrivalAirport || '',
                 arrivalFlightNo: group.arrivalFlightNo || '',
+                arrivalTime: group.arrivalTime || '',
                 arrivalCity: group.arrivalCity || '',
                 departureDate: group.departureDate ? group.departureDate.split('T')[0] : '',
                 departureAirport: group.departureAirport || '',
                 departureFlightNo: group.departureFlightNo || '',
+                departureTime: group.departureTime || '',
+                returnAirport: group.returnAirport || '',
+                returnCity: group.returnCity || '',
                 departureCity: group.departureCity || '',
                 arrivalHotel: group.arrivalHotel?._id || group.hotel?._id || '',
                 departureHotel: group.departureHotel?._id || group.hotel?._id || '',
-                maktab: group.maktab || ''
+                maktab: group.maktab || '',
+                remarks: group.remarks || ''
             });
         } catch (error) {
             console.error('Error fetching group:', error);
@@ -263,6 +273,15 @@ const GroupForm = () => {
                                     />
                                 </div>
                                 <div className="form-group">
+                                    <label>Arrival Time</label>
+                                    <Input
+                                        type="time"
+                                        name="arrivalTime"
+                                        value={formData.arrivalTime}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="form-group">
                                     <label>Arrival Airport</label>
                                     <select
                                         name="arrivalAirport"
@@ -338,6 +357,15 @@ const GroupForm = () => {
                                     />
                                 </div>
                                 <div className="form-group">
+                                    <label>Departure Time</label>
+                                    <Input
+                                        type="time"
+                                        name="departureTime"
+                                        value={formData.departureTime}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="form-group">
                                     <label>Departure Airport</label>
                                     <select
                                         name="departureAirport"
@@ -365,6 +393,24 @@ const GroupForm = () => {
                                 </div>
                             </div>
                             <div className="form-row">
+                                <div className="form-group">
+                                    <label>Return Airport (Flight Arrives At)</label>
+                                    <Input
+                                        name="returnAirport"
+                                        value={formData.returnAirport}
+                                        onChange={handleChange}
+                                        placeholder="e.g., LHE, ISB, KHI"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Return / Landing City</label>
+                                    <Input
+                                        name="returnCity"
+                                        value={formData.returnCity}
+                                        onChange={handleChange}
+                                        placeholder="e.g., Lahore, Karachi, Islamabad"
+                                    />
+                                </div>
                                 <div className="form-group">
                                     <label>Departure City *</label>
                                     <select
@@ -397,6 +443,22 @@ const GroupForm = () => {
                                         ))}
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div className="form-section">
+                            <h3>Remarks</h3>
+                            <div className="form-group">
+                                <label>Remarks / Notes</label>
+                                <textarea
+                                    name="remarks"
+                                    value={formData.remarks}
+                                    onChange={handleChange}
+                                    className="select-input"
+                                    rows={3}
+                                    placeholder="Any additional notes about this group..."
+                                    style={{ resize: 'vertical', fontFamily: 'inherit', fontSize: '0.9rem' }}
+                                />
                             </div>
                         </div>
 

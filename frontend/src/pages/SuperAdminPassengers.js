@@ -101,6 +101,10 @@ const SuperAdminPassengers = () => {
                     <Home size={20} />
                     <span>Dashboard</span>
                 </button>
+                <button className="nav-item" onClick={() => navigate('/super-admin/companies')}>
+                    <Building2 size={20} />
+                    <span>Companies</span>
+                </button>
                 <button className="nav-item active" onClick={() => navigate('/super-admin/passengers')}>
                     <UserCheck size={20} />
                     <span>Passengers</span>

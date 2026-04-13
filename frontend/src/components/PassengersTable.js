@@ -39,7 +39,7 @@ const PassengersTable = ({
     const fileInputRef = useRef(null);
     const showActionColumn = !readOnly && Boolean(onAdd || onUpdate || onDelete);
     const showImportActions = !readOnly && Boolean(onImport);
-    const emptyColSpan = showCompanyColumn ? (showActionColumn ? 7 : 6) : (showActionColumn ? 6 : 5);
+    const emptyColSpan = showCompanyColumn ? (showActionColumn ? 9 : 8) : (showActionColumn ? 8 : 7);
 
     useEffect(() => {
         let filtered = passengers;
@@ -76,6 +76,8 @@ const PassengersTable = ({
             firstName: '',
             lastName: '',
             passportNo: '',
+            visaNumber: '',
+            mofaApplicationNo: '',
             group: ''
         });
     };
@@ -116,6 +118,8 @@ const PassengersTable = ({
             firstName: passenger.firstName,
             lastName: passenger.lastName,
             passportNo: passenger.passportNo,
+            visaNumber: passenger.visaNumber || '',
+            mofaApplicationNo: passenger.mofaApplicationNo || '',
             group: passenger.group?._id || ''
         });
     };
@@ -301,6 +305,8 @@ Omar,Ibrahim,E5678901,`;
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Passport No.</th>
+                            <th>Visa No.</th>
+                            <th>MOFA No.</th>
                             {showCompanyColumn && <th>Company</th>}
                             <th>Group</th>
                             <th>Date Created</th>
@@ -337,6 +343,24 @@ Omar,Ibrahim,E5678901,`;
                                         value={newRow.passportNo}
                                         onChange={(e) => handleNewRowChange('passportNo', e.target.value)}
                                         placeholder="Passport No. *"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="text"
+                                        className="table-cell-input"
+                                        value={newRow.visaNumber}
+                                        onChange={(e) => handleNewRowChange('visaNumber', e.target.value)}
+                                        placeholder="Visa No."
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="text"
+                                        className="table-cell-input"
+                                        value={newRow.mofaApplicationNo}
+                                        onChange={(e) => handleNewRowChange('mofaApplicationNo', e.target.value)}
+                                        placeholder="MOFA No."
                                     />
                                 </td>
                                 {showCompanyColumn && (
@@ -441,6 +465,36 @@ Omar,Ibrahim,E5678901,`;
                                             ) : (
                                                 <div className="table-cell-display" onClick={() => handleEdit(passenger)}>
                                                     {passenger.passportNo}
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    className="table-cell-input"
+                                                    value={editData.visaNumber}
+                                                    onChange={(e) => handleEditChange('visaNumber', e.target.value)}
+                                                    placeholder="Visa No."
+                                                />
+                                            ) : (
+                                                <div className="table-cell-display">
+                                                    {passenger.visaNumber || <span className="text-muted">-</span>}
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    className="table-cell-input"
+                                                    value={editData.mofaApplicationNo}
+                                                    onChange={(e) => handleEditChange('mofaApplicationNo', e.target.value)}
+                                                    placeholder="MOFA No."
+                                                />
+                                            ) : (
+                                                <div className="table-cell-display">
+                                                    {passenger.mofaApplicationNo || <span className="text-muted">-</span>}
                                                 </div>
                                             )}
                                         </td>
