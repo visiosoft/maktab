@@ -14,7 +14,21 @@ import {
 import Button from './Button';
 import './PassengersTable.css';
 
-const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, onImport, loading, deleteLabel = 'delete' }) => {
+const PassengersTable = ({
+    passengers,
+    groups = [],
+    onAdd,
+    onUpdate,
+    onDelete,
+    onImport,
+    loading,
+    deleteLabel = 'delete',
+    title = 'Passenger List',
+    emptyTitle = 'No passengers yet',
+    emptyDescription = 'Click "Add Passenger" to add your first passenger',
+    readOnly = false,
+    showCompanyColumn = false,
+}) => {
     const [editingId, setEditingId] = useState(null);
     const [newRow, setNewRow] = useState(null);
     const [editData, setEditData] = useState({});
@@ -23,16 +37,22 @@ const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, o
     const [filteredPassengers, setFilteredPassengers] = useState(passengers);
     const [importing, setImporting] = useState(false);
     const fileInputRef = useRef(null);
+    const showActionColumn = !readOnly && Boolean(onAdd || onUpdate || onDelete);
+    const showImportActions = !readOnly && Boolean(onImport);
+    const emptyColSpan = showCompanyColumn ? (showActionColumn ? 7 : 6) : (showActionColumn ? 6 : 5);
 
     useEffect(() => {
         let filtered = passengers;
+        const normalizedSearchTerm = searchTerm.toLowerCase();
 
         // Filter by search term
         if (searchTerm) {
             filtered = filtered.filter(p =>
-                p.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                p.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                p.passportNo.toLowerCase().includes(searchTerm.toLowerCase())
+                p.firstName?.toLowerCase().includes(normalizedSearchTerm) ||
+                p.lastName?.toLowerCase().includes(normalizedSearchTerm) ||
+                p.passportNo?.toLowerCase().includes(normalizedSearchTerm) ||
+                p.group?.groupName?.toLowerCase().includes(normalizedSearchTerm) ||
+                p.company?.name?.toLowerCase().includes(normalizedSearchTerm)
             );
         }
 
@@ -49,6 +69,7 @@ const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, o
     }, [searchTerm, groupFilter, passengers]);
 
     const handleAddNew = () => {
+        if (readOnly || !onAdd) return;
         if (newRow || editingId) return;
 
         setNewRow({
@@ -87,6 +108,7 @@ const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, o
     };
 
     const handleEdit = (passenger) => {
+        if (readOnly || !onUpdate) return;
         if (newRow) return;
 
         setEditingId(passenger._id);
@@ -126,6 +148,7 @@ const PassengersTable = ({ passengers, groups = [], onAdd, onUpdate, onDelete, o
     };
 
     const handleImportClick = () => {
+        if (!onImport) return;
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
@@ -179,6 +202,7 @@ Omar,Ibrahim,E5678901,`;
     };
 
     const handleDelete = async (id) => {
+        if (!onDelete) return;
         if (window.confirm(`Are you sure you want to ${deleteLabel} this passenger?`)) {
             try {
                 await onDelete(id);
@@ -203,7 +227,7 @@ Omar,Ibrahim,E5678901,`;
             <div className="table-header">
                 <h3 className="table-title">
                     <Users size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-                    Passenger List
+                    {title}
                 </h3>
                 <div className="table-actions">
                     <div className="search-box">
@@ -228,39 +252,45 @@ Omar,Ibrahim,E5678901,`;
                             </option>
                         ))}
                     </select>
-                    <Button
-                        variant="primary"
-                        icon={<Plus size={18} />}
-                        onClick={handleAddNew}
-                        disabled={!!newRow || !!editingId}
-                    >
-                        Add Passenger
-                    </Button>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-end' }}>
+                    {!readOnly && onAdd && (
                         <Button
-                            variant="secondary"
-                            icon={importing ? <Loader size={18} className="spin" /> : <Upload size={18} />}
-                            onClick={handleImportClick}
-                            disabled={importing || !!newRow || !!editingId}
+                            variant="primary"
+                            icon={<Plus size={18} />}
+                            onClick={handleAddNew}
+                            disabled={!!newRow || !!editingId}
                         >
-                            {importing ? 'Importing...' : 'Import CSV'}
+                            Add Passenger
                         </Button>
-                        <button
-                            onClick={handleDownloadSample}
-                            className="sample-download-link"
-                            type="button"
-                        >
-                            <Download size={12} />
-                            Download Sample CSV
-                        </button>
-                    </div>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".csv"
-                        onChange={handleFileChange}
-                        style={{ display: 'none' }}
-                    />
+                    )}
+                    {showImportActions && (
+                        <>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-end' }}>
+                                <Button
+                                    variant="secondary"
+                                    icon={importing ? <Loader size={18} className="spin" /> : <Upload size={18} />}
+                                    onClick={handleImportClick}
+                                    disabled={importing || !!newRow || !!editingId}
+                                >
+                                    {importing ? 'Importing...' : 'Import CSV'}
+                                </Button>
+                                <button
+                                    onClick={handleDownloadSample}
+                                    className="sample-download-link"
+                                    type="button"
+                                >
+                                    <Download size={12} />
+                                    Download Sample CSV
+                                </button>
+                            </div>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".csv"
+                                onChange={handleFileChange}
+                                style={{ display: 'none' }}
+                            />
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -271,9 +301,10 @@ Omar,Ibrahim,E5678901,`;
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Passport No.</th>
+                            {showCompanyColumn && <th>Company</th>}
                             <th>Group</th>
                             <th>Date Created</th>
-                            <th style={{ textAlign: 'right' }}>Actions</th>
+                            {showActionColumn && <th style={{ textAlign: 'right' }}>Actions</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -308,6 +339,11 @@ Omar,Ibrahim,E5678901,`;
                                         placeholder="Passport No. *"
                                     />
                                 </td>
+                                {showCompanyColumn && (
+                                    <td>
+                                        <span className="text-muted">Assigned on save</span>
+                                    </td>
+                                )}
                                 <td>
                                     <select
                                         className="table-cell-input"
@@ -325,35 +361,37 @@ Omar,Ibrahim,E5678901,`;
                                 <td>
                                     <span className="text-muted">-</span>
                                 </td>
-                                <td>
-                                    <div className="row-actions">
-                                        <button
-                                            className="action-icon-button save"
-                                            onClick={handleSaveNew}
-                                            title="Save"
-                                        >
-                                            <Save size={18} />
-                                        </button>
-                                        <button
-                                            className="action-icon-button cancel"
-                                            onClick={handleCancelNew}
-                                            title="Cancel"
-                                        >
-                                            <X size={18} />
-                                        </button>
-                                    </div>
-                                </td>
+                                {showActionColumn && (
+                                    <td>
+                                        <div className="row-actions">
+                                            <button
+                                                className="action-icon-button save"
+                                                onClick={handleSaveNew}
+                                                title="Save"
+                                            >
+                                                <Save size={18} />
+                                            </button>
+                                            <button
+                                                className="action-icon-button cancel"
+                                                onClick={handleCancelNew}
+                                                title="Cancel"
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                )}
                             </tr>
                         )}
 
                         {/* Existing Rows */}
                         {filteredPassengers.length === 0 && !newRow ? (
                             <tr>
-                                <td colSpan="6">
+                                <td colSpan={emptyColSpan}>
                                     <div className="empty-state">
                                         <Users size={48} />
-                                        <h3>No passengers yet</h3>
-                                        <p>Click "Add Passenger" to add your first passenger</p>
+                                        <h3>{emptyTitle}</h3>
+                                        <p>{emptyDescription}</p>
                                     </div>
                                 </td>
                             </tr>
@@ -406,6 +444,13 @@ Omar,Ibrahim,E5678901,`;
                                                 </div>
                                             )}
                                         </td>
+                                        {showCompanyColumn && (
+                                            <td>
+                                                <div className="table-cell-display">
+                                                    {passenger.company?.name || 'No Company'}
+                                                </div>
+                                            </td>
+                                        )}
                                         <td>
                                             {isEditing ? (
                                                 <select
@@ -432,54 +477,62 @@ Omar,Ibrahim,E5678901,`;
                                         </td>
                                         <td>
                                             <div className="table-cell-display">
-                                                {new Date(passenger.createdAt).toLocaleDateString('en-US', {
-                                                    year: 'numeric',
-                                                    month: 'short',
-                                                    day: 'numeric'
-                                                })}
+                                                {passenger.createdAt
+                                                    ? new Date(passenger.createdAt).toLocaleDateString('en-US', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric'
+                                                    })
+                                                    : '-'}
                                             </div>
                                         </td>
-                                        <td>
-                                            <div className="row-actions">
-                                                {isEditing ? (
-                                                    <>
-                                                        <button
-                                                            className="action-icon-button save"
-                                                            onClick={() => handleSaveEdit(passenger._id)}
-                                                            title="Save"
-                                                        >
-                                                            <Save size={18} />
-                                                        </button>
-                                                        <button
-                                                            className="action-icon-button cancel"
-                                                            onClick={handleCancelEdit}
-                                                            title="Cancel"
-                                                        >
-                                                            <X size={18} />
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <button
-                                                            className="action-icon-button edit"
-                                                            onClick={() => handleEdit(passenger)}
-                                                            title="Edit"
-                                                            disabled={!!newRow}
-                                                        >
-                                                            <Edit2 size={18} />
-                                                        </button>
-                                                        <button
-                                                            className="action-icon-button delete"
-                                                            onClick={() => handleDelete(passenger._id)}
-                                                            title={deleteLabel.charAt(0).toUpperCase() + deleteLabel.slice(1)}
-                                                            disabled={!!newRow || !!editingId}
-                                                        >
-                                                            <Trash2 size={18} />
-                                                        </button>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </td>
+                                        {showActionColumn && (
+                                            <td>
+                                                <div className="row-actions">
+                                                    {isEditing ? (
+                                                        <>
+                                                            <button
+                                                                className="action-icon-button save"
+                                                                onClick={() => handleSaveEdit(passenger._id)}
+                                                                title="Save"
+                                                            >
+                                                                <Save size={18} />
+                                                            </button>
+                                                            <button
+                                                                className="action-icon-button cancel"
+                                                                onClick={handleCancelEdit}
+                                                                title="Cancel"
+                                                            >
+                                                                <X size={18} />
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            {onUpdate && (
+                                                                <button
+                                                                    className="action-icon-button edit"
+                                                                    onClick={() => handleEdit(passenger)}
+                                                                    title="Edit"
+                                                                    disabled={!!newRow}
+                                                                >
+                                                                    <Edit2 size={18} />
+                                                                </button>
+                                                            )}
+                                                            {onDelete && (
+                                                                <button
+                                                                    className="action-icon-button delete"
+                                                                    onClick={() => handleDelete(passenger._id)}
+                                                                    title={deleteLabel.charAt(0).toUpperCase() + deleteLabel.slice(1)}
+                                                                    disabled={!!newRow || !!editingId}
+                                                                >
+                                                                    <Trash2 size={18} />
+                                                                </button>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        )}
                                     </tr>
                                 );
                             })

@@ -313,6 +313,13 @@ const SuperAdminDashboard = () => {
                 </button>
                 <button
                     className="nav-item"
+                    onClick={() => navigate('/super-admin/passengers')}
+                >
+                    <UserCheck size={20} />
+                    <span>Passengers</span>
+                </button>
+                <button
+                    className="nav-item"
                     onClick={() => navigate('/hotels')}
                 >
                     <Building2 size={20} />
@@ -384,10 +391,10 @@ const SuperAdminDashboard = () => {
                             const remaining = companyQuota - companyPassengers;
                             const percentage = companyQuota > 0 ? Math.round((companyPassengers / companyQuota) * 100) : 0;
                             const unassigned = unassignedCounts[company._id] || 0;
-                            
+
                             return (
-                                <div 
-                                    key={company._id} 
+                                <div
+                                    key={company._id}
                                     style={{
                                         background: 'white',
                                         borderRadius: '12px',
@@ -418,7 +425,7 @@ const SuperAdminDashboard = () => {
                                             {percentage}%
                                         </div>
                                     </div>
-                                    
+
                                     <div style={{ marginBottom: '1rem' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                             <span style={{ fontSize: '0.875rem', color: '#666' }}>Quota</span>
@@ -439,11 +446,11 @@ const SuperAdminDashboard = () => {
                                             </div>
                                         )}
                                     </div>
-                                    
-                                    <div style={{ 
-                                        width: '100%', 
-                                        height: '8px', 
-                                        background: '#f0f0f0', 
+
+                                    <div style={{
+                                        width: '100%',
+                                        height: '8px',
+                                        background: '#f0f0f0',
                                         borderRadius: '4px',
                                         overflow: 'hidden'
                                     }}>
