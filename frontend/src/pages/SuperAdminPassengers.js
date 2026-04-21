@@ -7,28 +7,21 @@ import Button from '../components/Button';
 import { superAdminAPI } from '../services/api';
 import './Passengers.css';
 
-const formatDateForInput = (date) => date.toISOString().split('T')[0];
-
 const SuperAdminPassengers = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     const [passengers, setPassengers] = useState([]);
     const [selectedCompanyId, setSelectedCompanyId] = useState('all');
-    const [selectedTravelDate, setSelectedTravelDate] = useState(formatDateForInput(new Date()));
-    const [selectedTravelType, setSelectedTravelType] = useState('any');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchData();
-    }, [selectedTravelDate, selectedTravelType]);
+    }, []);
 
     const fetchData = async () => {
         try {
             setLoading(true);
-            const passengersResponse = await superAdminAPI.getPassengers({
-                travelDate: selectedTravelDate,
-                travelType: selectedTravelType
-            });
+            const passengersResponse = await superAdminAPI.getPassengers();
 
             setPassengers(passengersResponse.data);
         } catch (error) {
@@ -75,18 +68,6 @@ const SuperAdminPassengers = () => {
     const selectedCompany = selectedCompanyId === 'all'
         ? null
         : companies.find((company) => company._id === selectedCompanyId);
-
-    const formattedSelectedTravelDate = new Date(`${selectedTravelDate}T00:00:00`).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-
-    const travelTypeLabel = selectedTravelType === 'arrival'
-        ? 'arriving'
-        : selectedTravelType === 'departure'
-            ? 'departing'
-            : 'traveling';
 
     if (loading) {
         return (
@@ -161,50 +142,25 @@ const SuperAdminPassengers = () => {
                     <h1>Passengers Across Companies</h1>
                     <p>
                         {selectedCompany
-                            ? `Showing ${filteredPassengers.length} passengers from ${selectedCompany.name} ${travelTypeLabel} on ${formattedSelectedTravelDate}.`
-                            : `Showing ${passengers.length} passengers across ${companyCount} compan${companyCount === 1 ? 'y' : 'ies'} ${travelTypeLabel} on ${formattedSelectedTravelDate}. ${unassignedCount} without a group.`}
+                            ? `Showing ${filteredPassengers.length} passengers from ${selectedCompany.name}. ${unassignedCount} without a group.`
+                            : `Showing ${passengers.length} passengers across ${companyCount} compan${companyCount === 1 ? 'y' : 'ies'}. ${unassignedCount} without a group.`}
                     </p>
-                    <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', maxWidth: '900px' }}>
-                        <div>
-                            <label htmlFor="super-admin-travel-date" style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Travel Date</label>
-                            <input
-                                id="super-admin-travel-date"
-                                type="date"
-                                className="table-cell-input"
-                                value={selectedTravelDate}
-                                onChange={(event) => setSelectedTravelDate(event.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="super-admin-travel-type" style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Travel Type</label>
-                            <select
-                                id="super-admin-travel-type"
-                                className="table-cell-input"
-                                value={selectedTravelType}
-                                onChange={(event) => setSelectedTravelType(event.target.value)}
-                            >
-                                <option value="any">Arrival or Departure</option>
-                                <option value="arrival">Arrival Only</option>
-                                <option value="departure">Departure Only</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label htmlFor="super-admin-company-filter" style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Company</label>
-                            <select
-                                id="super-admin-company-filter"
-                                className="table-cell-input"
-                                value={selectedCompanyId}
-                                onChange={(event) => setSelectedCompanyId(event.target.value)}
-                                aria-label="Filter passengers by company"
-                            >
-                                <option value="all">All Companies</option>
-                                {companies.map((company) => (
-                                    <option key={company._id} value={company._id}>
-                                        {company.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                    <div style={{ marginTop: '1rem', maxWidth: '320px' }}>
+                        <label htmlFor="super-admin-company-filter" style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Company</label>
+                        <select
+                            id="super-admin-company-filter"
+                            className="table-cell-input"
+                            value={selectedCompanyId}
+                            onChange={(event) => setSelectedCompanyId(event.target.value)}
+                            aria-label="Filter passengers by company"
+                        >
+                            <option value="all">All Companies</option>
+                            {companies.map((company) => (
+                                <option key={company._id} value={company._id}>
+                                    {company.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                 </div>
 
@@ -214,6 +170,8 @@ const SuperAdminPassengers = () => {
                     loading={loading}
                     readOnly
                     showCompanyColumn
+                    showSearch={false}
+                    showGroupFilter={false}
                     title="All Passengers"
                     emptyTitle="No Passengers Found"
                     emptyDescription="Passenger records from all companies will appear here."

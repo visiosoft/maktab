@@ -28,6 +28,8 @@ const PassengersTable = ({
     emptyDescription = 'Click "Add Passenger" to add your first passenger',
     readOnly = false,
     showCompanyColumn = false,
+    showSearch = true,
+    showGroupFilter = true,
 }) => {
     const [editingId, setEditingId] = useState(null);
     const [newRow, setNewRow] = useState(null);
@@ -236,28 +238,32 @@ Omar,Ibrahim,E5678901,`;
                     {title}
                 </h3>
                 <div className="table-actions">
-                    <div className="search-box">
-                        <Search className="search-icon" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Search passengers..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                    <select
-                        className="group-filter"
-                        value={groupFilter}
-                        onChange={(e) => setGroupFilter(e.target.value)}
-                    >
-                        <option value="">All Groups</option>
-                        <option value="no-group">No Group</option>
-                        {groups.map(group => (
-                            <option key={group._id} value={group._id}>
-                                {group.groupName}
-                            </option>
-                        ))}
-                    </select>
+                    {showSearch && (
+                        <div className="search-box">
+                            <Search className="search-icon" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Search passengers..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                    )}
+                    {showGroupFilter && (
+                        <select
+                            className="group-filter"
+                            value={groupFilter}
+                            onChange={(e) => setGroupFilter(e.target.value)}
+                        >
+                            <option value="">All Groups</option>
+                            <option value="no-group">No Group</option>
+                            {groups.map(group => (
+                                <option key={group._id} value={group._id}>
+                                    {group.groupName}
+                                </option>
+                            ))}
+                        </select>
+                    )}
                     {!readOnly && onAdd && (
                         <Button
                             variant="primary"
