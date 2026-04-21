@@ -6,7 +6,7 @@ import Button from '../components/Button';
 import Card from '../components/Card';
 import Input from '../components/Input';
 import Modal from '../components/Modal';
-import { Building2, Plus, Edit2, Trash2, Search, Home, Users, LogOut } from 'lucide-react';
+import { Building2, Plus, Edit2, Trash2, Search, Home, Users, LogOut, Bell } from 'lucide-react';
 import './Hotels.css';
 
 const Hotels = () => {
@@ -94,20 +94,30 @@ const Hotels = () => {
     return (
         <div className="hotels-page">
             <div className="dashboard-header">
-                <div className="dashboard-header-content">
+                <div className="dashboard-header-content flex-between">
                     <div className="dashboard-logo">
                         <div className="dashboard-logo-icon">
-                            <Building2 size={28} />
+                            <Building2 size={24} />
                         </div>
                         <div className="dashboard-logo-text">
                             <h1>Maktab</h1>
-                            <p>Super Admin - Hotels Management</p>
+                            <p>Hotels Management</p>
                         </div>
                     </div>
-                    <Button variant="danger" size="small" onClick={logout}>
-                        <LogOut size={18} />
-                        Logout
-                    </Button>
+                    <div className="dashboard-header-tools">
+                        <div className="dashboard-search">
+                            <Search size={16} />
+                            <input type="text" placeholder="Quick search…" />
+                        </div>
+                        <button className="dashboard-notification" title="Notifications">
+                            <Bell size={20} />
+                        </button>
+                        <div className="dashboard-user">
+                            <Button variant="secondary" size="small" icon={<LogOut size={16} />} onClick={logout}>
+                                Logout
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </div>
 

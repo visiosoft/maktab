@@ -6,7 +6,7 @@ import Button from '../components/Button';
 import Card from '../components/Card';
 import Input from '../components/Input';
 import Modal from '../components/Modal';
-import { Save, X, Plus, Building2, Users, Home, LogOut, FileText, UserCheck } from 'lucide-react';
+import { Save, X, Plus, Building2, Users, Home, LogOut, FileText, UserCheck, Bell, Search } from 'lucide-react';
 import { SAUDI_AIRPORTS } from '../constants/airports';
 import './GroupForm.css';
 
@@ -29,6 +29,8 @@ const GroupForm = () => {
         arrivalFlightNo: '',
         arrivalTime: '',
         arrivalCity: '',
+        originAirport: '',
+        originCity: '',
         departureDate: '',
         departureAirport: '',
         departureFlightNo: '',
@@ -80,6 +82,8 @@ const GroupForm = () => {
                 arrivalFlightNo: group.arrivalFlightNo || '',
                 arrivalTime: group.arrivalTime || '',
                 arrivalCity: group.arrivalCity || '',
+                originAirport: group.originAirport || '',
+                originCity: group.originCity || '',
                 departureDate: group.departureDate ? group.departureDate.split('T')[0] : '',
                 departureAirport: group.departureAirport || '',
                 departureFlightNo: group.departureFlightNo || '',
@@ -161,10 +165,10 @@ const GroupForm = () => {
         return (
             <div className="group-form-page">
                 <div className="dashboard-header">
-                    <div className="dashboard-header-content">
+                    <div className="dashboard-header-content flex-between">
                         <div className="dashboard-logo">
                             <div className="dashboard-logo-icon">
-                                <Users size={28} />
+                                <Users size={24} />
                             </div>
                             <div className="dashboard-logo-text">
                                 <h1>{company?.name || 'Maktab'}</h1>
@@ -185,20 +189,30 @@ const GroupForm = () => {
     return (
         <div className="group-form-page">
             <div className="dashboard-header">
-                <div className="dashboard-header-content">
+                <div className="dashboard-header-content flex-between">
                     <div className="dashboard-logo">
                         <div className="dashboard-logo-icon">
-                            <Users size={28} />
+                            <Users size={24} />
                         </div>
                         <div className="dashboard-logo-text">
                             <h1>Maktab</h1>
                             <p>{isEdit ? 'Edit Group' : 'Create New Group'}</p>
                         </div>
                     </div>
-                    <Button variant="danger" size="small" onClick={logout}>
-                        <LogOut size={18} />
-                        Logout
-                    </Button>
+                    <div className="dashboard-header-tools">
+                        <div className="dashboard-search">
+                            <Search size={16} />
+                            <input type="text" placeholder="Quick search…" />
+                        </div>
+                        <button className="dashboard-notification" title="Notifications">
+                            <Bell size={20} />
+                        </button>
+                        <div className="dashboard-user">
+                            <Button variant="secondary" size="small" icon={<LogOut size={16} />} onClick={logout}>
+                                Logout
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -345,6 +359,30 @@ const GroupForm = () => {
                         </div>
 
                         <div className="form-section">
+                            <h3>Travel Route Details</h3>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Origin Airport</label>
+                                    <Input
+                                        name="originAirport"
+                                        value={formData.originAirport}
+                                        onChange={handleChange}
+                                        placeholder="e.g., DAC, LHE, ISB"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Origin City</label>
+                                    <Input
+                                        name="originCity"
+                                        value={formData.originCity}
+                                        onChange={handleChange}
+                                        placeholder="e.g., Dhaka, Lahore, Islamabad"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="form-section">
                             <h3>Departure Details</h3>
                             <div className="form-row">
                                 <div className="form-group">
@@ -393,24 +431,6 @@ const GroupForm = () => {
                                 </div>
                             </div>
                             <div className="form-row">
-                                <div className="form-group">
-                                    <label>Return Airport (Flight Arrives At)</label>
-                                    <Input
-                                        name="returnAirport"
-                                        value={formData.returnAirport}
-                                        onChange={handleChange}
-                                        placeholder="e.g., LHE, ISB, KHI"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Return / Landing City</label>
-                                    <Input
-                                        name="returnCity"
-                                        value={formData.returnCity}
-                                        onChange={handleChange}
-                                        placeholder="e.g., Lahore, Karachi, Islamabad"
-                                    />
-                                </div>
                                 <div className="form-group">
                                     <label>Departure City *</label>
                                     <select

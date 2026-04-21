@@ -1,34 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, FileText, Home, LogOut, UserCheck } from 'lucide-react';
+import { Building2, FileText, Home, LogOut, UserCheck, Bell, Search } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import PassengersTable from '../components/PassengersTable';
 import Button from '../components/Button';
 import { superAdminAPI } from '../services/api';
 import './Passengers.css';
 
+const formatDateForInput = (date) => date.toISOString().split('T')[0];
+
 const SuperAdminPassengers = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     const [passengers, setPassengers] = useState([]);
-    const [groups, setGroups] = useState([]);
     const [selectedCompanyId, setSelectedCompanyId] = useState('all');
+    const [selectedTravelDate, setSelectedTravelDate] = useState(formatDateForInput(new Date()));
+    const [selectedTravelType, setSelectedTravelType] = useState('any');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [selectedTravelDate, selectedTravelType]);
 
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [passengersResponse, groupsResponse] = await Promise.all([
-                superAdminAPI.getPassengers(),
-                superAdminAPI.getGroups()
-            ]);
+            const passengersResponse = await superAdminAPI.getPassengers({
+                travelDate: selectedTravelDate,
+                travelType: selectedTravelType
+            });
 
             setPassengers(passengersResponse.data);
-            setGroups(groupsResponse.data);
         } catch (error) {
             console.error('Error fetching super admin passengers:', error);
         } finally {
@@ -48,19 +50,43 @@ const SuperAdminPassengers = () => {
         .map(([, company]) => company)
         .sort((left, right) => left.name.localeCompare(right.name));
 
+    useEffect(() => {
+        if (selectedCompanyId !== 'all' && !companies.some((company) => company._id === selectedCompanyId)) {
+            setSelectedCompanyId('all');
+        }
+    }, [companies, selectedCompanyId]);
+
     const filteredPassengers = selectedCompanyId === 'all'
         ? passengers
         : passengers.filter((passenger) => passenger.company?._id === selectedCompanyId);
 
-    const filteredGroups = selectedCompanyId === 'all'
-        ? groups
-        : groups.filter((group) => group.company?._id === selectedCompanyId);
+    const filteredGroups = Array.from(
+        filteredPassengers.reduce((groupMap, passenger) => {
+            if (passenger.group?._id) {
+                groupMap.set(passenger.group._id, passenger.group);
+            }
+
+            return groupMap;
+        }, new Map()).values()
+    ).sort((left, right) => (left.groupName || '').localeCompare(right.groupName || ''));
 
     const companyCount = companies.length;
     const unassignedCount = filteredPassengers.filter((passenger) => !passenger.group).length;
     const selectedCompany = selectedCompanyId === 'all'
         ? null
         : companies.find((company) => company._id === selectedCompanyId);
+
+    const formattedSelectedTravelDate = new Date(`${selectedTravelDate}T00:00:00`).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    const travelTypeLabel = selectedTravelType === 'arrival'
+        ? 'arriving'
+        : selectedTravelType === 'departure'
+            ? 'departing'
+            : 'traveling';
 
     if (loading) {
         return (
@@ -73,25 +99,36 @@ const SuperAdminPassengers = () => {
     return (
         <div className="passengers-page">
             <div className="dashboard-header">
-                <div className="dashboard-header-content">
+                <div className="dashboard-header-content flex-between">
                     <div className="dashboard-logo">
                         <div className="dashboard-logo-icon">
-                            <UserCheck size={28} />
+                            <UserCheck size={24} />
                         </div>
                         <div className="dashboard-logo-text">
                             <h1>Maktab</h1>
                             <p>All Company Passengers</p>
                         </div>
                     </div>
-                    <div className="dashboard-user">
-                        <div className="dashboard-user-info">
-                            <p>Logged in as</p>
-                            <h3>{user?.email}</h3>
+                    <div className="dashboard-header-tools">
+                        <div className="dashboard-search">
+                            <Search size={16} />
+                            <input type="text" placeholder="Quick search…" />
                         </div>
-                        <Button variant="danger" size="small" onClick={logout}>
-                            <LogOut size={18} />
-                            Logout
-                        </Button>
+                        <button className="dashboard-notification" title="Notifications">
+                            <Bell size={20} />
+                        </button>
+                        <div className="dashboard-user">
+                            <div className="dashboard-avatar">
+                                {user?.email?.[0]?.toUpperCase() || 'A'}
+                            </div>
+                            <div className="dashboard-user-info">
+                                <p>Logged in as</p>
+                                <h3>{user?.email}</h3>
+                            </div>
+                            <Button variant="secondary" size="small" icon={<LogOut size={16} />} onClick={logout}>
+                                Logout
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -124,23 +161,50 @@ const SuperAdminPassengers = () => {
                     <h1>Passengers Across Companies</h1>
                     <p>
                         {selectedCompany
-                            ? `Review passenger records for ${selectedCompany.name}. ${filteredPassengers.length} passengers, ${unassignedCount} without a group.`
-                            : `Review all passenger records created under your companies in one place. ${passengers.length} passengers across ${companyCount} compan${companyCount === 1 ? 'y' : 'ies'}, ${unassignedCount} without a group.`}
+                            ? `Showing ${filteredPassengers.length} passengers from ${selectedCompany.name} ${travelTypeLabel} on ${formattedSelectedTravelDate}.`
+                            : `Showing ${passengers.length} passengers across ${companyCount} compan${companyCount === 1 ? 'y' : 'ies'} ${travelTypeLabel} on ${formattedSelectedTravelDate}. ${unassignedCount} without a group.`}
                     </p>
-                    <div style={{ marginTop: '1rem', maxWidth: '320px' }}>
-                        <select
-                            className="table-cell-input"
-                            value={selectedCompanyId}
-                            onChange={(event) => setSelectedCompanyId(event.target.value)}
-                            aria-label="Filter passengers by company"
-                        >
-                            <option value="all">All Companies</option>
-                            {companies.map((company) => (
-                                <option key={company._id} value={company._id}>
-                                    {company.name}
-                                </option>
-                            ))}
-                        </select>
+                    <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', maxWidth: '900px' }}>
+                        <div>
+                            <label htmlFor="super-admin-travel-date" style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Travel Date</label>
+                            <input
+                                id="super-admin-travel-date"
+                                type="date"
+                                className="table-cell-input"
+                                value={selectedTravelDate}
+                                onChange={(event) => setSelectedTravelDate(event.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="super-admin-travel-type" style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Travel Type</label>
+                            <select
+                                id="super-admin-travel-type"
+                                className="table-cell-input"
+                                value={selectedTravelType}
+                                onChange={(event) => setSelectedTravelType(event.target.value)}
+                            >
+                                <option value="any">Arrival or Departure</option>
+                                <option value="arrival">Arrival Only</option>
+                                <option value="departure">Departure Only</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="super-admin-company-filter" style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Company</label>
+                            <select
+                                id="super-admin-company-filter"
+                                className="table-cell-input"
+                                value={selectedCompanyId}
+                                onChange={(event) => setSelectedCompanyId(event.target.value)}
+                                aria-label="Filter passengers by company"
+                            >
+                                <option value="all">All Companies</option>
+                                {companies.map((company) => (
+                                    <option key={company._id} value={company._id}>
+                                        {company.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
 

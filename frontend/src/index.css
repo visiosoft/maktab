@@ -1,3 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --bg-canvas: #f4efe6;
+    --bg-muted: #fbf8f2;
+    --surface-primary: rgba(255, 252, 247, 0.88);
+    --surface-secondary: #f7f2e9;
+    --surface-tertiary: #f1ebdf;
+    --surface-strong: #ffffff;
+    --border-soft: rgba(116, 105, 88, 0.12);
+    --border-strong: rgba(21, 87, 65, 0.16);
+    --text-primary: #1f2937;
+    --text-secondary: #5f6b63;
+    --text-muted: #8a948c;
+    --accent-primary: #1f7a5a;
+    --accent-primary-strong: #175944;
+    --accent-primary-soft: rgba(31, 122, 90, 0.12);
+    --accent-warning: #c47d2d;
+    --accent-danger: #b5544b;
+    --accent-neutral: #6f766f;
+    --shadow-soft: 0 18px 40px rgba(90, 74, 49, 0.08);
+    --shadow-card: 0 10px 24px rgba(90, 74, 49, 0.08);
+    --shadow-hover: 0 18px 32px rgba(64, 88, 73, 0.12);
+    --radius-sm: 10px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -5,13 +34,30 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-        sans-serif;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background:
+        radial-gradient(circle at top left, rgba(69, 128, 101, 0.1), transparent 28%),
+        radial-gradient(circle at top right, rgba(201, 164, 110, 0.12), transparent 24%),
+        linear-gradient(180deg, #f8f3eb 0%, #f3ede3 52%, #efe7da 100%);
+    color: var(--text-primary);
     min-height: 100vh;
+}
+
+#root {
+    min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+a {
+    color: inherit;
 }
 
 code {
@@ -26,17 +72,17 @@ code {
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: rgba(116, 105, 88, 0.08);
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: rgba(31, 122, 90, 0.35);
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: rgba(31, 122, 90, 0.55);
 }
 
 /* Animations */

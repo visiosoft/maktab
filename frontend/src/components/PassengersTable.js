@@ -39,7 +39,7 @@ const PassengersTable = ({
     const fileInputRef = useRef(null);
     const showActionColumn = !readOnly && Boolean(onAdd || onUpdate || onDelete);
     const showImportActions = !readOnly && Boolean(onImport);
-    const emptyColSpan = showCompanyColumn ? (showActionColumn ? 9 : 8) : (showActionColumn ? 8 : 7);
+    const emptyColSpan = showCompanyColumn ? (showActionColumn ? 10 : 9) : (showActionColumn ? 9 : 8);
 
     useEffect(() => {
         let filtered = passengers;
@@ -78,6 +78,7 @@ const PassengersTable = ({
             passportNo: '',
             visaNumber: '',
             mofaApplicationNo: '',
+            remarks: '',
             group: ''
         });
     };
@@ -120,6 +121,7 @@ const PassengersTable = ({
             passportNo: passenger.passportNo,
             visaNumber: passenger.visaNumber || '',
             mofaApplicationNo: passenger.mofaApplicationNo || '',
+            remarks: passenger.remarks || '',
             group: passenger.group?._id || ''
         });
     };
@@ -307,6 +309,7 @@ Omar,Ibrahim,E5678901,`;
                             <th>Passport No.</th>
                             <th>Visa No.</th>
                             <th>MOFA No.</th>
+                            <th>Remarks</th>
                             {showCompanyColumn && <th>Company</th>}
                             <th>Group</th>
                             <th>Date Created</th>
@@ -361,6 +364,15 @@ Omar,Ibrahim,E5678901,`;
                                         value={newRow.mofaApplicationNo}
                                         onChange={(e) => handleNewRowChange('mofaApplicationNo', e.target.value)}
                                         placeholder="MOFA No."
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="text"
+                                        className="table-cell-input"
+                                        value={newRow.remarks}
+                                        onChange={(e) => handleNewRowChange('remarks', e.target.value)}
+                                        placeholder="Remarks"
                                     />
                                 </td>
                                 {showCompanyColumn && (
@@ -495,6 +507,21 @@ Omar,Ibrahim,E5678901,`;
                                             ) : (
                                                 <div className="table-cell-display">
                                                     {passenger.mofaApplicationNo || <span className="text-muted">-</span>}
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    className="table-cell-input"
+                                                    value={editData.remarks}
+                                                    onChange={(e) => handleEditChange('remarks', e.target.value)}
+                                                    placeholder="Remarks"
+                                                />
+                                            ) : (
+                                                <div className="table-cell-display">
+                                                    {passenger.remarks || <span className="text-muted">-</span>}
                                                 </div>
                                             )}
                                         </td>

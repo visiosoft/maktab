@@ -1,8 +1,9 @@
 .passengers-table-container {
-    background: white;
-    border-radius: 16px;
+    background: rgba(255, 252, 247, 0.9);
+    border-radius: 20px;
     padding: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(116, 105, 88, 0.12);
+    box-shadow: 0 16px 32px rgba(90, 74, 49, 0.08);
     overflow: visible;
 }
 
@@ -18,7 +19,7 @@
 .table-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #333;
+    color: #1f2937;
     margin: 0;
 }
 
@@ -41,19 +42,22 @@
 }
 
 .passengers-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f3ede4;
 }
 
 .passengers-table th {
     padding: 1rem;
     text-align: left;
     font-weight: 600;
-    color: white;
+    color: #425147;
     white-space: nowrap;
-    font-size: 0.875rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     position: sticky;
     top: 0;
     z-index: 10;
+    border-bottom: 1px solid rgba(116, 105, 88, 0.16);
 }
 
 .passengers-table th:first-child {
@@ -67,26 +71,30 @@
 }
 
 .passengers-table tbody tr {
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid rgba(116, 105, 88, 0.08);
     transition: all 0.2s ease;
 }
 
+.passengers-table tbody tr:nth-child(even) {
+    background: rgba(247, 242, 233, 0.45);
+}
+
 .passengers-table tbody tr:hover {
-    background: #f8f9fa;
+    background: rgba(31, 122, 90, 0.08);
 }
 
 .passengers-table tbody tr.editing-row {
-    background: #fff9e6;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: rgba(196, 125, 45, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(196, 125, 45, 0.18);
 }
 
 .passengers-table tbody tr.new-row {
-    background: #e6f7ff;
+    background: rgba(31, 122, 90, 0.1);
 }
 
 .passengers-table td {
     padding: 0.75rem 1rem;
-    color: #555;
+    color: #4b5a52;
     font-size: 0.875rem;
     vertical-align: middle;
 }
@@ -94,7 +102,7 @@
 .passengers-table td:first-child {
     padding-left: 1.5rem;
     font-weight: 600;
-    color: #333;
+    color: #1f2937;
 }
 
 .passengers-table td:last-child {
@@ -104,26 +112,26 @@
 .table-cell-input {
     width: 100%;
     padding: 0.5rem 0.75rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
+    border: 1px solid rgba(116, 105, 88, 0.14);
+    border-radius: 10px;
     font-size: 0.875rem;
     transition: all 0.2s ease;
-    background: white;
+    background: rgba(255, 255, 255, 0.92);
     font-family: inherit;
 }
 
 .table-cell-input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #1f7a5a;
+    box-shadow: 0 0 0 4px rgba(31, 122, 90, 0.12);
 }
 
 .table-cell-input.error {
-    border-color: #f5576c;
+    border-color: #b5544b;
 }
 
 .table-cell-input.error:focus {
-    box-shadow: 0 0 0 3px rgba(245, 87, 108, 0.1);
+    box-shadow: 0 0 0 4px rgba(181, 84, 75, 0.12);
 }
 
 .table-cell-input select,
@@ -147,7 +155,7 @@ select.table-cell-input {
 }
 
 .table-cell-display:hover {
-    background: #f0f0f0;
+    background: rgba(31, 122, 90, 0.08);
 }
 
 .table-cell-empty {
@@ -191,39 +199,39 @@ select.table-cell-input {
 }
 
 .action-icon-button:hover {
-    background: #f0f0f0;
+    background: rgba(31, 122, 90, 0.08);
 }
 
 .action-icon-button.save {
-    color: #00f2fe;
+    color: #1f7a5a;
 }
 
 .action-icon-button.save:hover {
-    background: #e6f9ff;
+    background: rgba(31, 122, 90, 0.12);
 }
 
 .action-icon-button.cancel {
-    color: #ff9800;
+    color: #c47d2d;
 }
 
 .action-icon-button.cancel:hover {
-    background: #fff3e0;
+    background: rgba(196, 125, 45, 0.12);
 }
 
 .action-icon-button.edit {
-    color: #667eea;
+    color: #1f7a5a;
 }
 
 .action-icon-button.edit:hover {
-    background: #f0f2ff;
+    background: rgba(31, 122, 90, 0.12);
 }
 
 .action-icon-button.delete {
-    color: #f5576c;
+    color: #b5544b;
 }
 
 .action-icon-button.delete:hover {
-    background: #fff0f0;
+    background: rgba(181, 84, 75, 0.12);
 }
 
 .passengers-table tbody tr:last-child {
@@ -258,9 +266,9 @@ select.table-cell-input {
     justify-content: space-between;
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 2px solid #f0f0f0;
+    border-top: 1px solid rgba(116, 105, 88, 0.12);
     font-size: 0.875rem;
-    color: #666;
+    color: #66736b;
 }
 
 .loading-spinner {
@@ -268,7 +276,7 @@ select.table-cell-input {
     align-items: center;
     justify-content: center;
     padding: 3rem;
-    color: #667eea;
+    color: #1f7a5a;
 }
 
 .loading-spinner svg {
@@ -293,16 +301,17 @@ select.table-cell-input {
 .search-box input {
     width: 100%;
     padding: 0.5rem 1rem 0.5rem 2.5rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border: 1px solid rgba(116, 105, 88, 0.14);
+    border-radius: 12px;
     font-size: 0.875rem;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: rgba(255, 255, 255, 0.92);
 }
 
 .search-box input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #1f7a5a;
+    box-shadow: 0 0 0 4px rgba(31, 122, 90, 0.12);
 }
 
 .search-icon {
@@ -310,7 +319,7 @@ select.table-cell-input {
     left: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #999;
+    color: #8a948c;
     pointer-events: none;
 }
 

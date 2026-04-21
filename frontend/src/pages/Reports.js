@@ -4,7 +4,7 @@ import { groupsAPI, companiesAPI, superAdminAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { Home, Building2, LogOut, FileText, Calendar, Download, Users, UserCheck } from 'lucide-react';
+import { Home, Building2, LogOut, FileText, Calendar, Download, Users, UserCheck, Bell, Search } from 'lucide-react';
 import './Reports.css';
 
 const Reports = () => {
@@ -45,7 +45,7 @@ const Reports = () => {
     }, [user?.role]);
 
     useEffect(() => {
-        if (!isSuperAdmin || !selectedCompanyId) {
+        if (!isSuperAdmin || !selectedCompanyId || selectedCompanyId === '') {
             console.log('Skipping fetchSuperAdminReports - isSuperAdmin:', isSuperAdmin, 'selectedCompanyId:', selectedCompanyId);
             return;
         }
@@ -72,13 +72,13 @@ const Reports = () => {
             }
 
             setSelectedCompanyId((currentCompanyId) => {
-                if (currentCompanyId && companyList.some((item) => item._id === currentCompanyId)) {
+                if (currentCompanyId && (currentCompanyId === 'all' || companyList.some((item) => item._id === currentCompanyId))) {
                     console.log('Keeping current company:', currentCompanyId);
                     return currentCompanyId;
                 }
 
-                console.log('Setting default company:', companyList[0]._id);
-                return companyList[0]._id;
+                console.log('Setting default to all companies');
+                return 'all';
             });
         } catch (error) {
             console.error('Error fetching companies:', error);
@@ -638,20 +638,30 @@ const Reports = () => {
         <div className="reports-page">
             {/* Header */}
             <div className="dashboard-header">
-                <div className="dashboard-header-content">
+                <div className="dashboard-header-content flex-between">
                     <div className="dashboard-logo">
                         <div className="dashboard-logo-icon">
-                            <FileText size={28} />
+                            <FileText size={24} />
                         </div>
                         <div className="dashboard-logo-text">
                             <h1>{company?.name || 'Maktab'}</h1>
                             <p>{isSuperAdmin ? 'Super Admin Travel Reports' : 'Travel Reports & Analytics'}</p>
                         </div>
                     </div>
-                    <Button variant="danger" size="small" onClick={logout}>
-                        <LogOut size={18} />
-                        Logout
-                    </Button>
+                    <div className="dashboard-header-tools">
+                        <div className="dashboard-search">
+                            <Search size={16} />
+                            <input type="text" placeholder="Quick search…" />
+                        </div>
+                        <button className="dashboard-notification" title="Notifications">
+                            <Bell size={20} />
+                        </button>
+                        <div className="dashboard-user">
+                            <Button variant="secondary" size="small" icon={<LogOut size={16} />} onClick={logout}>
+                                Logout
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -706,11 +716,14 @@ const Reports = () => {
                                     {companies.length === 0 ? (
                                         <option value="">No companies available</option>
                                     ) : (
-                                        companies.map((item) => (
-                                            <option key={item._id} value={item._id}>
-                                                {item.name}
-                                            </option>
-                                        ))
+                                        <>
+                                            <option value="all">All Companies</option>
+                                            {companies.map((item) => (
+                                                <option key={item._id} value={item._id}>
+                                                    {item.name}
+                                                </option>
+                                            ))}
+                                        </>
                                     )}
                                 </select>
                             </div>
@@ -721,7 +734,7 @@ const Reports = () => {
                 {isSuperAdmin && !selectedCompanyId ? (
                     <Card>
                         <div className="empty-report">
-                            <p>Select a company to view reports.</p>
+                            <p>Select a company or choose All Companies to view reports.</p>
                         </div>
                     </Card>
                 ) : (

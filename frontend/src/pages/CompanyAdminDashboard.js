@@ -23,7 +23,9 @@ import {
     BarChart3,
     ArrowRight,
     Clock,
-    MapPin
+    MapPin,
+    Bell,
+    Search
 } from 'lucide-react';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
@@ -218,24 +220,37 @@ const CompanyAdminDashboard = () => {
         <div className="dashboard">
             {/* Header */}
             <div className="dashboard-header">
-                <div className="dashboard-header-content">
+                <div className="dashboard-header-content flex-between">
                     <div className="dashboard-logo">
                         <div className="dashboard-logo-icon">
-                            <Building2 size={28} />
+                            <Building2 size={24} />
                         </div>
                         <div className="dashboard-logo-text" onClick={() => setShowCompanyModal(true)} style={{ cursor: 'pointer' }}>
-                            <h1>{company?.name || 'Loading...'}</h1>
+                            <h1>{company?.name || 'Maktab'}</h1>
                             <p>Company Admin Portal</p>
                         </div>
                     </div>
-                    <div className="dashboard-user">
-                        <div className="dashboard-user-info">
-                            <p>Logged in as</p>
-                            <h3>{user?.email}</h3>
+                    <div className="dashboard-header-tools">
+                        <div className="dashboard-search">
+                            <Search size={16} />
+                            <input type="text" placeholder="Quick search…" />
                         </div>
-                        <Button variant="danger" size="small" icon={<LogOut size={18} />} onClick={logout}>
-                            Logout
-                        </Button>
+                        <button className="dashboard-notification" title="Notifications" onClick={() => {}}>
+                            <Bell size={20} />
+                            <span className="dashboard-notification-dot" />
+                        </button>
+                        <div className="dashboard-user">
+                            <div className="dashboard-avatar">
+                                {user?.email?.[0]?.toUpperCase() || 'U'}
+                            </div>
+                            <div className="dashboard-user-info">
+                                <p>Logged in as</p>
+                                <h3>{user?.email}</h3>
+                            </div>
+                            <Button variant="secondary" size="small" icon={<LogOut size={16} />} onClick={logout}>
+                                Logout
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>

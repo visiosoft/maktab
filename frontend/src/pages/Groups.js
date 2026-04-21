@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Input from '../components/Input';
-import { Users, Plus, Edit2, Trash2, Search, Calendar, Plane, Home, Building2, LogOut, FileText, Grid, List, UserCheck } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, Search, Calendar, Plane, Home, Building2, LogOut, FileText, Grid, List, UserCheck, Bell } from 'lucide-react';
 import { SAUDI_AIRPORTS } from '../constants/airports';
 import './Groups.css';
 
@@ -100,20 +100,30 @@ const Groups = () => {
     return (
         <div className="groups-page">
             <div className="dashboard-header">
-                <div className="dashboard-header-content">
+                <div className="dashboard-header-content flex-between">
                     <div className="dashboard-logo">
                         <div className="dashboard-logo-icon">
-                            <Users size={28} />
+                            <Users size={24} />
                         </div>
                         <div className="dashboard-logo-text">
                             <h1>{company?.name || 'Maktab'}</h1>
                             <p>Groups Management</p>
                         </div>
                     </div>
-                    <Button variant="danger" size="small" onClick={logout}>
-                        <LogOut size={18} />
-                        Logout
-                    </Button>
+                    <div className="dashboard-header-tools">
+                        <div className="dashboard-search">
+                            <Search size={16} />
+                            <input type="text" placeholder="Quick search…" />
+                        </div>
+                        <button className="dashboard-notification" title="Notifications">
+                            <Bell size={20} />
+                        </button>
+                        <div className="dashboard-user">
+                            <Button variant="secondary" size="small" icon={<LogOut size={16} />} onClick={logout}>
+                                Logout
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </div>
 

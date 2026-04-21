@@ -1640,3 +1640,608 @@
     letterSpacing: 0.5px;
     display: inline-block;
 }
+
+/* SaaS UI Refresh */
+.dashboard,
+.passengers-page,
+.groups-page,
+.hotels-page,
+.reports-page,
+.group-form-page,
+.group-passengers-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, rgba(31, 122, 90, 0.08), transparent 24%),
+        radial-gradient(circle at 85% 0%, rgba(196, 125, 45, 0.12), transparent 22%),
+        linear-gradient(180deg, #faf6ee 0%, #f4eee3 100%);
+}
+
+.dashboard-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background: rgba(250, 246, 238, 0.82);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(116, 105, 88, 0.12);
+    box-shadow: 0 10px 30px rgba(90, 74, 49, 0.06);
+    padding: 0;
+}
+
+.dashboard-header-content {
+    max-width: none;
+    min-height: 88px;
+    padding: 18px 32px 18px 288px;
+    gap: 24px;
+}
+
+.dashboard-logo {
+    gap: 14px;
+}
+
+.dashboard-logo-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #1f7a5a 0%, #2d8b69 100%);
+    box-shadow: 0 12px 20px rgba(31, 122, 90, 0.22);
+}
+
+.dashboard-logo-text h1 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1f2937;
+    letter-spacing: -0.02em;
+}
+
+.dashboard-logo-text p {
+    font-size: 0.82rem;
+    color: #7b857d;
+}
+
+.dashboard-header-tools {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+}
+
+.dashboard-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 260px;
+    width: min(360px, 32vw);
+    padding: 0 14px;
+    min-height: 46px;
+    border-radius: 14px;
+    border: 1px solid rgba(116, 105, 88, 0.14);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.dashboard-search svg {
+    color: #879289;
+    flex-shrink: 0;
+}
+
+.dashboard-search input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #24322c;
+    font-size: 0.9rem;
+}
+
+.dashboard-search input::placeholder {
+    color: #99a39b;
+}
+
+.dashboard-notification {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    border: 1px solid rgba(116, 105, 88, 0.14);
+    background: rgba(255, 255, 255, 0.72);
+    color: #55635b;
+    box-shadow: 0 8px 18px rgba(90, 74, 49, 0.06);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+.dashboard-notification:hover {
+    transform: translateY(-1px);
+    color: #1f7a5a;
+    box-shadow: 0 12px 24px rgba(90, 74, 49, 0.1);
+}
+
+.dashboard-notification-dot {
+    position: absolute;
+    top: 11px;
+    right: 11px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #c47d2d;
+    box-shadow: 0 0 0 3px #fff9f0;
+}
+
+.dashboard-user {
+    gap: 12px;
+    padding-left: 4px;
+}
+
+.dashboard-user-info {
+    text-align: left;
+}
+
+.dashboard-user-info p {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #8d968e;
+}
+
+.dashboard-user-info h3 {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #24322c;
+}
+
+.dashboard-avatar {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e4d7c2 0%, #efe8dd 100%);
+    color: #1f7a5a;
+    font-weight: 700;
+    border: 1px solid rgba(116, 105, 88, 0.12);
+}
+
+.dashboard-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 248px;
+    max-width: 248px;
+    z-index: 35;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 108px 18px 24px;
+    margin: 0;
+    background: rgba(255, 251, 246, 0.92);
+    backdrop-filter: blur(18px);
+    border-right: 1px solid rgba(116, 105, 88, 0.12);
+    box-shadow: 18px 0 38px rgba(90, 74, 49, 0.05);
+}
+
+.nav-item {
+    justify-content: flex-start;
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    color: #58645d;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.nav-item:hover {
+    color: #1f7a5a;
+    background: rgba(31, 122, 90, 0.08);
+    border-color: rgba(31, 122, 90, 0.1);
+}
+
+.nav-item.active {
+    color: #1f7a5a;
+    background: linear-gradient(135deg, rgba(31, 122, 90, 0.16), rgba(31, 122, 90, 0.08));
+    border-color: rgba(31, 122, 90, 0.16);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.dashboard-container,
+.dashboard .dashboard-container,
+.passengers-page .page-content,
+.groups-page .page-content,
+.hotels-page .page-content,
+.reports-page .page-content,
+.group-form-page .page-content,
+.group-passengers-page .page-content {
+    max-width: none;
+    margin: 0;
+    margin-left: 248px;
+    padding: 120px 32px 32px;
+}
+
+.dashboard-welcome {
+    margin-bottom: 24px;
+}
+
+.dashboard-welcome h2,
+.passengers-header h1,
+.page-header h1 {
+    font-size: clamp(1.7rem, 2.4vw, 2.35rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #1f2937;
+}
+
+.dashboard-welcome p,
+.passengers-header p,
+.report-subtitle {
+    color: #6d786f;
+    font-size: 0.98rem;
+    max-width: 760px;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #24322c;
+    letter-spacing: -0.01em;
+}
+
+.stat-card,
+.quota-card,
+.maktab-card,
+.company-card,
+.table-container,
+.companies-table-container,
+.report-card,
+.activity-list,
+.quota-progress-container,
+.quota-analytics-table-container,
+.schedule-card,
+.action-card,
+.group-card,
+.search-card {
+    background: rgba(255, 252, 247, 0.9);
+    border: 1px solid rgba(116, 105, 88, 0.12);
+    box-shadow: 0 14px 28px rgba(90, 74, 49, 0.08);
+}
+
+.stat-card,
+.quota-card,
+.maktab-card,
+.company-card,
+.action-card,
+.group-card {
+    border-radius: 18px;
+}
+
+.table-container,
+.companies-table-container,
+.report-card,
+.schedule-card,
+.quota-progress-container,
+.quota-analytics-table-container,
+.search-card {
+    border-radius: 20px;
+}
+
+.stat-card:hover,
+.quota-card:hover,
+.maktab-card:hover,
+.company-card:hover,
+.action-card:hover,
+.group-card:hover {
+    box-shadow: 0 18px 34px rgba(64, 88, 73, 0.12);
+}
+
+.stat-icon,
+.action-icon,
+.quota-icon,
+.activity-icon,
+.report-icon {
+    border-radius: 14px;
+}
+
+.stat-icon.primary,
+.primary-card,
+.action-icon.primary,
+.maktab-a,
+.quota-progress-percentage {
+    color: #1f7a5a;
+}
+
+.stat-icon.primary,
+.stat-icon.success,
+.stat-icon.warning,
+.stat-icon.info {
+    background: linear-gradient(135deg, #1f7a5a 0%, #2d8b69 100%);
+}
+
+.companies-table thead,
+.hotels-table thead,
+.quota-analytics-table thead,
+.passengers-report-table thead,
+.data-table thead {
+    background: #f3ede4;
+    color: #435248;
+}
+
+.companies-table thead th,
+.hotels-table th,
+.quota-analytics-table thead th,
+.passengers-report-table th,
+.data-table th {
+    color: #435248;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid rgba(116, 105, 88, 0.14);
+}
+
+.data-table td,
+.companies-table tbody tr.company-row td,
+.hotels-table td,
+.quota-analytics-table td,
+.passengers-report-table td {
+    color: #4b5a52;
+}
+
+.data-table tbody tr:nth-child(even),
+.companies-table tbody tr.company-row:nth-child(even),
+.hotels-table tbody tr:nth-child(even),
+.quota-analytics-table tbody tr:nth-child(even),
+.passengers-report-table tbody tr:nth-child(even) {
+    background: rgba(247, 242, 233, 0.4);
+}
+
+.data-table tr:hover,
+.companies-table tbody tr.company-row:hover,
+.hotels-table tbody tr:hover,
+.quota-analytics-table tbody tr:hover,
+.passengers-report-table tbody tr:hover,
+.report-item:hover,
+.schedule-item:hover,
+.activity-item:hover {
+    background: rgba(31, 122, 90, 0.08);
+}
+
+.status-badge,
+.company-status,
+.hotel-badge,
+.maktab-badge,
+.maktab-tag {
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-weight: 700;
+}
+
+.status-badge.active,
+.company-status.active,
+.status-badge.success {
+    background: rgba(31, 122, 90, 0.12);
+    color: #1f7a5a;
+    border-color: rgba(31, 122, 90, 0.14);
+}
+
+.status-badge.warning {
+    background: rgba(196, 125, 45, 0.12);
+    color: #a16623;
+    border-color: rgba(196, 125, 45, 0.14);
+}
+
+.status-badge.danger,
+.company-status.inactive,
+.status-badge.inactive {
+    background: rgba(181, 84, 75, 0.12);
+    color: #a04d45;
+    border-color: rgba(181, 84, 75, 0.14);
+}
+
+.search-card,
+.report-filters,
+.group-info,
+.summary,
+.reports-footer {
+    border-radius: 18px;
+}
+
+.report-filters,
+.group-info {
+    background: rgba(247, 242, 233, 0.7);
+    border: 1px solid rgba(116, 105, 88, 0.12);
+}
+
+.summary,
+.reports-footer {
+    background: linear-gradient(135deg, #1f7a5a 0%, #2d8b69 100%);
+    box-shadow: 0 16px 28px rgba(31, 122, 90, 0.18);
+}
+
+.report-select,
+.report-input,
+.select-input,
+.form-select,
+.search-box input {
+    border: 1px solid rgba(116, 105, 88, 0.14);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.88);
+}
+
+.report-select:focus,
+.report-input:focus,
+.select-input:focus,
+.form-select:focus,
+.search-box input:focus {
+    border-color: #1f7a5a;
+    box-shadow: 0 0 0 4px rgba(31, 122, 90, 0.12);
+}
+
+.btn-icon,
+.icon-button,
+.expand-btn {
+    border-radius: 10px;
+}
+
+.btn-icon.primary,
+.icon-button.primary,
+.expand-btn,
+.view-btn.active,
+.stat-content h3,
+.stat-value,
+.maktab-count,
+.quota-card-body h2,
+.quota-progress-percentage {
+    color: #1f7a5a;
+}
+
+.btn-icon.primary:hover,
+.icon-button.primary:hover,
+.view-btn.active {
+    background: rgba(31, 122, 90, 0.12);
+}
+
+.btn-icon.danger,
+.icon-button.danger {
+    color: #b5544b;
+}
+
+.btn-icon.danger:hover,
+.icon-button.danger:hover {
+    background: rgba(181, 84, 75, 0.12);
+}
+
+.btn-icon.success,
+.icon-button.success {
+    color: #1f7a5a;
+}
+
+.btn-icon.success:hover,
+.icon-button.success:hover {
+    background: rgba(31, 122, 90, 0.12);
+}
+
+.empty-state,
+.empty-report,
+.loading-state,
+.loading {
+    color: #7c867e;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-header-content {
+        padding: 18px 24px 18px 24px;
+    }
+
+    .dashboard-nav {
+        top: 88px;
+        width: 100%;
+        max-width: none;
+        height: auto;
+        bottom: auto;
+        flex-direction: row;
+        align-items: center;
+        overflow-x: auto;
+        padding: 12px 24px;
+        box-shadow: 0 12px 24px rgba(90, 74, 49, 0.05);
+        border-right: none;
+        border-bottom: 1px solid rgba(116, 105, 88, 0.12);
+    }
+
+    .nav-item {
+        width: auto;
+        white-space: nowrap;
+    }
+
+    .dashboard-container,
+    .dashboard .dashboard-container,
+    .passengers-page .page-content,
+    .groups-page .page-content,
+    .hotels-page .page-content,
+    .reports-page .page-content,
+    .group-form-page .page-content,
+    .group-passengers-page .page-content {
+        margin-left: 0;
+        padding: 164px 24px 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header-content {
+        min-height: auto;
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 16px;
+    }
+
+    .dashboard-header-tools {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .dashboard-search {
+        width: 100%;
+        min-width: 0;
+        order: 1;
+    }
+
+    .dashboard-user {
+        width: 100%;
+        justify-content: space-between;
+        order: 3;
+    }
+
+    .dashboard-notification {
+        order: 2;
+    }
+
+    .dashboard-nav {
+        top: 150px;
+        padding: 10px 16px;
+    }
+
+    .dashboard-container,
+    .dashboard .dashboard-container,
+    .passengers-page .page-content,
+    .groups-page .page-content,
+    .hotels-page .page-content,
+    .reports-page .page-content,
+    .group-form-page .page-content,
+    .group-passengers-page .page-content {
+        padding: 214px 16px 20px;
+    }
+}
+
+@media (max-width: 560px) {
+    .dashboard-logo-text h1 {
+        font-size: 1.08rem;
+    }
+
+    .dashboard-logo-text p {
+        font-size: 0.75rem;
+    }
+
+    .dashboard-user {
+        align-items: center;
+        gap: 10px;
+    }
+
+    .dashboard-user-info h3 {
+        max-width: 128px;
+    }
+
+    .dashboard-avatar {
+        width: 38px;
+        height: 38px;
+    }
+}

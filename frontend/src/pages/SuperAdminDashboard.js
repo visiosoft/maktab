@@ -25,7 +25,9 @@ import {
     FileText,
     UserCheck,
     ArrowRight,
-    Calendar
+    Calendar,
+    Bell,
+    Search
 } from 'lucide-react';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
@@ -354,24 +356,36 @@ const SuperAdminDashboard = () => {
         <div className="dashboard">
             {/* Header */}
             <div className="dashboard-header">
-                <div className="dashboard-header-content">
+                <div className="dashboard-header-content flex-between">
                     <div className="dashboard-logo">
                         <div className="dashboard-logo-icon">
-                            <Building2 size={28} />
+                            <Building2 size={24} />
                         </div>
                         <div className="dashboard-logo-text">
-                            <h1>Maktab</h1>
+                            <h1>AL NAFI MUNAZZAM</h1>
                             <p>Super Admin Portal</p>
                         </div>
                     </div>
-                    <div className="dashboard-user">
-                        <div className="dashboard-user-info">
-                            <p>Logged in as</p>
-                            <h3>{user?.email}</h3>
+                    <div className="dashboard-header-tools">
+                        <div className="dashboard-search">
+                            <Search size={16} />
+                            <input type="text" placeholder="Quick search…" />
                         </div>
-                        <Button variant="danger" size="small" icon={<LogOut size={18} />} onClick={logout}>
-                            Logout
-                        </Button>
+                        <button className="dashboard-notification" title="Notifications">
+                            <Bell size={20} />
+                        </button>
+                        <div className="dashboard-user">
+                            <div className="dashboard-avatar">
+                                {user?.email?.[0]?.toUpperCase() || 'A'}
+                            </div>
+                            <div className="dashboard-user-info">
+                                <p>Logged in as</p>
+                                <h3>{user?.email}</h3>
+                            </div>
+                            <Button variant="secondary" size="small" icon={<LogOut size={16} />} onClick={logout}>
+                                Logout
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>

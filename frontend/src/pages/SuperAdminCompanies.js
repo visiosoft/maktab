@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     AlertCircle,
+    ArrowDown,
+    ArrowUp,
+    ArrowUpDown,
     Building2,
     ChevronDown,
     ChevronRight,
@@ -13,7 +16,9 @@ import {
     Plus,
     Trash2,
     UserCheck,
-    UserPlus
+    UserPlus,
+    Bell,
+    Search
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { companiesAPI, superAdminAPI } from '../services/api';
@@ -31,6 +36,8 @@ const SuperAdminCompanies = () => {
     const [passengerCounts, setPassengerCounts] = useState({});
     const [unassignedCounts, setUnassignedCounts] = useState({});
     const [loading, setLoading] = useState(true);
+    const [sortField, setSortField] = useState('name');
+    const [sortDirection, setSortDirection] = useState('asc');
     const [showCompanyModal, setShowCompanyModal] = useState(false);
     const [showAdminModal, setShowAdminModal] = useState(false);
     const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
@@ -252,6 +259,55 @@ const SuperAdminCompanies = () => {
         }
     };
 
+    const handleSort = (field) => {
+        if (sortField === field) {
+            setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+        }
+    };
+
+    const sortedCompanies = [...companies].sort((a, b) => {
+        let aVal, bVal;
+        if (sortField === 'name') {
+            aVal = (a.name || '').toLowerCase();
+            bVal = (b.name || '').toLowerCase();
+        } else if (sortField === 'email') {
+            aVal = (a.email || '').toLowerCase();
+            bVal = (b.email || '').toLowerCase();
+        } else if (sortField === 'industry') {
+            aVal = (a.industry || '').toLowerCase();
+            bVal = (b.industry || '').toLowerCase();
+        } else if (sortField === 'quota') {
+            const aUsed = passengerCounts[a._id] || 0;
+            const bUsed = passengerCounts[b._id] || 0;
+            aVal = a.passengerQuota > 0 ? aUsed / a.passengerQuota : 0;
+            bVal = b.passengerQuota > 0 ? bUsed / b.passengerQuota : 0;
+        } else if (sortField === 'unassigned') {
+            aVal = unassignedCounts[a._id] || 0;
+            bVal = unassignedCounts[b._id] || 0;
+        } else if (sortField === 'status') {
+            aVal = a.isActive ? 0 : 1;
+            bVal = b.isActive ? 0 : 1;
+        } else {
+            return 0;
+        }
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const SortIcon = ({ field }) => {
+        if (sortField !== field) return <ArrowUpDown size={14} style={{ opacity: 0.4, marginLeft: '0.3rem', flexShrink: 0 }} />;
+        return sortDirection === 'asc'
+            ? <ArrowUp size={14} style={{ color: '#667eea', marginLeft: '0.3rem', flexShrink: 0 }} />
+            : <ArrowDown size={14} style={{ color: '#667eea', marginLeft: '0.3rem', flexShrink: 0 }} />;
+    };
+
+    const thStyle = { cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' };
+    const thInner = { display: 'flex', alignItems: 'center', gap: '0.1rem' };
+
     const openResetPasswordModal = (company, admin) => {
         setSelectedCompany(company);
         setSelectedAdmin(admin);
@@ -282,24 +338,36 @@ const SuperAdminCompanies = () => {
     return (
         <div className="dashboard">
             <div className="dashboard-header">
-                <div className="dashboard-header-content">
+                <div className="dashboard-header-content flex-between">
                     <div className="dashboard-logo">
                         <div className="dashboard-logo-icon">
-                            <Building2 size={28} />
+                            <Building2 size={24} />
                         </div>
                         <div className="dashboard-logo-text">
                             <h1>Maktab</h1>
                             <p>Company Management</p>
                         </div>
                     </div>
-                    <div className="dashboard-user">
-                        <div className="dashboard-user-info">
-                            <p>Logged in as</p>
-                            <h3>{user?.email}</h3>
+                    <div className="dashboard-header-tools">
+                        <div className="dashboard-search">
+                            <Search size={16} />
+                            <input type="text" placeholder="Quick search…" />
                         </div>
-                        <Button variant="danger" size="small" icon={<LogOut size={18} />} onClick={logout}>
-                            Logout
-                        </Button>
+                        <button className="dashboard-notification" title="Notifications">
+                            <Bell size={20} />
+                        </button>
+                        <div className="dashboard-user">
+                            <div className="dashboard-avatar">
+                                {user?.email?.[0]?.toUpperCase() || 'A'}
+                            </div>
+                            <div className="dashboard-user-info">
+                                <p>Logged in as</p>
+                                <h3>{user?.email}</h3>
+                            </div>
+                            <Button variant="secondary" size="small" icon={<LogOut size={16} />} onClick={logout}>
+                                Logout
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -386,17 +454,17 @@ const SuperAdminCompanies = () => {
                                 <thead>
                                     <tr>
                                         <th style={{ width: '40px' }}></th>
-                                        <th>Company Name</th>
-                                        <th>Email</th>
-                                        <th>Industry</th>
-                                        <th>Quota</th>
-                                        <th>Arrival Incomplete</th>
-                                        <th>Status</th>
+                                        <th style={thStyle} onClick={() => handleSort('name')}><div style={thInner}>Company Name <SortIcon field="name" /></div></th>
+                                        <th style={thStyle} onClick={() => handleSort('email')}><div style={thInner}>Email <SortIcon field="email" /></div></th>
+                                        <th style={thStyle} onClick={() => handleSort('industry')}><div style={thInner}>Industry <SortIcon field="industry" /></div></th>
+                                        <th style={thStyle} onClick={() => handleSort('quota')}><div style={thInner}>Quota <SortIcon field="quota" /></div></th>
+                                        <th style={thStyle} onClick={() => handleSort('unassigned')}><div style={thInner}>Arrival Incomplete <SortIcon field="unassigned" /></div></th>
+                                        <th style={thStyle} onClick={() => handleSort('status')}><div style={thInner}>Status <SortIcon field="status" /></div></th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {companies.map((company) => (
+                                    {sortedCompanies.map((company) => (
                                         <React.Fragment key={company._id}>
                                             <tr className="company-row">
                                                 <td>
