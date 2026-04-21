@@ -154,6 +154,11 @@ router.post('/bulk-import', async (req, res) => {
                 createdBy: req.user.id
             };
 
+            // Add optional fields if provided
+            if (passengerData.visaNumber) newPassengerData.visaNumber = passengerData.visaNumber;
+            if (passengerData.mofaApplicationNo) newPassengerData.mofaApplicationNo = passengerData.mofaApplicationNo;
+            if (passengerData.remarks) newPassengerData.remarks = passengerData.remarks;
+
             // Add group if provided
             if (passengerData.group) {
                 newPassengerData.group = passengerData.group;
@@ -220,9 +225,9 @@ router.get('/', async (req, res) => {
 // @access  Company Admin
 router.post('/', async (req, res) => {
     try {
-        const { firstName, lastName, passportNo, visaNumber, mofaApplicationNo, group } = req.body;
+        const { firstName, lastName, passportNo, visaNumber, mofaApplicationNo, remarks, group } = req.body;
 
-        console.log('Received passenger data:', { firstName, lastName, passportNo, visaNumber, mofaApplicationNo, group });
+        console.log('Received passenger data:', { firstName, lastName, passportNo, visaNumber, mofaApplicationNo, remarks, group });
 
         if (!firstName || !lastName || !passportNo) {
             console.log('Validation failed - missing fields');
@@ -269,6 +274,7 @@ router.post('/', async (req, res) => {
 
         if (visaNumber) passengerData.visaNumber = visaNumber;
         if (mofaApplicationNo) passengerData.mofaApplicationNo = mofaApplicationNo;
+        if (remarks) passengerData.remarks = remarks;
 
         // Add group if provided
         if (group) {
@@ -299,7 +305,7 @@ router.post('/', async (req, res) => {
 // @access  Company Admin
 router.put('/:id', async (req, res) => {
     try {
-        const { firstName, lastName, passportNo, visaNumber, mofaApplicationNo, group } = req.body;
+        const { firstName, lastName, passportNo, visaNumber, mofaApplicationNo, remarks, group } = req.body;
 
         const admin = await CompanyAdmin.findById(req.user.id);
 
@@ -336,6 +342,7 @@ router.put('/:id', async (req, res) => {
         if (passportNo) passenger.passportNo = passportNo.toUpperCase();
         if (visaNumber !== undefined) passenger.visaNumber = visaNumber || null;
         if (mofaApplicationNo !== undefined) passenger.mofaApplicationNo = mofaApplicationNo || null;
+        if (remarks !== undefined) passenger.remarks = remarks || null;
         if (group !== undefined) passenger.group = group || null;
 
         await passenger.save();

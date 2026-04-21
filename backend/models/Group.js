@@ -29,6 +29,14 @@ const GroupSchema = new mongoose.Schema({
         enum: ['Makkah', 'Madinah'],
         required: true
     },
+    originAirport: {
+        type: String,
+        trim: true
+    },
+    originCity: {
+        type: String,
+        trim: true
+    },
     departureDate: {
         type: Date,
         required: true

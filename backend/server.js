@@ -1,4 +1,6 @@
 require('dotenv').config();
+const dns = require('dns'); // Configure DNS servers to improve MongoDB Atlas connectivity
+dns.setServers(['1.1.1.1', '8.8.8.8']);
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');

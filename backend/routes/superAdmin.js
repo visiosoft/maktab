@@ -81,12 +81,36 @@ router.get('/passenger-counts', async (req, res) => {
 // @access  Super Admin
 router.get('/passengers', async (req, res) => {
     try {
-        const passengers = await Passenger.find()
+        const { travelDate, travelType = 'any' } = req.query;
+        let passengerQuery = {};
+
+        if (travelDate) {
+            const startOfDay = new Date(`${travelDate}T00:00:00.000Z`);
+            const endOfDay = new Date(`${travelDate}T23:59:59.999Z`);
+            const groupDateQuery = {};
+
+            if (travelType === 'arrival') {
+                groupDateQuery.arrivalDate = { $gte: startOfDay, $lte: endOfDay };
+            } else if (travelType === 'departure') {
+                groupDateQuery.departureDate = { $gte: startOfDay, $lte: endOfDay };
+            } else {
+                groupDateQuery.$or = [
+                    { arrivalDate: { $gte: startOfDay, $lte: endOfDay } },
+                    { departureDate: { $gte: startOfDay, $lte: endOfDay } }
+                ];
+            }
+
+            const matchingGroups = await Group.find(groupDateQuery).select('_id');
+            const matchingGroupIds = matchingGroups.map((group) => group._id);
+            passengerQuery.group = { $in: matchingGroupIds };
+        }
+
+        const passengers = await Passenger.find(passengerQuery)
             .populate('company', 'name')
             .populate('createdBy', 'username email')
             .populate({
                 path: 'group',
-                select: 'groupName maktab company',
+                select: 'groupName maktab company arrivalDate departureDate',
                 populate: {
                     path: 'company',
                     select: 'name'
@@ -133,7 +157,7 @@ router.get('/groups', async (req, res) => {
 });
 
 // @route   GET /api/super-admin/reports
-// @desc    Get report data for a specific company
+// @desc    Get report data for a specific company or all companies
 // @access  Super Admin
 router.get('/reports', async (req, res) => {
     try {
@@ -144,14 +168,22 @@ router.get('/reports', async (req, res) => {
             return res.status(400).json({ message: 'companyId is required' });
         }
 
-        const company = await Company.findById(companyId).select('name email');
-        console.log('[Super Admin Reports] Company found:', company);
+        const isAll = companyId === 'all';
 
-        if (!company) {
-            return res.status(404).json({ message: 'Company not found' });
+        // For a specific company, verify it exists
+        let company = null;
+        if (!isAll) {
+            company = await Company.findById(companyId).select('name email');
+            console.log('[Super Admin Reports] Company found:', company);
+            if (!company) {
+                return res.status(404).json({ message: 'Company not found' });
+            }
+        } else {
+            company = { _id: 'all', name: 'All Companies' };
         }
 
-        const groups = await Group.find({ company: companyId })
+        const groupQuery = isAll ? {} : { company: companyId };
+        const groups = await Group.find(groupQuery)
             .populate('company', 'name')
             .populate('arrivalHotel', 'name city address')
             .populate('departureHotel', 'name city address')
@@ -160,12 +192,14 @@ router.get('/reports', async (req, res) => {
         console.log('[Super Admin Reports] Groups found:', groups.length);
 
         const groupIds = groups.map((group) => group._id);
-        const passengers = groupIds.length
-            ? await Passenger.find({
-                company: companyId,
-                group: { $in: groupIds }
-            })
-                .select('firstName lastName passportNo group')
+        const passengerQuery = groupIds.length
+            ? { group: { $in: groupIds }, ...(isAll ? {} : { company: companyId }) }
+            : null;
+
+        const passengers = passengerQuery
+            ? await Passenger.find(passengerQuery)
+                .select('firstName lastName passportNo group company')
+                .populate('company', 'name')
                 .sort({ createdAt: 1 })
             : [];
 

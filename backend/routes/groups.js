@@ -100,6 +100,8 @@ router.post('/', async (req, res) => {
             arrivalFlightNo,
             arrivalTime,
             arrivalCity,
+            originAirport,
+            originCity,
             departureDate,
             departureAirport,
             departureFlightNo,
@@ -155,6 +157,8 @@ router.post('/', async (req, res) => {
             arrivalFlightNo,
             arrivalTime,
             arrivalCity,
+            originAirport,
+            originCity,
             departureDate,
             departureAirport,
             departureFlightNo,
@@ -246,6 +250,8 @@ router.put('/:id', async (req, res) => {
             arrivalFlightNo,
             arrivalTime,
             arrivalCity,
+            originAirport,
+            originCity,
             departureDate,
             departureAirport,
             departureFlightNo,
@@ -309,6 +315,8 @@ router.put('/:id', async (req, res) => {
         if (arrivalFlightNo !== undefined) group.arrivalFlightNo = arrivalFlightNo;
         if (arrivalTime !== undefined) group.arrivalTime = arrivalTime;
         if (arrivalCity !== undefined) group.arrivalCity = arrivalCity;
+        if (originAirport !== undefined) group.originAirport = originAirport;
+        if (originCity !== undefined) group.originCity = originCity;
         if (departureDate !== undefined) group.departureDate = departureDate;
         if (departureAirport !== undefined) group.departureAirport = departureAirport;
         if (departureFlightNo !== undefined) group.departureFlightNo = departureFlightNo;
