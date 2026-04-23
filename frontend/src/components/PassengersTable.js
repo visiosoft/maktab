@@ -279,10 +279,10 @@ Omar,Ibrahim,E5678901,`;
                                     type="text"
                                     placeholder={
                                         searchField === 'all' ? 'Quick search...' :
-                                        searchField === 'name' ? 'Search by name...' :
-                                        searchField === 'passportNo' ? 'Search by passport no...' :
-                                        searchField === 'visaNo' ? 'Search by visa no...' :
-                                        'Search by MOFA no...'
+                                            searchField === 'name' ? 'Search by name...' :
+                                                searchField === 'passportNo' ? 'Search by passport no...' :
+                                                    searchField === 'visaNo' ? 'Search by visa no...' :
+                                                        'Search by MOFA no...'
                                     }
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}

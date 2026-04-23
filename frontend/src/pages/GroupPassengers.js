@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import PassengersTable from '../components/PassengersTable';
-import { ArrowLeft, Users, Home, Building2, LogOut, FileText, UserCheck, Bell, Search } from 'lucide-react';
+import { ArrowLeft, Users, Home, Building2, LogOut, FileText, UserCheck, Bell, Search, X } from 'lucide-react';
 import { SAUDI_AIRPORTS } from '../constants/airports';
 import './GroupPassengers.css';
 
@@ -20,6 +20,8 @@ const GroupPassengers = () => {
     const [company, setCompany] = useState(null);
     const [loading, setLoading] = useState(true);
     const [assigning, setAssigning] = useState(false);
+    const [unassignedSearch, setUnassignedSearch] = useState('');
+    const [unassignedSearchField, setUnassignedSearchField] = useState('all');
 
     const getAirportCity = (code) => {
         const airport = SAUDI_AIRPORTS.find(a => a.code === code);
@@ -193,10 +195,6 @@ const GroupPassengers = () => {
                         </div>
                     </div>
                     <div className="dashboard-header-tools">
-                        <div className="dashboard-search">
-                            <Search size={16} />
-                            <input type="text" placeholder="Quick search…" />
-                        </div>
                         <button className="dashboard-notification" title="Notifications">
                             <Bell size={20} />
                         </button>
@@ -278,61 +276,136 @@ const GroupPassengers = () => {
                     />
                 </Card>
 
-                {unassignedPassengers.length > 0 && (
-                    <Card style={{ marginTop: '2rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                            <h3>Available Passengers (No Group Assigned)</h3>
-                            <Button
-                                variant="primary"
-                                onClick={handleAssignPassengers}
-                                disabled={selectedPassengers.length === 0 || assigning}
-                            >
-                                {assigning ? 'Assigning...' : `Assign ${selectedPassengers.length > 0 ? selectedPassengers.length : ''} to Group`}
-                            </Button>
-                        </div>
-                        <div className="unassigned-passengers-table">
-                            <table className="data-table">
-                                <thead>
-                                    <tr>
-                                        <th style={{ width: '50px' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedPassengers.length === unassignedPassengers.length && unassignedPassengers.length > 0}
-                                                onChange={handleSelectAll}
-                                            />
-                                        </th>
-                                        <th>#</th>
-                                        <th>First Name</th>
-                                        <th>Last Name</th>
-                                        <th>Passport No.</th>
-                                        <th>Created Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {unassignedPassengers.map((passenger, index) => (
-                                        <tr key={passenger._id}>
-                                            <td>
+                {unassignedPassengers.length > 0 && (() => {
+                    const normalizedSearch = unassignedSearch.toLowerCase();
+                    const displayedUnassigned = unassignedSearch
+                        ? unassignedPassengers.filter(p => {
+                            switch (unassignedSearchField) {
+                                case 'name':
+                                    return (
+                                        p.firstName?.toLowerCase().includes(normalizedSearch) ||
+                                        p.lastName?.toLowerCase().includes(normalizedSearch) ||
+                                        `${p.firstName} ${p.lastName}`.toLowerCase().includes(normalizedSearch)
+                                    );
+                                case 'passportNo':
+                                    return p.passportNo?.toLowerCase().includes(normalizedSearch);
+                                case 'visaNo':
+                                    return p.visaNumber?.toLowerCase().includes(normalizedSearch);
+                                case 'mofaNo':
+                                    return p.mofaApplicationNo?.toLowerCase().includes(normalizedSearch);
+                                default:
+                                    return (
+                                        p.firstName?.toLowerCase().includes(normalizedSearch) ||
+                                        p.lastName?.toLowerCase().includes(normalizedSearch) ||
+                                        `${p.firstName} ${p.lastName}`.toLowerCase().includes(normalizedSearch) ||
+                                        p.passportNo?.toLowerCase().includes(normalizedSearch) ||
+                                        p.visaNumber?.toLowerCase().includes(normalizedSearch) ||
+                                        p.mofaApplicationNo?.toLowerCase().includes(normalizedSearch)
+                                    );
+                            }
+                        })
+                        : unassignedPassengers;
+
+                    return (
+                        <Card style={{ marginTop: '2rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                                <h3 style={{ margin: 0 }}>Available Passengers (No Group Assigned)</h3>
+                                <Button
+                                    variant="primary"
+                                    onClick={handleAssignPassengers}
+                                    disabled={selectedPassengers.length === 0 || assigning}
+                                >
+                                    {assigning ? 'Assigning...' : `Assign ${selectedPassengers.length > 0 ? selectedPassengers.length : ''} to Group`}
+                                </Button>
+                            </div>
+                            <div className="quick-search-wrapper" style={{ marginBottom: '1rem', maxWidth: '480px' }}>
+                                <select
+                                    className="search-field-select"
+                                    value={unassignedSearchField}
+                                    onChange={(e) => { setUnassignedSearchField(e.target.value); setUnassignedSearch(''); }}
+                                >
+                                    <option value="all">All Fields</option>
+                                    <option value="name">Name</option>
+                                    <option value="passportNo">Passport No.</option>
+                                    <option value="visaNo">Visa No.</option>
+                                    <option value="mofaNo">MOFA No.</option>
+                                </select>
+                                <div className="search-box">
+                                    <Search className="search-icon" size={16} />
+                                    <input
+                                        type="text"
+                                        placeholder={
+                                            unassignedSearchField === 'all' ? 'Quick search available passengers...' :
+                                                unassignedSearchField === 'name' ? 'Search by name...' :
+                                                    unassignedSearchField === 'passportNo' ? 'Search by passport no...' :
+                                                        unassignedSearchField === 'visaNo' ? 'Search by visa no...' :
+                                                            'Search by MOFA no...'
+                                        }
+                                        value={unassignedSearch}
+                                        onChange={(e) => setUnassignedSearch(e.target.value)}
+                                    />
+                                    {unassignedSearch && (
+                                        <button
+                                            className="search-clear-btn"
+                                            onClick={() => setUnassignedSearch('')}
+                                            title="Clear search"
+                                            type="button"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="unassigned-passengers-table">
+                                <table className="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th style={{ width: '50px' }}>
                                                 <input
                                                     type="checkbox"
-                                                    checked={selectedPassengers.includes(passenger._id)}
-                                                    onChange={() => handleSelectPassenger(passenger._id)}
+                                                    checked={selectedPassengers.length === unassignedPassengers.length && unassignedPassengers.length > 0}
+                                                    onChange={handleSelectAll}
                                                 />
-                                            </td>
-                                            <td>{index + 1}</td>
-                                            <td>{passenger.firstName}</td>
-                                            <td>{passenger.lastName}</td>
-                                            <td>{passenger.passportNo}</td>
-                                            <td>{new Date(passenger.createdAt).toLocaleDateString()}</td>
+                                            </th>
+                                            <th>#</th>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                            <th>Passport No.</th>
+                                            <th>Visa No.</th>
+                                            <th>MOFA No.</th>
+                                            <th>Created Date</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                        <p style={{ marginTop: '1rem', color: '#666', fontSize: '0.875rem' }}>
-                            Select passengers from the list above and click "Assign to Group" to add them to {group?.groupName}.
-                        </p>
-                    </Card>
-                )}
+                                    </thead>
+                                    <tbody>
+                                        {displayedUnassigned.length === 0 ? (
+                                            <tr><td colSpan={8} style={{ textAlign: 'center', padding: '1.5rem', color: '#888' }}>No passengers match your search.</td></tr>
+                                        ) : displayedUnassigned.map((passenger, index) => (
+                                            <tr key={passenger._id}>
+                                                <td>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedPassengers.includes(passenger._id)}
+                                                        onChange={() => handleSelectPassenger(passenger._id)}
+                                                    />
+                                                </td>
+                                                <td>{index + 1}</td>
+                                                <td>{passenger.firstName}</td>
+                                                <td>{passenger.lastName}</td>
+                                                <td>{passenger.passportNo}</td>
+                                                <td>{passenger.visaNumber || '—'}</td>
+                                                <td>{passenger.mofaApplicationNo || '—'}</td>
+                                                <td>{new Date(passenger.createdAt).toLocaleDateString()}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p style={{ marginTop: '1rem', color: '#666', fontSize: '0.875rem' }}>
+                                Select passengers from the list above and click "Assign to Group" to add them to {group?.groupName}.
+                            </p>
+                        </Card>
+                    );
+                })()}
             </div>
         </div>
     );
