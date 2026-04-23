@@ -77,7 +77,8 @@ const SuperAdminBackup = () => {
                             <Download size={24} />
                         </div>
                         <div className="dashboard-logo-text">
-                            <h1>Maktab</h1>
+                            <h1>AL NAFI MUNAZZAM
+                            </h1>
                             <p>Database Backup</p>
                         </div>
                     </div>
