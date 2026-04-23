@@ -12,6 +12,7 @@ import Reports from './pages/Reports';
 import Passengers from './pages/Passengers';
 import SuperAdminPassengers from './pages/SuperAdminPassengers';
 import SuperAdminCompanies from './pages/SuperAdminCompanies';
+import SuperAdminBackup from './pages/SuperAdminBackup';
 
 const PrivateRoute = ({ children, requiredRole }) => {
     const { user, loading } = useAuth();
@@ -119,6 +120,14 @@ function AppRoutes() {
                 element={
                     <PrivateRoute requiredRole="company_admin">
                         <GroupPassengers />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/super-admin/backup"
+                element={
+                    <PrivateRoute requiredRole="super_admin">
+                        <SuperAdminBackup />
                     </PrivateRoute>
                 }
             />

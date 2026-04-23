@@ -6,6 +6,18 @@ const Company = require('../models/Company');
 const CompanyAdmin = require('../models/CompanyAdmin');
 const Passenger = require('../models/Passenger');
 const Group = require('../models/Group');
+const Hotel = require('../models/Hotel');
+
+const backupCollections = {
+    superAdmins: SuperAdmin,
+    companies: Company,
+    companyAdmins: CompanyAdmin,
+    passengers: Passenger,
+    groups: Group,
+    hotels: Hotel
+};
+
+const formatBackupTimestamp = (date = new Date()) => date.toISOString().replace(/[:.]/g, '-');
 
 // All routes require authentication and super admin role
 router.use(authMiddleware);
@@ -260,6 +272,40 @@ router.get('/unassigned-counts', async (req, res) => {
     } catch (error) {
         console.error('Error fetching unassigned counts:', error);
         res.status(500).json({ message: 'Server error fetching unassigned counts' });
+    }
+});
+
+// @route   GET /api/super-admin/backup
+// @desc    Export a full database backup as JSON
+// @access  Super Admin
+router.get('/backup', async (req, res) => {
+    try {
+        const entries = await Promise.all(
+            Object.entries(backupCollections).map(async ([key, Model]) => {
+                const documents = await Model.find().lean();
+                return [key, documents];
+            })
+        );
+
+        const generatedAt = new Date();
+        const fileTimestamp = formatBackupTimestamp(generatedAt);
+        const backupPayload = {
+            metadata: {
+                generatedAt: generatedAt.toISOString(),
+                generatedBy: req.user.id,
+                generatedByRole: req.user.role,
+                databaseName: process.env.DB_NAME || 'default',
+                collectionCount: entries.length
+            },
+            data: Object.fromEntries(entries)
+        };
+
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="maktab-backup-${fileTimestamp}.json"`);
+        res.status(200).send(JSON.stringify(backupPayload, null, 2));
+    } catch (error) {
+        console.error('Error generating backup:', error);
+        res.status(500).json({ message: 'Server error generating backup' });
     }
 });
 

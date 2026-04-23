@@ -18,7 +18,8 @@ import {
     UserCheck,
     UserPlus,
     Bell,
-    Search
+    Search,
+    Download
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { companiesAPI, superAdminAPI } from '../services/api';
@@ -392,6 +393,10 @@ const SuperAdminCompanies = () => {
                 <button className="nav-item" onClick={() => navigate('/reports')}>
                     <FileText size={20} />
                     <span>Reports</span>
+                </button>
+                <button className="nav-item" onClick={() => navigate('/super-admin/backup')}>
+                    <Download size={20} />
+                    <span>Backup</span>
                 </button>
             </div>
 

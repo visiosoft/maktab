@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, FileText, Home, LogOut, UserCheck, Bell } from 'lucide-react';
+import { Building2, FileText, Home, LogOut, UserCheck, Bell, Download } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import PassengersTable from '../components/PassengersTable';
 import Button from '../components/Button';
@@ -130,6 +130,10 @@ const SuperAdminPassengers = () => {
                 <button className="nav-item" onClick={() => navigate('/reports')}>
                     <FileText size={20} />
                     <span>Reports</span>
+                </button>
+                <button className="nav-item" onClick={() => navigate('/super-admin/backup')}>
+                    <Download size={20} />
+                    <span>Backup</span>
                 </button>
             </div>
 

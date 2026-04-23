@@ -6,7 +6,7 @@ import Button from '../components/Button';
 import Card from '../components/Card';
 import Input from '../components/Input';
 import Modal from '../components/Modal';
-import { Building2, Plus, Edit2, Trash2, Search, Home, Users, LogOut, Bell } from 'lucide-react';
+import { Building2, Plus, Edit2, Trash2, Search, Home, LogOut, Bell, Download, FileText, UserCheck } from 'lucide-react';
 import './Hotels.css';
 
 const Hotels = () => {
@@ -126,9 +126,25 @@ const Hotels = () => {
                     <Home size={20} />
                     <span>Dashboard</span>
                 </button>
+                <button className="nav-item" onClick={() => navigate('/super-admin/companies')}>
+                    <Building2 size={20} />
+                    <span>Companies</span>
+                </button>
+                <button className="nav-item" onClick={() => navigate('/super-admin/passengers')}>
+                    <UserCheck size={20} />
+                    <span>Passengers</span>
+                </button>
                 <button className="nav-item active" onClick={() => navigate('/hotels')}>
                     <Building2 size={20} />
                     <span>Hotels</span>
+                </button>
+                <button className="nav-item" onClick={() => navigate('/reports')}>
+                    <FileText size={20} />
+                    <span>Reports</span>
+                </button>
+                <button className="nav-item" onClick={() => navigate('/super-admin/backup')}>
+                    <Download size={20} />
+                    <span>Backup</span>
                 </button>
             </div>
 

@@ -52,6 +52,7 @@ export const superAdminAPI = {
     getGroups: () => api.get('/super-admin/groups'),
     getReports: (companyId) => api.get(`/super-admin/reports?companyId=${companyId}`),
     getUnassignedCounts: () => api.get('/super-admin/unassigned-counts'),
+    downloadBackup: () => api.get('/super-admin/backup', { responseType: 'blob' }),
 };
 
 // Companies API
