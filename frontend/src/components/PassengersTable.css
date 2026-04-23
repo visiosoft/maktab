@@ -295,23 +295,84 @@ select.table-cell-input {
 
 .search-box {
     position: relative;
-    min-width: 250px;
+    min-width: 200px;
+    flex: 1;
+}
+
+.quick-search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid rgba(116, 105, 88, 0.18);
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 1px 4px rgba(90, 74, 49, 0.06);
+    transition: box-shadow 0.2s ease;
+}
+
+.quick-search-wrapper:focus-within {
+    border-color: #1f7a5a;
+    box-shadow: 0 0 0 4px rgba(31, 122, 90, 0.12);
+}
+
+.search-field-select {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-right: 1px solid rgba(116, 105, 88, 0.14);
+    border-radius: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #425147;
+    background: rgba(243, 237, 228, 0.7);
+    cursor: pointer;
+    white-space: nowrap;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 1.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23425147' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.4rem center;
+}
+
+.search-field-select:focus {
+    outline: none;
+}
+
+.search-clear-btn {
+    position: absolute;
+    right: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: #8a948c;
+    line-height: 1;
+    padding: 0 0.1rem;
+    display: flex;
+    align-items: center;
+}
+
+.search-clear-btn:hover {
+    color: #c47d2d;
 }
 
 .search-box input {
     width: 100%;
     padding: 0.5rem 1rem 0.5rem 2.5rem;
-    border: 1px solid rgba(116, 105, 88, 0.14);
-    border-radius: 12px;
+    border: none;
+    border-radius: 0;
     font-size: 0.875rem;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    background: rgba(255, 255, 255, 0.92);
+    background: transparent;
 }
 
 .search-box input:focus {
     outline: none;
-    border-color: #1f7a5a;
-    box-shadow: 0 0 0 4px rgba(31, 122, 90, 0.12);
+    border-color: transparent;
+    box-shadow: none;
 }
 
 .search-icon {

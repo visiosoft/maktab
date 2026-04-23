@@ -35,6 +35,7 @@ const PassengersTable = ({
     const [newRow, setNewRow] = useState(null);
     const [editData, setEditData] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchField, setSearchField] = useState('all');
     const [groupFilter, setGroupFilter] = useState('');
     const [filteredPassengers, setFilteredPassengers] = useState(passengers);
     const [importing, setImporting] = useState(false);
@@ -49,13 +50,33 @@ const PassengersTable = ({
 
         // Filter by search term
         if (searchTerm) {
-            filtered = filtered.filter(p =>
-                p.firstName?.toLowerCase().includes(normalizedSearchTerm) ||
-                p.lastName?.toLowerCase().includes(normalizedSearchTerm) ||
-                p.passportNo?.toLowerCase().includes(normalizedSearchTerm) ||
-                p.group?.groupName?.toLowerCase().includes(normalizedSearchTerm) ||
-                p.company?.name?.toLowerCase().includes(normalizedSearchTerm)
-            );
+            filtered = filtered.filter(p => {
+                switch (searchField) {
+                    case 'name':
+                        return (
+                            p.firstName?.toLowerCase().includes(normalizedSearchTerm) ||
+                            p.lastName?.toLowerCase().includes(normalizedSearchTerm) ||
+                            `${p.firstName} ${p.lastName}`.toLowerCase().includes(normalizedSearchTerm)
+                        );
+                    case 'passportNo':
+                        return p.passportNo?.toLowerCase().includes(normalizedSearchTerm);
+                    case 'visaNo':
+                        return p.visaNumber?.toLowerCase().includes(normalizedSearchTerm);
+                    case 'mofaNo':
+                        return p.mofaApplicationNo?.toLowerCase().includes(normalizedSearchTerm);
+                    default:
+                        return (
+                            p.firstName?.toLowerCase().includes(normalizedSearchTerm) ||
+                            p.lastName?.toLowerCase().includes(normalizedSearchTerm) ||
+                            `${p.firstName} ${p.lastName}`.toLowerCase().includes(normalizedSearchTerm) ||
+                            p.passportNo?.toLowerCase().includes(normalizedSearchTerm) ||
+                            p.visaNumber?.toLowerCase().includes(normalizedSearchTerm) ||
+                            p.mofaApplicationNo?.toLowerCase().includes(normalizedSearchTerm) ||
+                            p.group?.groupName?.toLowerCase().includes(normalizedSearchTerm) ||
+                            p.company?.name?.toLowerCase().includes(normalizedSearchTerm)
+                        );
+                }
+            });
         }
 
         // Filter by group
@@ -68,7 +89,7 @@ const PassengersTable = ({
         }
 
         setFilteredPassengers(filtered);
-    }, [searchTerm, groupFilter, passengers]);
+    }, [searchTerm, searchField, groupFilter, passengers]);
 
     const handleAddNew = () => {
         if (readOnly || !onAdd) return;
@@ -239,14 +260,44 @@ Omar,Ibrahim,E5678901,`;
                 </h3>
                 <div className="table-actions">
                     {showSearch && (
-                        <div className="search-box">
-                            <Search className="search-icon" size={16} />
-                            <input
-                                type="text"
-                                placeholder="Search passengers..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                        <div className="quick-search-wrapper">
+                            <select
+                                className="search-field-select"
+                                value={searchField}
+                                onChange={(e) => { setSearchField(e.target.value); setSearchTerm(''); }}
+                                title="Search by field"
+                            >
+                                <option value="all">All Fields</option>
+                                <option value="name">Name</option>
+                                <option value="passportNo">Passport No.</option>
+                                <option value="visaNo">Visa No.</option>
+                                <option value="mofaNo">MOFA No.</option>
+                            </select>
+                            <div className="search-box">
+                                <Search className="search-icon" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder={
+                                        searchField === 'all' ? 'Quick search...' :
+                                        searchField === 'name' ? 'Search by name...' :
+                                        searchField === 'passportNo' ? 'Search by passport no...' :
+                                        searchField === 'visaNo' ? 'Search by visa no...' :
+                                        'Search by MOFA no...'
+                                    }
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                {searchTerm && (
+                                    <button
+                                        className="search-clear-btn"
+                                        onClick={() => setSearchTerm('')}
+                                        title="Clear search"
+                                        type="button"
+                                    >
+                                        ×
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     )}
                     {showGroupFilter && (

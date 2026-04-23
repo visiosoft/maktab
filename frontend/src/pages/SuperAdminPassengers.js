@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, FileText, Home, LogOut, UserCheck, Bell, Search } from 'lucide-react';
+import { Building2, FileText, Home, LogOut, UserCheck, Bell } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import PassengersTable from '../components/PassengersTable';
 import Button from '../components/Button';
@@ -91,10 +91,6 @@ const SuperAdminPassengers = () => {
                         </div>
                     </div>
                     <div className="dashboard-header-tools">
-                        <div className="dashboard-search">
-                            <Search size={16} />
-                            <input type="text" placeholder="Quick search…" />
-                        </div>
                         <button className="dashboard-notification" title="Notifications">
                             <Bell size={20} />
                         </button>
@@ -170,7 +166,7 @@ const SuperAdminPassengers = () => {
                     loading={loading}
                     readOnly
                     showCompanyColumn
-                    showSearch={false}
+                    showSearch
                     showGroupFilter={false}
                     title="All Passengers"
                     emptyTitle="No Passengers Found"
