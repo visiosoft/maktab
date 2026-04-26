@@ -428,13 +428,6 @@ const SuperAdminDashboard = () => {
                     <FileText size={20} />
                     <span>Reports</span>
                 </button>
-                <button
-                    className="nav-item"
-                    onClick={() => navigate('/super-admin/backup')}
-                >
-                    <Download size={20} />
-                    <span>Backup</span>
-                </button>
             </div>
 
             {/* Main Content */}

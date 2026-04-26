@@ -684,10 +684,6 @@ const Reports = () => {
                             <Building2 size={20} />
                             <span>Hotels</span>
                         </button>
-                        <button className="nav-item" onClick={() => navigate('/super-admin/backup')}>
-                            <Download size={20} />
-                            <span>Backup</span>
-                        </button>
                     </>
                 ) : (
                     <>
