@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { groupsAPI, hotelsAPI, companiesAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { setFormDataForErrorLog, clearFormDataForErrorLog } from '../services/errorHandler';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Input from '../components/Input';
@@ -51,6 +52,12 @@ const GroupForm = () => {
             fetchGroup();
         }
     }, [id]);
+
+    // Keep error handler aware of current form data
+    useEffect(() => {
+        setFormDataForErrorLog(formData);
+        return () => clearFormDataForErrorLog();
+    }, [formData]);
 
     const fetchCompany = async () => {
         try {

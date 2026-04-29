@@ -28,7 +28,8 @@ import {
     Calendar,
     Bell,
     Search,
-    Download
+    Download,
+    AlertTriangle
 } from 'lucide-react';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
@@ -427,6 +428,13 @@ const SuperAdminDashboard = () => {
                 >
                     <FileText size={20} />
                     <span>Reports</span>
+                </button>
+                <button
+                    className="nav-item"
+                    onClick={() => navigate('/super-admin/error-logs')}
+                >
+                    <AlertTriangle size={20} />
+                    <span>Error Logs</span>
                 </button>
             </div>
 

@@ -13,6 +13,7 @@ import Passengers from './pages/Passengers';
 import SuperAdminPassengers from './pages/SuperAdminPassengers';
 import SuperAdminCompanies from './pages/SuperAdminCompanies';
 import SuperAdminBackup from './pages/SuperAdminBackup';
+import ErrorLogs from './pages/ErrorLogs';
 
 const PrivateRoute = ({ children, requiredRole }) => {
     const { user, loading } = useAuth();
@@ -128,6 +129,14 @@ function AppRoutes() {
                 element={
                     <PrivateRoute requiredRole="super_admin">
                         <SuperAdminBackup />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/super-admin/error-logs"
+                element={
+                    <PrivateRoute requiredRole="super_admin">
+                        <ErrorLogs />
                     </PrivateRoute>
                 }
             />

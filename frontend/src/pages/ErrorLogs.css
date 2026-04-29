@@ -1,0 +1,267 @@
+.error-logs-page {
+    min-height: 100vh;
+}
+
+.error-logs-toolbar {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.error-logs-toolbar input,
+.error-logs-toolbar select {
+    padding: 0.6rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    background: #fff;
+    color: #1f2937;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.error-logs-toolbar input:focus,
+.error-logs-toolbar select:focus {
+    border-color: #667eea;
+}
+
+.error-logs-toolbar input {
+    flex: 1;
+    min-width: 200px;
+}
+
+.error-logs-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.error-stat-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 160px;
+}
+
+.error-stat-card .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-stat-card .stat-icon.total {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.error-stat-card .stat-icon.unresolved {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.error-stat-card .stat-icon.resolved {
+    background: #ecfdf5;
+    color: #22c55e;
+}
+
+.error-stat-card .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1;
+}
+
+.error-stat-card .stat-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.error-log-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.error-log-item {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.error-log-item:hover {
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
+}
+
+.error-log-item.resolved {
+    opacity: 0.6;
+    border-left: 4px solid #22c55e;
+}
+
+.error-log-item.unresolved {
+    border-left: 4px solid #ef4444;
+}
+
+.error-log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.error-log-message {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.95rem;
+    word-break: break-word;
+    flex: 1;
+}
+
+.error-log-type {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.error-log-type.api {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.error-log-type.runtime {
+    background: #fce7f3;
+    color: #9d174d;
+}
+
+.error-log-type.unhandled_rejection {
+    background: #ede9fe;
+    color: #5b21b6;
+}
+
+.error-log-type.network {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.error-log-type.unknown {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.error-log-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    color: #6b7280;
+    margin-top: 0.4rem;
+}
+
+.error-log-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.error-log-detail {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.error-log-detail pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 1rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.error-log-detail-row {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+    font-size: 0.85rem;
+}
+
+.error-log-detail-row strong {
+    color: #374151;
+    min-width: 100px;
+}
+
+.error-log-detail-row span {
+    color: #6b7280;
+    word-break: break-all;
+}
+
+.error-log-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.error-logs-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.error-logs-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6b7280;
+}
+
+.error-logs-empty svg {
+    margin-bottom: 1rem;
+    color: #22c55e;
+}
+
+@media (max-width: 640px) {
+    .error-logs-toolbar {
+        flex-direction: column;
+    }
+
+    .error-logs-toolbar input {
+        width: 100%;
+    }
+
+    .error-log-header {
+        flex-direction: column;
+    }
+
+    .error-log-meta {
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .error-logs-stats {
+        flex-direction: column;
+    }
+}

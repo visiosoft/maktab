@@ -45,6 +45,7 @@ app.use('/api/companies', require('./routes/companies'));
 app.use('/api/passengers', require('./routes/passengers'));
 app.use('/api/hotels', require('./routes/hotels'));
 app.use('/api/groups', require('./routes/groups'));
+app.use('/api/error-logs', require('./routes/errorLogs'));
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getCurrentFormData } from './errorHandler';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5010/api';
 
@@ -33,6 +34,41 @@ api.interceptors.response.use(
             localStorage.removeItem('user');
             window.location.href = '/login';
         }
+
+        // Log API errors (skip error-logs endpoint to avoid loops)
+        if (!error.config?.url?.includes('error-logs')) {
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            const errorData = {
+                message: error.response?.data?.message || error.message || 'API Error',
+                stack: error.stack,
+                type: 'api',
+                url: error.config?.url,
+                method: error.config?.method?.toUpperCase(),
+                statusCode: error.response?.status,
+                userId: userData._id || userData.id,
+                userEmail: userData.email,
+                userRole: userData.role,
+                companyId: userData.companyId,
+                userAgent: navigator.userAgent,
+                pageUrl: window.location.href,
+                meta: {
+                    requestData: (() => {
+                        try {
+                            if (!error.config?.data) return undefined;
+                            return typeof error.config.data === 'string'
+                                ? JSON.parse(error.config.data)
+                                : error.config.data;
+                        } catch { return error.config?.data; }
+                    })(),
+                    responseData: error.response?.data,
+                    formData: getCurrentFormData() || undefined,
+                },
+            };
+            axios.post(`${API_URL}/error-logs`, errorData, {
+                headers: { 'Content-Type': 'application/json' },
+            }).catch(() => { });
+        }
+
         return Promise.reject(error);
     }
 );
@@ -100,6 +136,19 @@ export const groupsAPI = {
     delete: (id) => api.delete(`/groups/${id}`),
     getPassengers: (id) => api.get(`/groups/${id}/passengers`),
     assignPassengers: (data) => api.put('/groups/assign-passengers', data),
+};
+
+// Error Logs API
+export const errorLogsAPI = {
+    send: (errorData) => {
+        // Use raw axios to avoid interceptor loops
+        return axios.post(`${API_URL}/error-logs`, errorData, {
+            headers: { 'Content-Type': 'application/json' },
+        }).catch(() => { }); // silently fail - don't cause more errors
+    },
+    getAll: (params = {}) => api.get('/error-logs', { params }),
+    toggleResolve: (id) => api.put(`/error-logs/${id}/resolve`),
+    clearResolved: () => api.delete('/error-logs/clear'),
 };
 
 export default api;
