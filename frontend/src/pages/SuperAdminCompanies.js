@@ -345,7 +345,7 @@ const SuperAdminCompanies = () => {
                             <Building2 size={24} />
                         </div>
                         <div className="dashboard-logo-text">
-                            <h1>Maktab</h1>
+                            <h1>AL NAFI MUNAZZAM</h1>
                             <p>Company Management</p>
                         </div>
                     </div>
@@ -439,7 +439,7 @@ const SuperAdminCompanies = () => {
 
                 <div className="companies-section fade-in">
                     <div className="section-header">
-                        <h3>All Companies</h3>
+                        <h3>AL NAFI MUNAZZAM</h3>
                         <Button variant="primary" icon={<Plus size={20} />} onClick={openCreateCompanyModal}>
                             Add Company
                         </Button>

@@ -100,7 +100,8 @@ const Hotels = () => {
                             <Building2 size={24} />
                         </div>
                         <div className="dashboard-logo-text">
-                            <h1>Maktab</h1>
+                            <h1>AL NAFI MUNAZZAM
+</h1>
                             <p>Hotels Management</p>
                         </div>
                     </div>

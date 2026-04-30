@@ -86,7 +86,7 @@ const SuperAdminPassengers = () => {
                             <UserCheck size={24} />
                         </div>
                         <div className="dashboard-logo-text">
-                            <h1>Maktab</h1>
+                            <h1>AL NAFI MUNAZZAM</h1>
                             <p>All Company Passengers</p>
                         </div>
                     </div>
@@ -150,7 +150,7 @@ const SuperAdminPassengers = () => {
                             onChange={(event) => setSelectedCompanyId(event.target.value)}
                             aria-label="Filter passengers by company"
                         >
-                            <option value="all">All Companies</option>
+                            <option value="all">AL NAFI MUNAZZAM</option>
                             {companies.map((company) => (
                                 <option key={company._id} value={company._id}>
                                     {company.name}

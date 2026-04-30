@@ -215,6 +215,12 @@ const SuperAdminDashboard = () => {
         return Object.values(map).sort((a, b) => (a.arrivalTime || '').localeCompare(b.arrivalTime || ''));
     };
 
+    const totalUnassignedPassengers = Object.values(unassignedCounts).reduce(
+        (sum, count) => sum + (count || 0),
+        0
+    );
+    const totalPassengerCount = totalPassengers + totalUnassignedPassengers;
+
     const handleSaveCompany = async (e) => {
         e.preventDefault();
         try {
@@ -574,143 +580,6 @@ const SuperAdminDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Quota Overview */}
-                    <div className="fade-in" style={{ marginTop: '2rem' }}>
-                        <h3 className="section-title">Company Quota Overview</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                            {companies.map((company) => {
-                                const companyPassengers = passengerCounts[company._id] || 0;
-                                const companyQuota = company.passengerQuota || 0;
-                                const remaining = companyQuota - companyPassengers;
-                                const percentage = companyQuota > 0 ? Math.round((companyPassengers / companyQuota) * 100) : 0;
-                                const unassigned = unassignedCounts[company._id] || 0;
-
-                                return (
-                                    <div
-                                        key={company._id}
-                                        style={{
-                                            background: 'white',
-                                            borderRadius: '12px',
-                                            padding: '1.5rem',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                            border: '2px solid #f0f0f0',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.boxShadow = '0 4px 16px rgba(102, 126, 234, 0.2)';
-                                            e.currentTarget.style.borderColor = '#667eea';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                                            e.currentTarget.style.borderColor = '#f0f0f0';
-                                        }}
-                                    >
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                            <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#333', fontWeight: '600' }}>{company.name}</h4>
-                                            <div style={{
-                                                background: percentage >= 90 ? 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' : percentage >= 70 ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                                                padding: '0.25rem 0.75rem',
-                                                borderRadius: '12px',
-                                                color: 'white',
-                                                fontSize: '0.75rem',
-                                                fontWeight: '600'
-                                            }}>
-                                                {percentage}%
-                                            </div>
-                                        </div>
-
-                                        <div style={{ marginBottom: '1rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                                <span style={{ fontSize: '0.875rem', color: '#666' }}>Quota</span>
-                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#333' }}>{companyQuota}</span>
-                                            </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                                <span style={{ fontSize: '0.875rem', color: '#666' }}>Used</span>
-                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#667eea' }}>{companyPassengers}</span>
-                                            </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                                <span style={{ fontSize: '0.875rem', color: '#666' }}>Remaining</span>
-                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: remaining > 0 ? '#4caf50' : '#f44336' }}>{remaining}</span>
-                                            </div>
-                                            {unassigned > 0 && (
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #f0f0f0' }}>
-                                                    <span style={{ fontSize: '0.875rem', color: '#ff9800' }}>Unassigned</span>
-                                                    <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#ff9800' }}>{unassigned}</span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div style={{
-                                            width: '100%',
-                                            height: '8px',
-                                            background: '#f0f0f0',
-                                            borderRadius: '4px',
-                                            overflow: 'hidden'
-                                        }}>
-                                            <div style={{
-                                                width: `${Math.min(percentage, 100)}%`,
-                                                height: '100%',
-                                                background: percentage >= 90 ? 'linear-gradient(90deg, #fa709a 0%, #fee140 100%)' : percentage >= 70 ? 'linear-gradient(90deg, #f093fb 0%, #f5576c 100%)' : 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
-                                                transition: 'width 0.3s ease',
-                                                borderRadius: '4px'
-                                            }}></div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div className="fade-in" style={{ marginTop: '2rem' }}>
-                        <h3 className="section-title">Quick Actions</h3>
-                        <div className="quick-actions-grid">
-                            <button className="action-card" onClick={() => navigate('/super-admin/companies')}>
-                                <div className="action-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                                    <Building2 size={24} />
-                                </div>
-                                <div className="action-content">
-                                    <div className="action-title">Manage Companies</div>
-                                    <div className="action-subtitle">Open company management</div>
-                                </div>
-                                <ArrowRight size={20} />
-                            </button>
-
-                            <button className="action-card" onClick={() => navigate('/hotels')}>
-                                <div className="action-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
-                                    <Building2 size={24} />
-                                </div>
-                                <div className="action-content">
-                                    <div className="action-title">Manage Hotels</div>
-                                    <div className="action-subtitle">Add & configure hotels</div>
-                                </div>
-                                <ArrowRight size={20} />
-                            </button>
-
-                            <button className="action-card" onClick={() => navigate('/reports')}>
-                                <div className="action-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
-                                    <FileText size={24} />
-                                </div>
-                                <div className="action-content">
-                                    <div className="action-title">View Reports</div>
-                                    <div className="action-subtitle">Generate company reports</div>
-                                </div>
-                                <ArrowRight size={20} />
-                            </button>
-
-                            <button className="action-card" onClick={() => navigate('/super-admin/passengers')}>
-                                <div className="action-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
-                                    <UserCheck size={24} />
-                                </div>
-                                <div className="action-content">
-                                    <div className="action-title">View Passengers</div>
-                                    <div className="action-subtitle">Inspect passenger records</div>
-                                </div>
-                                <ArrowRight size={20} />
-                            </button>
-                        </div>
-                    </div>
-
                     {/* Quick Insights */}
                     <div className="fade-in" style={{ marginTop: '2rem' }}>
                         <h3 className="section-title">Quick Insights</h3>
@@ -730,32 +599,36 @@ const SuperAdminDashboard = () => {
                                     <Building2 size={24} />
                                 </div>
                                 <div className="stat-content">
-                                    <div className="stat-value">{stats?.activeCompanies || 0}</div>
-                                    <div className="stat-label">Active Companies</div>
+                                    <div className="stat-value">{totalPassengerCount}</div>
+                                    <div className="stat-label">Total Passengers</div>
                                 </div>
                             </div>
 
                             <div className="stat-card">
-                                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
-                                    <Plane size={24} />
+                                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)' }}>
+                                    <UserCheck size={24} />
                                 </div>
                                 <div className="stat-content">
-                                    <div className="stat-value">{upcomingArrivals.length}</div>
-                                    <div className="stat-label">Upcoming Arrivals</div>
+                                    <div className="stat-value">{totalPassengers}</div>
+                                    <div className="stat-label">Passengers Added</div>
                                 </div>
                             </div>
 
                             <div className="stat-card">
-                                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
-                                    <Calendar size={24} />
+                                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #ff9a44 0%, #ff6a88 100%)' }}>
+                                    <AlertTriangle size={24} />
                                 </div>
                                 <div className="stat-content">
-                                    <div className="stat-value">{upcomingDepartures.length}</div>
-                                    <div className="stat-label">Upcoming Departures</div>
+                                    <div className="stat-value">{totalUnassignedPassengers}</div>
+                                    <div className="stat-label">Passengers Not Added To Group</div>
                                 </div>
                             </div>
+
+
                         </div>
                     </div>
+
+
 
                     {/* Today's Schedule */}
                     <div className="fade-in" style={{ marginTop: '2rem' }}>
@@ -778,7 +651,7 @@ const SuperAdminDashboard = () => {
                                         cursor: 'pointer'
                                     }}
                                 >
-                                    <option value="all">All Companies</option>
+                                    <option value="all">AL NAFI MUNAZZAM</option>
                                     {companies.map((company) => (
                                         <option key={company._id} value={company._id}>
                                             {company.name}
@@ -900,6 +773,92 @@ const SuperAdminDashboard = () => {
                                     )}
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    {/* Quota Overview */}
+                    <div className="fade-in" style={{ marginTop: '2rem' }}>
+                        <h3 className="section-title">Company Quota Overview</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                            {companies.map((company) => {
+                                const companyPassengers = passengerCounts[company._id] || 0;
+                                const companyQuota = company.passengerQuota || 0;
+                                const remaining = companyQuota - companyPassengers;
+                                const percentage = companyQuota > 0 ? Math.round((companyPassengers / companyQuota) * 100) : 0;
+                                const unassigned = unassignedCounts[company._id] || 0;
+
+                                return (
+                                    <div
+                                        key={company._id}
+                                        style={{
+                                            background: 'white',
+                                            borderRadius: '12px',
+                                            padding: '1.5rem',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                            border: '2px solid #f0f0f0',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.boxShadow = '0 4px 16px rgba(102, 126, 234, 0.2)';
+                                            e.currentTarget.style.borderColor = '#667eea';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                                            e.currentTarget.style.borderColor = '#f0f0f0';
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                            <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#333', fontWeight: '600' }}>{company.name}</h4>
+                                            <div style={{
+                                                background: percentage >= 90 ? 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' : percentage >= 70 ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                                padding: '0.25rem 0.75rem',
+                                                borderRadius: '12px',
+                                                color: 'white',
+                                                fontSize: '0.75rem',
+                                                fontWeight: '600'
+                                            }}>
+                                                {percentage}%
+                                            </div>
+                                        </div>
+
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                <span style={{ fontSize: '0.875rem', color: '#666' }}>Quota</span>
+                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#333' }}>{companyQuota}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                <span style={{ fontSize: '0.875rem', color: '#666' }}>Used</span>
+                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#667eea' }}>{companyPassengers}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                <span style={{ fontSize: '0.875rem', color: '#666' }}>Remaining</span>
+                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: remaining > 0 ? '#4caf50' : '#f44336' }}>{remaining}</span>
+                                            </div>
+                                            {unassigned > 0 && (
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #f0f0f0' }}>
+                                                    <span style={{ fontSize: '0.875rem', color: '#ff9800' }}>Unassigned</span>
+                                                    <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#ff9800' }}>{unassigned}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div style={{
+                                            width: '100%',
+                                            height: '8px',
+                                            background: '#f0f0f0',
+                                            borderRadius: '4px',
+                                            overflow: 'hidden'
+                                        }}>
+                                            <div style={{
+                                                width: `${Math.min(percentage, 100)}%`,
+                                                height: '100%',
+                                                background: percentage >= 90 ? 'linear-gradient(90deg, #fa709a 0%, #fee140 100%)' : percentage >= 70 ? 'linear-gradient(90deg, #f093fb 0%, #f5576c 100%)' : 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+                                                transition: 'width 0.3s ease',
+                                                borderRadius: '4px'
+                                            }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
