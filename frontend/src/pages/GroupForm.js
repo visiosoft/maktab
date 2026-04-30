@@ -72,6 +72,12 @@ const GroupForm = () => {
                 newErrors[field] = `${label} is required`;
             }
         });
+        const alphanumericFields = { arrivalFlightNo: 'Arrival Flight No', departureFlightNo: 'Departure Flight No' };
+        Object.entries(alphanumericFields).forEach(([field, label]) => {
+            if (formData[field] && !/^[a-zA-Z0-9]+$/.test(formData[field])) {
+                newErrors[field] = `${label} must contain only letters and numbers`;
+            }
+        });
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -144,9 +150,13 @@ const GroupForm = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        const flightFields = ['arrivalFlightNo', 'departureFlightNo'];
+        const sanitizedValue = flightFields.includes(name)
+            ? value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
+            : value;
         setFormData({
             ...formData,
-            [name]: value
+            [name]: sanitizedValue
         });
         if (errors[name]) {
             setErrors({ ...errors, [name]: '' });

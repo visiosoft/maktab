@@ -47,6 +47,7 @@ const SuperAdminDashboard = () => {
     const [unassignedCounts, setUnassignedCounts] = useState({});
     const [groups, setGroups] = useState([]);
     const [todayArrivals, setTodayArrivals] = useState([]);
+    const [tomorrowArrivals, setTomorrowArrivals] = useState([]);
     const [todayDepartures, setTodayDepartures] = useState([]);
     const [upcomingArrivals, setUpcomingArrivals] = useState([]);
     const [upcomingDepartures, setUpcomingDepartures] = useState([]);
@@ -151,6 +152,12 @@ const SuperAdminDashboard = () => {
                 return arrivalDate.getTime() === today.getTime();
             });
 
+            const arrivalsTomorrow = groupsData.filter(group => {
+                const arrivalDate = new Date(group.arrivalDate);
+                arrivalDate.setHours(0, 0, 0, 0);
+                return arrivalDate.getTime() === tomorrow.getTime();
+            });
+
             const departuresToday = groupsData.filter(group => {
                 const departureDate = new Date(group.departureDate);
                 departureDate.setHours(0, 0, 0, 0);
@@ -172,6 +179,7 @@ const SuperAdminDashboard = () => {
             console.log('[Super Admin] Today\'s departures:', departuresToday.length, departuresToday);
 
             setTodayArrivals(arrivalsToday);
+            setTomorrowArrivals(arrivalsTomorrow);
             setTodayDepartures(departuresToday);
             setUpcomingArrivals(upcomingArr);
             setUpcomingDepartures(upcomingDep);
@@ -182,6 +190,29 @@ const SuperAdminDashboard = () => {
         } catch (error) {
             console.error('Error fetching groups:', error);
         }
+    };
+
+    const groupArrivals = (list) => {
+        const map = {};
+        list.forEach((group) => {
+            const key = [
+                group.arrivalFlightNo || '',
+                group.arrivalTime || '',
+                group.arrivalAirport || '',
+                group.maktab || '',
+                group.company?._id || '',
+                group.arrivalHotel?._id || ''
+            ].join('|');
+            if (!map[key]) {
+                map[key] = {
+                    ...group,
+                    passengerCount: group.passengerCount || 0
+                };
+            } else {
+                map[key].passengerCount += group.passengerCount || 0;
+            }
+        });
+        return Object.values(map).sort((a, b) => (a.arrivalTime || '').localeCompare(b.arrivalTime || ''));
     };
 
     const handleSaveCompany = async (e) => {
@@ -966,10 +997,8 @@ const SuperAdminDashboard = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 ? (
-                                            todayArrivals
-                                                .filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter)
-                                                .sort((a, b) => (a.arrivalTime || '').localeCompare(b.arrivalTime || ''))
+                                        {groupArrivals(todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter)).length > 0 ? (
+                                            groupArrivals(todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter))
                                                 .map((group, index) => (
                                                     <tr key={group._id} style={{
                                                         background: index % 2 === 0 ? '#1a1a2e' : '#1e1e3a',
@@ -989,12 +1018,16 @@ const SuperAdminDashboard = () => {
                                                         </td>
                                                         <td style={{ padding: '0.75rem 1rem' }}>
                                                             <span style={{
-                                                                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                                                                color: '#fff',
+                                                                background: '#2a2a4a',
+                                                                color: '#4facfe',
                                                                 padding: '0.2rem 0.6rem',
-                                                                borderRadius: '10px',
+                                                                borderRadius: '6px',
                                                                 fontWeight: '700',
-                                                                fontSize: '0.85rem'
+                                                                fontSize: '0.85rem',
+                                                                border: '1px solid #4facfe',
+                                                                minWidth: '2rem',
+                                                                display: 'inline-block',
+                                                                textAlign: 'center'
                                                             }}>
                                                                 {group.passengerCount || 0}
                                                             </span>
@@ -1031,7 +1064,7 @@ const SuperAdminDashboard = () => {
                                     </tbody>
                                 </table>
                             </div>
-                            {todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 && (
+                            {groupArrivals(todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter)).length > 0 && (
                                 <div style={{
                                     padding: '0.75rem 1.5rem',
                                     background: '#16213e',
@@ -1041,10 +1074,145 @@ const SuperAdminDashboard = () => {
                                     borderTop: '1px solid #2a2a4a'
                                 }}>
                                     <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
-                                        Total Flights: {todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length}
+                                        Total Flights: {groupArrivals(todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter)).length}
                                     </span>
                                     <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
-                                        Total Passengers: {todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).reduce((sum, g) => sum + (g.passengerCount || 0), 0)}
+                                        Total Passengers: {groupArrivals(todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter)).reduce((sum, g) => sum + (g.passengerCount || 0), 0)}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Tomorrow's Arrivals Board */}
+                        <div style={{
+                            background: '#1a1a2e',
+                            borderRadius: '12px',
+                            overflow: 'hidden',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                            marginBottom: '2rem'
+                        }}>
+                            <div style={{
+                                background: 'linear-gradient(135deg, #0f3460 0%, #1a3a5c 100%)',
+                                padding: '1rem 1.5rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <Plane size={22} style={{ color: '#a78bfa' }} />
+                                    <span style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                        Tomorrow's Arrivals
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#a78bfa', animation: 'pulse 2s infinite' }}></div>
+                                    <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
+                                        {new Date(new Date().setDate(new Date().getDate() + 1)).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </span>
+                                </div>
+                            </div>
+                            <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
+                                    <thead>
+                                        <tr style={{ background: '#16213e' }}>
+                                            {['Flight No', 'Time', 'Airport', 'No of Pax', 'Maktab', 'Company', 'Hotel'].map((header) => (
+                                                <th key={header} style={{
+                                                    padding: '0.75rem 1rem',
+                                                    color: '#a78bfa',
+                                                    fontSize: '0.8rem',
+                                                    fontWeight: '700',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '1px',
+                                                    textAlign: 'left',
+                                                    borderBottom: '1px solid #2a2a4a'
+                                                }}>
+                                                    {header}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {groupArrivals(tomorrowArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter)).length > 0 ? (
+                                            groupArrivals(tomorrowArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter))
+                                                .map((group, index) => (
+                                                    <tr key={group._id} style={{
+                                                        background: index % 2 === 0 ? '#1a1a2e' : '#1e1e3a',
+                                                        transition: 'background 0.2s'
+                                                    }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.background = '#2a2a4a'}
+                                                        onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? '#1a1a2e' : '#1e1e3a'}
+                                                    >
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#ffd700', fontWeight: '700', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
+                                                            {group.arrivalFlightNo || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontWeight: '600', fontSize: '0.95rem' }}>
+                                                            {group.arrivalTime || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontSize: '0.9rem' }}>
+                                                            {group.arrivalAirport || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem' }}>
+                                                            <span style={{
+                                                                background: '#2a2a4a',
+                                                                color: '#a78bfa',
+                                                                padding: '0.2rem 0.6rem',
+                                                                borderRadius: '6px',
+                                                                fontWeight: '700',
+                                                                fontSize: '0.85rem',
+                                                                border: '1px solid #a78bfa',
+                                                                minWidth: '2rem',
+                                                                display: 'inline-block',
+                                                                textAlign: 'center'
+                                                            }}>
+                                                                {group.passengerCount || 0}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem' }}>
+                                                            <span style={{
+                                                                background: '#2a2a4a',
+                                                                color: '#a78bfa',
+                                                                padding: '0.2rem 0.6rem',
+                                                                borderRadius: '6px',
+                                                                fontWeight: '600',
+                                                                fontSize: '0.85rem',
+                                                                border: '1px solid #a78bfa'
+                                                            }}>
+                                                                {group.maktab || '—'}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontSize: '0.9rem' }}>
+                                                            {group.company?.name || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontSize: '0.9rem' }}>
+                                                            {group.arrivalHotel?.name || '—'}
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                                                    <Plane size={32} style={{ opacity: 0.3, marginBottom: '0.5rem' }} />
+                                                    <p style={{ margin: 0 }}>No arrivals scheduled for tomorrow</p>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {tomorrowArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 && (
+                                <div style={{
+                                    padding: '0.75rem 1.5rem',
+                                    background: '#16213e',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    borderTop: '1px solid #2a2a4a'
+                                }}>
+                                    <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
+                                        Total Flights: {groupArrivals(tomorrowArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter)).length}
+                                    </span>
+                                    <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
+                                        Total Passengers: {groupArrivals(tomorrowArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter)).reduce((sum, g) => sum + (g.passengerCount || 0), 0)}
                                     </span>
                                 </div>
                             )}

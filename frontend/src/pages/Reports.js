@@ -27,8 +27,8 @@ const REPORT_CONFIG = {
     'arrival-2': {
         key: 'arrival-2',
         path: '/reports/arrival-2',
-        navLabel: 'Arrival Report 2',
-        title: 'Arrival Report 2',
+        navLabel: 'Group Arrival Report',
+        title: 'Group Arrival Report',
         subtitle: 'View arrival schedule by flight, company, and hotel for the selected date',
         printId: 'arrival-report-2'
     },
@@ -47,6 +47,14 @@ const REPORT_CONFIG = {
         title: 'Hotel Arrivals Report',
         subtitle: 'View which hotels are receiving passengers on selected date',
         printId: 'hotel-arrivals-report'
+    },
+    'arrivals-range': {
+        key: 'arrivals-range',
+        path: '/reports/arrivals-range',
+        navLabel: 'Arrivals Range',
+        title: 'Arrivals Range Report',
+        subtitle: 'View all arrival groups within a date range',
+        printId: 'arrivals-range-report'
     }
 };
 
@@ -66,6 +74,9 @@ const Reports = ({ reportType = 'maktab' }) => {
     const [arrivalReport2Date, setArrivalReport2Date] = useState(new Date().toISOString().split('T')[0]);
     const [departureDate, setDepartureDate] = useState(new Date().toISOString().split('T')[0]);
     const [hotelArrivalDate, setHotelArrivalDate] = useState(new Date().toISOString().split('T')[0]);
+    const [arrivalRangeFrom, setArrivalRangeFrom] = useState(new Date().toISOString().split('T')[0]);
+    const [arrivalRangeTo, setArrivalRangeTo] = useState(new Date().toISOString().split('T')[0]);
+    const [arrivalRangeMaktab, setArrivalRangeMaktab] = useState('All');
 
     const isSuperAdmin = user?.role === 'super_admin';
     const activeReport = REPORT_CONFIG[reportType] || REPORT_CONFIG.maktab;
@@ -293,19 +304,41 @@ const Reports = ({ reportType = 'maktab' }) => {
     };
 
     const getArrivalReport2 = () => {
-        return groups.filter((group) => {
+        const filtered = groups.filter((group) => {
             const arrivalDate = group.arrivalDate ? new Date(group.arrivalDate).toISOString().split('T')[0] : null;
             return arrivalDate === arrivalReport2Date;
-        }).map((group) => ({
-            id: group._id,
-            arrivalFlightNo: group.arrivalFlightNo,
-            arrivalTime: group.arrivalTime,
-            arrivalAirport: group.arrivalAirport,
-            paxCount: group.passengers?.length || 0,
-            maktab: group.maktab,
-            companyName: group.company?.name || company?.name || 'N/A',
-            hotel: group.arrivalHotel || group.hotel
-        })).sort((a, b) => {
+        });
+
+        const map = {};
+        filtered.forEach((group) => {
+            const hotel = group.arrivalHotel || group.hotel;
+            const companyName = group.company?.name || company?.name || 'N/A';
+            const key = [
+                group.arrivalFlightNo || '',
+                group.arrivalTime || '',
+                group.arrivalAirport || '',
+                group.maktab || '',
+                companyName,
+                hotel?._id || ''
+            ].join('|');
+
+            if (!map[key]) {
+                map[key] = {
+                    id: group._id,
+                    arrivalFlightNo: group.arrivalFlightNo,
+                    arrivalTime: group.arrivalTime,
+                    arrivalAirport: group.arrivalAirport,
+                    paxCount: group.passengers?.length || 0,
+                    maktab: group.maktab,
+                    companyName,
+                    hotel
+                };
+            } else {
+                map[key].paxCount += group.passengers?.length || 0;
+            }
+        });
+
+        return Object.values(map).sort((a, b) => {
             if ((a.arrivalFlightNo || '') !== (b.arrivalFlightNo || '')) {
                 return (a.arrivalFlightNo || '').localeCompare(b.arrivalFlightNo || '');
             }
@@ -371,6 +404,41 @@ const Reports = ({ reportType = 'maktab' }) => {
         })).sort((a, b) => a.hotelName.localeCompare(b.hotelName));
     };
 
+    const getArrivalRangeReport = () => {
+        const from = arrivalRangeFrom ? new Date(arrivalRangeFrom) : null;
+        const to = arrivalRangeTo ? new Date(arrivalRangeTo) : null;
+        if (to) to.setHours(23, 59, 59, 999);
+
+        return groups
+            .filter((group) => {
+                const arrivalDate = group.arrivalDate ? new Date(group.arrivalDate) : null;
+                if (!arrivalDate) return false;
+                const afterFrom = !from || arrivalDate >= from;
+                const beforeTo = !to || arrivalDate <= to;
+                const matchesMaktab = arrivalRangeMaktab === 'All' || group.maktab === arrivalRangeMaktab;
+                return afterFrom && beforeTo && matchesMaktab;
+            })
+            .map((group) => ({
+                id: group._id,
+                groupName: group.groupName,
+                arrivalDate: group.arrivalDate,
+                arrivalFlightNo: group.arrivalFlightNo,
+                arrivalTime: group.arrivalTime,
+                arrivalAirport: group.arrivalAirport,
+                arrivalCity: group.arrivalCity,
+                maktab: group.maktab,
+                companyName: group.company?.name || company?.name || 'N/A',
+                hotel: group.arrivalHotel || group.hotel,
+                passengerCount: group.passengers?.length || group.passengerCount || 0
+            }))
+            .sort((a, b) => {
+                const dateDiff = new Date(a.arrivalDate) - new Date(b.arrivalDate);
+                if (dateDiff !== 0) return dateDiff;
+                if (a.maktab !== b.maktab) return a.maktab.localeCompare(b.maktab);
+                return (a.arrivalFlightNo || '').localeCompare(b.arrivalFlightNo || '');
+            });
+    };
+
     const maktabReportGroups = getMaktabReport();
     const dateReportGroups = getDateReport();
     const arrivalReport2Rows = getArrivalReport2();
@@ -412,23 +480,24 @@ const Reports = ({ reportType = 'maktab' }) => {
             minute: '2-digit'
         });
 
-        const winPrint = window.open('', '', 'left=0,top=0,width=1024,height=768,toolbar=0,scrollbars=1,status=0');
+        const winPrint = window.open('', '', 'left=0,top=0,width=1200,height=768,toolbar=0,scrollbars=1,status=0');
+        const isRangeReport = reportId === 'arrivals-range-report';
         winPrint.document.write(`
       <html>
         <head>
           <title>${companyName} - Report</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            @page { margin: 1.5cm; size: A4; }
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 11pt; color: #333; line-height: 1.6; background: white; }
-            .print-header { border-bottom: 3px solid #667eea; padding-bottom: 15px; margin-bottom: 25px; }
-            .print-header h1 { font-size: 24pt; color: #667eea; font-weight: 700; margin-bottom: 5px; }
-            .print-header .subtitle { font-size: 10pt; color: #666; font-style: italic; }
-            .report-print-header h1 { color: #333; font-size: 18pt; margin: 20px 0 10px 0; font-weight: 600; }
-            .report-print-header p { color: #666; font-size: 10pt; margin-bottom: 15px; }
-            h2 { color: #444; font-size: 14pt; margin: 20px 0 12px 0; font-weight: 600; page-break-after: avoid; }
+            @page { margin: 1cm; size: ${isRangeReport ? 'A4 landscape' : 'A4'}; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: ${isRangeReport ? '7pt' : '11pt'}; color: #333; line-height: 1.4; background: white; }
+            .print-header { border-bottom: 3px solid #667eea; padding-bottom: ${isRangeReport ? '6px' : '15px'}; margin-bottom: ${isRangeReport ? '8px' : '25px'}; }
+            .print-header h1 { font-size: ${isRangeReport ? '14pt' : '24pt'}; color: #667eea; font-weight: 700; margin-bottom: 3px; }
+            .print-header .subtitle { font-size: ${isRangeReport ? '6.5pt' : '10pt'}; color: #666; font-style: italic; }
+            .report-print-header h1 { color: #333; font-size: ${isRangeReport ? '11pt' : '18pt'}; margin: ${isRangeReport ? '4px 0 2px' : '20px 0 10px 0'}; font-weight: 600; }
+            .report-print-header p { color: #666; font-size: ${isRangeReport ? '6.5pt' : '10pt'}; margin-bottom: ${isRangeReport ? '5px' : '15px'}; }
+            h2 { color: #444; font-size: ${isRangeReport ? '7pt' : '14pt'}; margin: ${isRangeReport ? '3px 0 1px' : '20px 0 12px 0'}; font-weight: 600; page-break-after: avoid; ${isRangeReport ? 'padding: 2px 5px; background: #f0f0f8; border-left: 2px solid #667eea;' : ''} }
             h3 { color: #667eea; font-size: 11pt; margin: 15px 0 8px 0; font-weight: 600; }
-            .summary { background: #f8f9fa; border-left: 4px solid #667eea; padding: 12px 15px; margin-bottom: 20px; font-size: 11pt; font-weight: 600; page-break-inside: avoid; }
+            .summary { background: #f8f9fa; border-left: 4px solid #667eea; padding: ${isRangeReport ? '2px 6px' : '12px 15px'}; margin-bottom: ${isRangeReport ? '5px' : '20px'}; font-size: ${isRangeReport ? '6.5pt' : '11pt'}; font-weight: 600; page-break-inside: avoid; }
             .summary strong { color: #667eea; }
             [style*="linear-gradient"] { background: #f0f0f5 !important; border: 2px solid #667eea !important; page-break-inside: avoid; }
             [style*="linear-gradient"] [style*="border-bottom"] { border-bottom: 1px solid #ccc !important; color: #333 !important; }
@@ -436,11 +505,11 @@ const Reports = ({ reportType = 'maktab' }) => {
             .group-info { display: flex; gap: 20px; margin-bottom: 12px; padding: 10px 15px; background: #f8f9fa; border-radius: 6px; font-size: 10pt; page-break-inside: avoid; }
             .group-info p { margin: 0; }
             .group-info strong { color: #333; font-weight: 600; }
-            .report-group { margin-bottom: 30px; page-break-inside: avoid; }
-            table { width: 100%; border-collapse: collapse; margin: 15px 0 25px 0; font-size: 10pt; page-break-inside: avoid; }
+            .report-group { margin-bottom: ${isRangeReport ? '4px' : '30px'}; page-break-inside: avoid; }
+            table { width: 100%; border-collapse: collapse; margin: ${isRangeReport ? '1px 0 3px 0' : '15px 0 25px 0'}; font-size: ${isRangeReport ? '6.5pt' : '10pt'}; page-break-inside: avoid; }
             thead { display: table-header-group; }
-            th { background-color: #667eea !important; color: white !important; padding: 10px 8px; text-align: left; font-weight: 600; border: 1px solid #5568d3; font-size: 10pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #667eea !important; color: white !important; padding: ${isRangeReport ? '2px 4px' : '10px 8px'}; text-align: left; font-weight: 600; border: 1px solid #5568d3; font-size: ${isRangeReport ? '6pt' : '10pt'}; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            td { border: 1px solid #ddd; padding: ${isRangeReport ? '2px 4px' : '8px'}; text-align: left; }
             tbody tr:nth-child(even) { background-color: #f9f9f9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             tbody tr:first-child td { border-top: 2px solid #667eea; }
             .empty-report { text-align: center; padding: 40px; color: #999; font-style: italic; }
@@ -448,10 +517,9 @@ const Reports = ({ reportType = 'maktab' }) => {
             .print-footer .company-name { font-weight: 600; color: #667eea; font-size: 7.5pt; }
             .print-footer .contact-info { margin-top: 2px; font-size: 6.5pt; color: #999; }
             .print-footer a { color: #667eea; text-decoration: none; }
-            @page { margin-bottom: 1.5cm; }
             button, input, select, svg, .filter-group { display: none !important; }
             @media print {
-              body { print-color-adjust: exact; -webkit-print-color-adjust: exact; padding-bottom: 60px; }
+              body { print-color-adjust: exact; -webkit-print-color-adjust: exact; padding-bottom: 40px; }
               .print-footer { position: fixed; bottom: 0; width: 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
               .report-group { page-break-inside: avoid; }
               h2, h3 { page-break-after: avoid; }
@@ -711,7 +779,7 @@ const Reports = ({ reportType = 'maktab' }) => {
 
             <div id={REPORT_CONFIG['arrival-2'].printId} className="report-content">
                 <div className="report-print-header">
-                    <h1>Arrival Report 2</h1>
+                    <h1>Group Arrival Report</h1>
                     <p>Date: {new Date(arrivalReport2Date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
 
@@ -966,6 +1034,120 @@ const Reports = ({ reportType = 'maktab' }) => {
         );
     };
 
+    const renderArrivalRangeReport = () => {
+        const rangeRows = getArrivalRangeReport();
+        const totalPax = rangeRows.reduce((sum, row) => sum + row.passengerCount, 0);
+
+        const groupsByDate = {};
+        rangeRows.forEach((row) => {
+            const dateKey = row.arrivalDate ? new Date(row.arrivalDate).toISOString().split('T')[0] : 'unknown';
+            if (!groupsByDate[dateKey]) groupsByDate[dateKey] = [];
+            groupsByDate[dateKey].push(row);
+        });
+
+        return (
+            <Card>
+                <div className="report-header">
+                    <div>
+                        <h2 className="report-title">{REPORT_CONFIG['arrivals-range'].title}</h2>
+                        <p className="report-subtitle">{REPORT_CONFIG['arrivals-range'].subtitle}</p>
+                    </div>
+                    <Button variant="secondary" icon={<Download size={18} />} onClick={() => printReport(REPORT_CONFIG['arrivals-range'].printId)}>
+                        Print Report
+                    </Button>
+                </div>
+
+                <div className="report-filters">
+                    <div className="filter-group">
+                        <label>From Date</label>
+                        <input type="date" value={arrivalRangeFrom} onChange={(e) => setArrivalRangeFrom(e.target.value)} className="report-input" />
+                    </div>
+                    <div className="filter-group">
+                        <label>To Date</label>
+                        <input type="date" value={arrivalRangeTo} onChange={(e) => setArrivalRangeTo(e.target.value)} className="report-input" />
+                    </div>
+                    <div className="filter-group">
+                        <label>Maktab</label>
+                        <select value={arrivalRangeMaktab} onChange={(e) => setArrivalRangeMaktab(e.target.value)} className="report-select">
+                            <option value="All">All Maktabs</option>
+                            <option value="A">Maktab A</option>
+                            <option value="B">Maktab B</option>
+                            <option value="C">Maktab C</option>
+                            <option value="D">Maktab D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id={REPORT_CONFIG['arrivals-range'].printId} className="report-content">
+                    <div className="report-print-header">
+                        <h1>Arrivals Range Report</h1>
+                        <p>
+                            {arrivalRangeFrom && new Date(arrivalRangeFrom).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            {' — '}
+                            {arrivalRangeTo && new Date(arrivalRangeTo).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            {arrivalRangeMaktab !== 'All' && ` | Maktab ${arrivalRangeMaktab}`}
+                        </p>
+                    </div>
+
+                    <div className="summary">
+                        <strong>Total Groups:</strong> {rangeRows.length} &nbsp;|&nbsp; <strong>Total PAX:</strong> {totalPax}
+                    </div>
+
+                    {rangeRows.length === 0 ? (
+                        <div className="empty-report">
+                            <Calendar size={48} />
+                            <p>No arrival groups found in the selected date range</p>
+                        </div>
+                    ) : (
+                        Object.entries(groupsByDate).sort(([a], [b]) => a.localeCompare(b)).map(([dateKey, rows]) => (
+                            <div key={dateKey} className="report-group">
+                                <h2 style={{ padding: '0.35rem 0.6rem', background: '#f0f0f8', borderRadius: '6px', borderLeft: '3px solid #667eea' }}>
+                                    <Calendar size={16} style={{ verticalAlign: 'middle', marginRight: '0.4rem' }} />
+                                    {new Date(dateKey).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                    <span style={{ marginLeft: '0.75rem', fontSize: '0.85rem', fontWeight: 'normal', color: '#667eea' }}>
+                                        {rows.length} group{rows.length !== 1 ? 's' : ''} — {rows.reduce((s, r) => s + r.passengerCount, 0)} PAX
+                                    </span>
+                                </h2>
+                                <table className="passengers-report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Group Name</th>
+                                            {isSuperAdmin && <th>Company</th>}
+                                            <th>Flight No</th>
+                                            <th>Time</th>
+                                            <th>Airport</th>
+                                            <th>City</th>
+                                            <th>Maktab</th>
+                                            <th>Hotel</th>
+                                            <th>PAX</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {rows.map((row, index) => (
+                                            <tr key={row.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{row.groupName || 'N/A'}</td>
+                                                {isSuperAdmin && <td>{row.companyName}</td>}
+                                                <td>{row.arrivalFlightNo || 'N/A'}</td>
+                                                <td>{row.arrivalTime || 'N/A'}</td>
+                                                <td>{row.arrivalAirport || 'N/A'}</td>
+                                                <td>{row.arrivalCity || 'N/A'}</td>
+                                                <td>{row.maktab || 'N/A'}</td>
+                                                <td>{row.hotel?.name || 'Not Assigned'}{row.hotel?.city && ` (${row.hotel.city})`}</td>
+                                                <td>{row.passengerCount}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </Card>
+        );
+    };
+
     const renderActiveReport = () => {
         if (reportType === 'arrival') {
             return renderArrivalReport();
@@ -981,6 +1163,10 @@ const Reports = ({ reportType = 'maktab' }) => {
 
         if (reportType === 'hotel-arrivals') {
             return renderHotelArrivalsReport();
+        }
+
+        if (reportType === 'arrivals-range') {
+            return renderArrivalRangeReport();
         }
 
         return renderMaktabReport();

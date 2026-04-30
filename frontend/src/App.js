@@ -189,6 +189,14 @@ function AppRoutes() {
                 }
             />
             <Route
+                path="/reports/arrivals-range"
+                element={
+                    <PrivateRoute requiredRole={['company_admin', 'super_admin']}>
+                        <Reports reportType="arrivals-range" />
+                    </PrivateRoute>
+                }
+            />
+            <Route
                 path="/"
                 element={
                     user ? (
