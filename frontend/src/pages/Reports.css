@@ -78,6 +78,39 @@
     margin-top: 1.5rem;
 }
 
+.reports-nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: -0.15rem;
+    padding-left: 0.6rem;
+}
+
+.report-subnav-item {
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 0.9rem;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: #6f7b73;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.report-subnav-item:hover {
+    background: rgba(31, 122, 90, 0.08);
+    color: #1f7a5a;
+    transform: translateX(2px);
+}
+
+.report-subnav-item.active {
+    background: rgba(31, 122, 90, 0.12);
+    color: #1f7a5a;
+}
+
 .report-print-header {
     display: none;
 }

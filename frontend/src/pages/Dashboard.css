@@ -3,6 +3,20 @@
     background: #f8f9fa;
 }
 
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
 .dashboard-header {
     background: white;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -114,7 +128,16 @@
     padding: 2rem;
 }
 
+.dashboard-tabs-container {
+    padding-bottom: 0;
+}
+
+.dashboard-tab-panel {
+    padding-top: 0;
+}
+
 .dashboard-welcome {
+    margin-top: 0;
     margin-bottom: 2rem;
 }
 
@@ -123,6 +146,9 @@
     font-weight: 800;
     color: #333;
     margin: 0 0 0.5rem 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+
 }
 
 .dashboard-welcome p {
@@ -1049,6 +1075,7 @@
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     }
 }
+
 /* Footer Styles */
 .reports-footer {
     margin-top: 4rem;
@@ -1866,11 +1893,16 @@
     max-width: none;
     margin: 0;
     margin-left: 248px;
-    padding: 120px 32px 32px;
+    padding: 120px 32px 0px;
+}
+
+.dashboard .dashboard-tab-panel {
+    margin-left: 248px;
+    padding: 0 32px 0;
 }
 
 .dashboard-welcome {
-    margin-bottom: 24px;
+    margin-bottom: 4px;
 }
 
 .dashboard-welcome h2,
@@ -2173,6 +2205,11 @@
         margin-left: 0;
         padding: 164px 24px 24px;
     }
+
+    .dashboard .dashboard-tab-panel {
+        margin-left: 0;
+        padding: 0 24px 24px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -2220,6 +2257,10 @@
     .group-passengers-page .page-content {
         padding: 214px 16px 20px;
     }
+
+    .dashboard .dashboard-tab-panel {
+        padding: 0 16px 20px;
+    }
 }
 
 @media (max-width: 560px) {
@@ -2243,5 +2284,476 @@
     .dashboard-avatar {
         width: 38px;
         height: 38px;
+    }
+}
+
+/* ================================
+   DASHBOARD TABS
+   ================================ */
+.dashboard-tabs {
+    display: flex;
+    gap: 0;
+    background: white;
+    border-radius: 12px;
+    padding: 0.6rem 0.35rem;
+    margin-bottom: 10px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+}
+
+.dashboard-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.dashboard-tab:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.dashboard-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.tab-badge {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.1rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.dashboard-tab:not(.active) .tab-badge {
+    background: #ef4444;
+    color: white;
+}
+
+/* ================================
+   UPCOMING SCHEDULE
+   ================================ */
+.upcoming-schedule {
+    max-width: 900px;
+}
+
+.upcoming-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    color: #1a1a1a;
+    margin: 0 0 1.5rem 0;
+}
+
+.upcoming-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.upcoming-date-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+}
+
+.upcoming-date-label {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1a1a1a;
+}
+
+.upcoming-date-relative {
+    font-size: 0.8rem;
+    color: #667eea;
+    font-weight: 600;
+    background: #eef2ff;
+    padding: 0.15rem 0.6rem;
+    border-radius: 10px;
+}
+
+.upcoming-event-card {
+    display: flex;
+    gap: 1rem;
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upcoming-event-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateX(4px);
+}
+
+.upcoming-event-card.arrival {
+    border-left: 4px solid #10b981;
+}
+
+.upcoming-event-card.departure {
+    border-left: 4px solid #f59e0b;
+}
+
+.upcoming-event-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.upcoming-event-card.arrival .upcoming-event-indicator {
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.upcoming-event-card.departure .upcoming-event-indicator {
+    background: #fffbeb;
+    color: #f59e0b;
+}
+
+.upcoming-event-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.upcoming-event-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.35rem;
+}
+
+.upcoming-type-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+}
+
+.upcoming-type-badge.arrival {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.upcoming-type-badge.departure {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.upcoming-time {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1a1a1a;
+}
+
+.upcoming-event-main {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.35rem;
+}
+
+.upcoming-event-main strong {
+    font-size: 1.05rem;
+    color: #1a1a1a;
+}
+
+.upcoming-flight-info {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #667eea;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.upcoming-event-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.upcoming-route,
+.upcoming-hotel,
+.upcoming-pax {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.upcoming-route svg {
+    color: #9ca3af;
+}
+
+/* ================================
+   FLIGHT BOARD
+   ================================ */
+.flight-board {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.fb-section {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #1a1a2e;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.fb-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.fb-header.arrivals {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.fb-header.departures {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.fb-table-wrapper {
+    overflow-x: auto;
+}
+
+.fb-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Consolas', 'SFMono-Regular', 'Menlo', 'Monaco', 'Liberation Mono', monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+.fb-table thead {
+    background: #16213e;
+}
+
+.fb-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #8892b0;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.fb-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #232946;
+    color: #ccd6f6;
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
+    vertical-align: middle;
+}
+
+.fb-row {
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.fb-row:hover {
+    background: #232946;
+}
+
+.fb-row.today {
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.fb-row.today:hover {
+    background: rgba(16, 185, 129, 0.15);
+}
+
+.fb-row.tomorrow {
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.fb-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.fb-status.today {
+    background: #10b981;
+    color: white;
+}
+
+.fb-status.soon {
+    background: #f59e0b;
+    color: #1a1a2e;
+}
+
+.fb-status.scheduled {
+    background: #334155;
+    color: #8892b0;
+}
+
+.fb-date {
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.fb-time {
+    font-weight: 700;
+    color: #e2e8f0;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+}
+
+.fb-flight {
+    font-weight: 700;
+    color: #64ffda;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+}
+
+.fb-airport {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.fb-airport-cell {
+    min-width: 110px;
+}
+
+.fb-code {
+    font-weight: 700;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+}
+
+.fb-city {
+    color: #8892b0;
+    font-size: 0.75rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.fb-group {
+    font-weight: 600;
+    color: #ccd6f6;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.fb-hotel {
+    color: #8892b0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.85rem;
+}
+
+.fb-pax {
+    font-weight: 600;
+    color: #64ffda;
+}
+
+.fb-empty {
+    text-align: center;
+    padding: 2rem !important;
+    color: #8892b0;
+    font-style: italic;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.fb-table .maktab-badge {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+}
+
+/* Tabs & Flight Board Mobile */
+@media (max-width: 768px) {
+    .dashboard-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dashboard-tab {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.8rem;
+    }
+
+    .upcoming-event-card {
+        padding: 0.75rem;
+    }
+
+    .upcoming-event-details {
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .upcoming-event-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+    }
+
+    .fb-table {
+        min-width: 900px;
+    }
+
+    .fb-header {
+        font-size: 0.95rem;
+        padding: 0.75rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-tabs {
+        padding: 0.25rem;
+    }
+
+    .dashboard-tab {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.75rem;
+    }
+
+    .dashboard-tab svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .upcoming-event-indicator {
+        display: none;
+    }
+
+    .upcoming-event-top {
+        flex-wrap: wrap;
+        gap: 0.4rem;
     }
 }

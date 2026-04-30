@@ -144,7 +144,47 @@ function AppRoutes() {
                 path="/reports"
                 element={
                     <PrivateRoute requiredRole={['company_admin', 'super_admin']}>
-                        <Reports />
+                        <Navigate to="/reports/maktab" replace />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/reports/maktab"
+                element={
+                    <PrivateRoute requiredRole={['company_admin', 'super_admin']}>
+                        <Reports reportType="maktab" />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/reports/arrival"
+                element={
+                    <PrivateRoute requiredRole={['company_admin', 'super_admin']}>
+                        <Reports reportType="arrival" />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/reports/arrival-2"
+                element={
+                    <PrivateRoute requiredRole={['company_admin', 'super_admin']}>
+                        <Reports reportType="arrival-2" />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/reports/departure"
+                element={
+                    <PrivateRoute requiredRole={['company_admin', 'super_admin']}>
+                        <Reports reportType="departure" />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/reports/hotel-arrivals"
+                element={
+                    <PrivateRoute requiredRole={['company_admin', 'super_admin']}>
+                        <Reports reportType="hotel-arrivals" />
                     </PrivateRoute>
                 }
             />

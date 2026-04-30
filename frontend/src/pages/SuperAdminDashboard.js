@@ -51,6 +51,7 @@ const SuperAdminDashboard = () => {
     const [upcomingArrivals, setUpcomingArrivals] = useState([]);
     const [upcomingDepartures, setUpcomingDepartures] = useState([]);
     const [scheduleCompanyFilter, setScheduleCompanyFilter] = useState('all');
+    const [dashboardTab, setDashboardTab] = useState('overview');
     const [totalPassengers, setTotalPassengers] = useState(0);
     const [totalQuota, setTotalQuota] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -445,390 +446,743 @@ const SuperAdminDashboard = () => {
                     <p>Manage your companies and admins from this dashboard.</p>
                 </div>
 
-                {/* Stats */}
-                <div className="stats-grid fade-in">
-                    <div className="stat-card">
-                        <div className="stat-icon primary">
-                            <Building2 />
-                        </div>
-                        <div className="stat-content">
-                            <h3>{stats?.totalCompanies || 0}</h3>
-                            <p>Total Companies</p>
-                        </div>
-                    </div>
-                    <div className="stat-card">
-                        <div className="stat-icon success">
-                            <CheckCircle />
-                        </div>
-                        <div className="stat-content">
-                            <h3>{stats?.activeCompanies || 0}</h3>
-                            <p>Active Companies</p>
-                        </div>
-                    </div>
-                    <div className="stat-card">
-                        <div className="stat-icon info">
-                            <Users />
-                        </div>
-                        <div className="stat-content">
-                            <h3>{stats?.totalCompanyAdmins || 0}</h3>
-                            <p>Total Admins</p>
-                        </div>
-                    </div>
-                    <div className="stat-card">
-                        <div className="stat-icon warning">
-                            <CheckCircle />
-                        </div>
-                        <div className="stat-content">
-                            <h3>{stats?.activeCompanyAdmins || 0}</h3>
-                            <p>Active Admins</p>
-                        </div>
-                    </div>
+                {/* Dashboard Tabs */}
+                <div className="dashboard-tabs fade-in" style={{ display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '2px solid #e5e7eb' }}>
+                    <button
+                        onClick={() => setDashboardTab('overview')}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            border: 'none',
+                            background: 'none',
+                            cursor: 'pointer',
+                            fontSize: '0.95rem',
+                            fontWeight: dashboardTab === 'overview' ? '700' : '500',
+                            color: dashboardTab === 'overview' ? '#667eea' : '#666',
+                            borderBottom: dashboardTab === 'overview' ? '3px solid #667eea' : '3px solid transparent',
+                            marginBottom: '-2px',
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                        }}
+                    >
+                        <Home size={18} />
+                        Overview
+                    </button>
+                    <button
+                        onClick={() => setDashboardTab('flightboard')}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            border: 'none',
+                            background: 'none',
+                            cursor: 'pointer',
+                            fontSize: '0.95rem',
+                            fontWeight: dashboardTab === 'flightboard' ? '700' : '500',
+                            color: dashboardTab === 'flightboard' ? '#667eea' : '#666',
+                            borderBottom: dashboardTab === 'flightboard' ? '3px solid #667eea' : '3px solid transparent',
+                            marginBottom: '-2px',
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                        }}
+                    >
+                        <Plane size={18} />
+                        Flight Board
+                        {todayArrivals.length > 0 && (
+                            <span style={{
+                                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                color: '#fff',
+                                padding: '0.1rem 0.5rem',
+                                borderRadius: '10px',
+                                fontSize: '0.75rem',
+                                fontWeight: '700'
+                            }}>{todayArrivals.length}</span>
+                        )}
+                    </button>
                 </div>
 
-                {/* Quota Overview */}
-                <div className="fade-in" style={{ marginTop: '2rem' }}>
-                    <h3 className="section-title">Company Quota Overview</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                        {companies.map((company) => {
-                            const companyPassengers = passengerCounts[company._id] || 0;
-                            const companyQuota = company.passengerQuota || 0;
-                            const remaining = companyQuota - companyPassengers;
-                            const percentage = companyQuota > 0 ? Math.round((companyPassengers / companyQuota) * 100) : 0;
-                            const unassigned = unassignedCounts[company._id] || 0;
+                {dashboardTab === 'overview' && (<>
+                    {/* Stats */}
+                    <div className="stats-grid fade-in">
+                        <div className="stat-card">
+                            <div className="stat-icon primary">
+                                <Building2 />
+                            </div>
+                            <div className="stat-content">
+                                <h3>{stats?.totalCompanies || 0}</h3>
+                                <p>Total Companies</p>
+                            </div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-icon success">
+                                <CheckCircle />
+                            </div>
+                            <div className="stat-content">
+                                <h3>{stats?.activeCompanies || 0}</h3>
+                                <p>Active Companies</p>
+                            </div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-icon info">
+                                <Users />
+                            </div>
+                            <div className="stat-content">
+                                <h3>{stats?.totalCompanyAdmins || 0}</h3>
+                                <p>Total Admins</p>
+                            </div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-icon warning">
+                                <CheckCircle />
+                            </div>
+                            <div className="stat-content">
+                                <h3>{stats?.activeCompanyAdmins || 0}</h3>
+                                <p>Active Admins</p>
+                            </div>
+                        </div>
+                    </div>
 
-                            return (
-                                <div
-                                    key={company._id}
+                    {/* Quota Overview */}
+                    <div className="fade-in" style={{ marginTop: '2rem' }}>
+                        <h3 className="section-title">Company Quota Overview</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                            {companies.map((company) => {
+                                const companyPassengers = passengerCounts[company._id] || 0;
+                                const companyQuota = company.passengerQuota || 0;
+                                const remaining = companyQuota - companyPassengers;
+                                const percentage = companyQuota > 0 ? Math.round((companyPassengers / companyQuota) * 100) : 0;
+                                const unassigned = unassignedCounts[company._id] || 0;
+
+                                return (
+                                    <div
+                                        key={company._id}
+                                        style={{
+                                            background: 'white',
+                                            borderRadius: '12px',
+                                            padding: '1.5rem',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                            border: '2px solid #f0f0f0',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.boxShadow = '0 4px 16px rgba(102, 126, 234, 0.2)';
+                                            e.currentTarget.style.borderColor = '#667eea';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                                            e.currentTarget.style.borderColor = '#f0f0f0';
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                            <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#333', fontWeight: '600' }}>{company.name}</h4>
+                                            <div style={{
+                                                background: percentage >= 90 ? 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' : percentage >= 70 ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                                padding: '0.25rem 0.75rem',
+                                                borderRadius: '12px',
+                                                color: 'white',
+                                                fontSize: '0.75rem',
+                                                fontWeight: '600'
+                                            }}>
+                                                {percentage}%
+                                            </div>
+                                        </div>
+
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                <span style={{ fontSize: '0.875rem', color: '#666' }}>Quota</span>
+                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#333' }}>{companyQuota}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                <span style={{ fontSize: '0.875rem', color: '#666' }}>Used</span>
+                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#667eea' }}>{companyPassengers}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                <span style={{ fontSize: '0.875rem', color: '#666' }}>Remaining</span>
+                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: remaining > 0 ? '#4caf50' : '#f44336' }}>{remaining}</span>
+                                            </div>
+                                            {unassigned > 0 && (
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #f0f0f0' }}>
+                                                    <span style={{ fontSize: '0.875rem', color: '#ff9800' }}>Unassigned</span>
+                                                    <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#ff9800' }}>{unassigned}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div style={{
+                                            width: '100%',
+                                            height: '8px',
+                                            background: '#f0f0f0',
+                                            borderRadius: '4px',
+                                            overflow: 'hidden'
+                                        }}>
+                                            <div style={{
+                                                width: `${Math.min(percentage, 100)}%`,
+                                                height: '100%',
+                                                background: percentage >= 90 ? 'linear-gradient(90deg, #fa709a 0%, #fee140 100%)' : percentage >= 70 ? 'linear-gradient(90deg, #f093fb 0%, #f5576c 100%)' : 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+                                                transition: 'width 0.3s ease',
+                                                borderRadius: '4px'
+                                            }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="fade-in" style={{ marginTop: '2rem' }}>
+                        <h3 className="section-title">Quick Actions</h3>
+                        <div className="quick-actions-grid">
+                            <button className="action-card" onClick={() => navigate('/super-admin/companies')}>
+                                <div className="action-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                                    <Building2 size={24} />
+                                </div>
+                                <div className="action-content">
+                                    <div className="action-title">Manage Companies</div>
+                                    <div className="action-subtitle">Open company management</div>
+                                </div>
+                                <ArrowRight size={20} />
+                            </button>
+
+                            <button className="action-card" onClick={() => navigate('/hotels')}>
+                                <div className="action-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                                    <Building2 size={24} />
+                                </div>
+                                <div className="action-content">
+                                    <div className="action-title">Manage Hotels</div>
+                                    <div className="action-subtitle">Add & configure hotels</div>
+                                </div>
+                                <ArrowRight size={20} />
+                            </button>
+
+                            <button className="action-card" onClick={() => navigate('/reports')}>
+                                <div className="action-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+                                    <FileText size={24} />
+                                </div>
+                                <div className="action-content">
+                                    <div className="action-title">View Reports</div>
+                                    <div className="action-subtitle">Generate company reports</div>
+                                </div>
+                                <ArrowRight size={20} />
+                            </button>
+
+                            <button className="action-card" onClick={() => navigate('/super-admin/passengers')}>
+                                <div className="action-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
+                                    <UserCheck size={24} />
+                                </div>
+                                <div className="action-content">
+                                    <div className="action-title">View Passengers</div>
+                                    <div className="action-subtitle">Inspect passenger records</div>
+                                </div>
+                                <ArrowRight size={20} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Quick Insights */}
+                    <div className="fade-in" style={{ marginTop: '2rem' }}>
+                        <h3 className="section-title">Quick Insights</h3>
+                        <div className="quick-stats-grid">
+                            <div className="stat-card">
+                                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                                    <Users size={24} />
+                                </div>
+                                <div className="stat-content">
+                                    <div className="stat-value">{groups.length}</div>
+                                    <div className="stat-label">Total Groups</div>
+                                </div>
+                            </div>
+
+                            <div className="stat-card">
+                                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
+                                    <Building2 size={24} />
+                                </div>
+                                <div className="stat-content">
+                                    <div className="stat-value">{stats?.activeCompanies || 0}</div>
+                                    <div className="stat-label">Active Companies</div>
+                                </div>
+                            </div>
+
+                            <div className="stat-card">
+                                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                                    <Plane size={24} />
+                                </div>
+                                <div className="stat-content">
+                                    <div className="stat-value">{upcomingArrivals.length}</div>
+                                    <div className="stat-label">Upcoming Arrivals</div>
+                                </div>
+                            </div>
+
+                            <div className="stat-card">
+                                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+                                    <Calendar size={24} />
+                                </div>
+                                <div className="stat-content">
+                                    <div className="stat-value">{upcomingDepartures.length}</div>
+                                    <div className="stat-label">Upcoming Departures</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Today's Schedule */}
+                    <div className="fade-in" style={{ marginTop: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <h3 className="section-title" style={{ margin: 0 }}>
+                                <Clock size={20} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+                                Schedule Overview
+                            </h3>
+                            <div style={{ minWidth: '250px' }}>
+                                <select
+                                    value={scheduleCompanyFilter}
+                                    onChange={(e) => setScheduleCompanyFilter(e.target.value)}
                                     style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        border: '2px solid #e0e0e0',
+                                        borderRadius: '8px',
+                                        fontSize: '0.9rem',
                                         background: 'white',
-                                        borderRadius: '12px',
-                                        padding: '1.5rem',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                        border: '2px solid #f0f0f0',
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.boxShadow = '0 4px 16px rgba(102, 126, 234, 0.2)';
-                                        e.currentTarget.style.borderColor = '#667eea';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                                        e.currentTarget.style.borderColor = '#f0f0f0';
+                                        cursor: 'pointer'
                                     }}
                                 >
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                        <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#333', fontWeight: '600' }}>{company.name}</h4>
-                                        <div style={{
-                                            background: percentage >= 90 ? 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' : percentage >= 70 ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                                            padding: '0.25rem 0.75rem',
-                                            borderRadius: '12px',
-                                            color: 'white',
-                                            fontSize: '0.75rem',
-                                            fontWeight: '600'
-                                        }}>
-                                            {percentage}%
-                                        </div>
-                                    </div>
+                                    <option value="all">All Companies</option>
+                                    {companies.map((company) => (
+                                        <option key={company._id} value={company._id}>
+                                            {company.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
 
-                                    <div style={{ marginBottom: '1rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                            <span style={{ fontSize: '0.875rem', color: '#666' }}>Quota</span>
-                                            <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#333' }}>{companyQuota}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                            <span style={{ fontSize: '0.875rem', color: '#666' }}>Used</span>
-                                            <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#667eea' }}>{companyPassengers}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                            <span style={{ fontSize: '0.875rem', color: '#666' }}>Remaining</span>
-                                            <span style={{ fontSize: '0.875rem', fontWeight: '600', color: remaining > 0 ? '#4caf50' : '#f44336' }}>{remaining}</span>
-                                        </div>
-                                        {unassigned > 0 && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #f0f0f0' }}>
-                                                <span style={{ fontSize: '0.875rem', color: '#ff9800' }}>Unassigned</span>
-                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#ff9800' }}>{unassigned}</span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div style={{
-                                        width: '100%',
-                                        height: '8px',
-                                        background: '#f0f0f0',
-                                        borderRadius: '4px',
-                                        overflow: 'hidden'
-                                    }}>
-                                        <div style={{
-                                            width: `${Math.min(percentage, 100)}%`,
-                                            height: '100%',
-                                            background: percentage >= 90 ? 'linear-gradient(90deg, #fa709a 0%, #fee140 100%)' : percentage >= 70 ? 'linear-gradient(90deg, #f093fb 0%, #f5576c 100%)' : 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
-                                            transition: 'width 0.3s ease',
-                                            borderRadius: '4px'
-                                        }}></div>
-                                    </div>
+                        {/* Today's Arrivals & Departures */}
+                        <h4 style={{ fontSize: '1rem', color: '#666', marginBottom: '1rem', marginTop: '1.5rem' }}>Today's Schedule</h4>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                            <div className="schedule-card">
+                                <div className="schedule-header" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                                    <Plane size={20} />
+                                    <span>Arrivals Today</span>
+                                    <span className="schedule-count">{todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length}</span>
                                 </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="fade-in" style={{ marginTop: '2rem' }}>
-                    <h3 className="section-title">Quick Actions</h3>
-                    <div className="quick-actions-grid">
-                        <button className="action-card" onClick={() => navigate('/super-admin/companies')}>
-                            <div className="action-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                                <Building2 size={24} />
-                            </div>
-                            <div className="action-content">
-                                <div className="action-title">Manage Companies</div>
-                                <div className="action-subtitle">Open company management</div>
-                            </div>
-                            <ArrowRight size={20} />
-                        </button>
-
-                        <button className="action-card" onClick={() => navigate('/hotels')}>
-                            <div className="action-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
-                                <Building2 size={24} />
-                            </div>
-                            <div className="action-content">
-                                <div className="action-title">Manage Hotels</div>
-                                <div className="action-subtitle">Add & configure hotels</div>
-                            </div>
-                            <ArrowRight size={20} />
-                        </button>
-
-                        <button className="action-card" onClick={() => navigate('/reports')}>
-                            <div className="action-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
-                                <FileText size={24} />
-                            </div>
-                            <div className="action-content">
-                                <div className="action-title">View Reports</div>
-                                <div className="action-subtitle">Generate company reports</div>
-                            </div>
-                            <ArrowRight size={20} />
-                        </button>
-
-                        <button className="action-card" onClick={() => navigate('/super-admin/passengers')}>
-                            <div className="action-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
-                                <UserCheck size={24} />
-                            </div>
-                            <div className="action-content">
-                                <div className="action-title">View Passengers</div>
-                                <div className="action-subtitle">Inspect passenger records</div>
-                            </div>
-                            <ArrowRight size={20} />
-                        </button>
-                    </div>
-                </div>
-
-                {/* Quick Insights */}
-                <div className="fade-in" style={{ marginTop: '2rem' }}>
-                    <h3 className="section-title">Quick Insights</h3>
-                    <div className="quick-stats-grid">
-                        <div className="stat-card">
-                            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                                <Users size={24} />
-                            </div>
-                            <div className="stat-content">
-                                <div className="stat-value">{groups.length}</div>
-                                <div className="stat-label">Total Groups</div>
-                            </div>
-                        </div>
-
-                        <div className="stat-card">
-                            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
-                                <Building2 size={24} />
-                            </div>
-                            <div className="stat-content">
-                                <div className="stat-value">{stats?.activeCompanies || 0}</div>
-                                <div className="stat-label">Active Companies</div>
-                            </div>
-                        </div>
-
-                        <div className="stat-card">
-                            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
-                                <Plane size={24} />
-                            </div>
-                            <div className="stat-content">
-                                <div className="stat-value">{upcomingArrivals.length}</div>
-                                <div className="stat-label">Upcoming Arrivals</div>
-                            </div>
-                        </div>
-
-                        <div className="stat-card">
-                            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
-                                <Calendar size={24} />
-                            </div>
-                            <div className="stat-content">
-                                <div className="stat-value">{upcomingDepartures.length}</div>
-                                <div className="stat-label">Upcoming Departures</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Today's Schedule */}
-                <div className="fade-in" style={{ marginTop: '2rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                        <h3 className="section-title" style={{ margin: 0 }}>
-                            <Clock size={20} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-                            Schedule Overview
-                        </h3>
-                        <div style={{ minWidth: '250px' }}>
-                            <select
-                                value={scheduleCompanyFilter}
-                                onChange={(e) => setScheduleCompanyFilter(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    border: '2px solid #e0e0e0',
-                                    borderRadius: '8px',
-                                    fontSize: '0.9rem',
-                                    background: 'white',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <option value="all">All Companies</option>
-                                {companies.map((company) => (
-                                    <option key={company._id} value={company._id}>
-                                        {company.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Today's Arrivals & Departures */}
-                    <h4 style={{ fontSize: '1rem', color: '#666', marginBottom: '1rem', marginTop: '1.5rem' }}>Today's Schedule</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-                        <div className="schedule-card">
-                            <div className="schedule-header" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
-                                <Plane size={20} />
-                                <span>Arrivals Today</span>
-                                <span className="schedule-count">{todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length}</span>
-                            </div>
-                            <div className="schedule-body">
-                                {todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 ? (
-                                    todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).map(group => (
-                                        <div key={group._id} className="schedule-item">
-                                            <div className="schedule-time">{new Date(group.arrivalDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                            <div className="schedule-details">
-                                                <div className="schedule-flight">Flight {group.arrivalFlightNo}</div>
-                                                <div className="schedule-meta">{group.company?.name} • Maktab {group.maktab} • {group.passengerCount || 0} pax</div>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="schedule-empty">No arrivals scheduled for today</div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="schedule-card">
-                            <div className="schedule-header" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
-                                <Plane size={20} style={{ transform: 'rotate(45deg)' }} />
-                                <span>Departures Today</span>
-                                <span className="schedule-count">{todayDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length}</span>
-                            </div>
-                            <div className="schedule-body">
-                                {todayDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 ? (
-                                    todayDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).map(group => (
-                                        <div key={group._id} className="schedule-item">
-                                            <div className="schedule-time">{new Date(group.departureDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                            <div className="schedule-details">
-                                                <div className="schedule-flight">Flight {group.departureFlightNo}</div>
-                                                <div className="schedule-meta">{group.company?.name} • Maktab {group.maktab} • {group.passengerCount || 0} pax</div>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="schedule-empty">No departures scheduled for today</div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Upcoming Schedule (Next 7 Days) */}
-                    <h4 style={{ fontSize: '1rem', color: '#666', marginBottom: '1rem', marginTop: '2rem' }}>Upcoming Schedule (Next 7 Days)</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-                        <div>
-                            <h3 className="section-title">
-                                <Plane size={18} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-                                Upcoming Arrivals
-                            </h3>
-                            <div className="report-card">
-                                {upcomingArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 ? (
-                                    upcomingArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).slice(0, 7).map(group => (
-                                        <div key={group._id} className="report-item">
-                                            <div className="report-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
-                                                <Plane size={20} />
-                                            </div>
-                                            <div className="report-details">
-                                                <h4>{group.company?.name}</h4>
-                                                <p>Flight {group.arrivalFlightNo} • Maktab {group.maktab}</p>
-                                                <div className="report-meta">
-                                                    {new Date(group.arrivalDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {new Date(group.arrivalDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {group.passengerCount || 0} pax
+                                <div className="schedule-body">
+                                    {todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 ? (
+                                        todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).map(group => (
+                                            <div key={group._id} className="schedule-item">
+                                                <div className="schedule-time">{new Date(group.arrivalDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                                <div className="schedule-details">
+                                                    <div className="schedule-flight">Flight {group.arrivalFlightNo}</div>
+                                                    <div className="schedule-meta">{group.company?.name} • Maktab {group.maktab} • {group.passengerCount || 0} pax</div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="empty-state">
-                                        <Plane size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-                                        <p>No upcoming arrivals in the next 7 days</p>
-                                    </div>
-                                )}
+                                        ))
+                                    ) : (
+                                        <div className="schedule-empty">No arrivals scheduled for today</div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
 
-                        <div>
-                            <h3 className="section-title">
-                                <Plane size={18} style={{ verticalAlign: 'middle', marginRight: '0.5rem', transform: 'rotate(45deg)' }} />
-                                Upcoming Departures
-                            </h3>
-                            <div className="report-card">
-                                {upcomingDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 ? (
-                                    upcomingDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).slice(0, 7).map(group => (
-                                        <div key={group._id} className="report-item">
-                                            <div className="report-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
-                                                <Plane size={20} style={{ transform: 'rotate(45deg)' }} />
-                                            </div>
-                                            <div className="report-details">
-                                                <h4>{group.company?.name}</h4>
-                                                <p>Flight {group.departureFlightNo} • Maktab {group.maktab}</p>
-                                                <div className="report-meta">
-                                                    {new Date(group.departureDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {new Date(group.departureDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {group.passengerCount || 0} pax
+                            <div className="schedule-card">
+                                <div className="schedule-header" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+                                    <Plane size={20} style={{ transform: 'rotate(45deg)' }} />
+                                    <span>Departures Today</span>
+                                    <span className="schedule-count">{todayDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length}</span>
+                                </div>
+                                <div className="schedule-body">
+                                    {todayDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 ? (
+                                        todayDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).map(group => (
+                                            <div key={group._id} className="schedule-item">
+                                                <div className="schedule-time">{new Date(group.departureDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                                <div className="schedule-details">
+                                                    <div className="schedule-flight">Flight {group.departureFlightNo}</div>
+                                                    <div className="schedule-meta">{group.company?.name} • Maktab {group.maktab} • {group.passengerCount || 0} pax</div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="empty-state">
-                                        <Plane size={48} style={{ opacity: 0.3, marginBottom: '1rem', transform: 'rotate(45deg)' }} />
-                                        <p>No upcoming departures in the next 7 days</p>
-                                    </div>
-                                )}
+                                        ))
+                                    ) : (
+                                        <div className="schedule-empty">No departures scheduled for today</div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div className="fade-in" style={{ marginTop: '2rem' }}>
-                    <div className="report-card">
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                        {/* Upcoming Schedule (Next 7 Days) */}
+                        <h4 style={{ fontSize: '1rem', color: '#666', marginBottom: '1rem', marginTop: '2rem' }}>Upcoming Schedule (Next 7 Days)</h4>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
                             <div>
-                                <h3 className="section-title" style={{ marginBottom: '0.5rem' }}>Company Management</h3>
-                                <p style={{ margin: 0, color: '#666' }}>
-                                    Company setup, quota changes, and company admins are now managed from the dedicated Companies page.
-                                </p>
+                                <h3 className="section-title">
+                                    <Plane size={18} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+                                    Upcoming Arrivals
+                                </h3>
+                                <div className="report-card">
+                                    {upcomingArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 ? (
+                                        upcomingArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).slice(0, 7).map(group => (
+                                            <div key={group._id} className="report-item">
+                                                <div className="report-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                                                    <Plane size={20} />
+                                                </div>
+                                                <div className="report-details">
+                                                    <h4>{group.company?.name}</h4>
+                                                    <p>Flight {group.arrivalFlightNo} • Maktab {group.maktab}</p>
+                                                    <div className="report-meta">
+                                                        {new Date(group.arrivalDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {new Date(group.arrivalDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {group.passengerCount || 0} pax
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="empty-state">
+                                            <Plane size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                                            <p>No upcoming arrivals in the next 7 days</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <Button variant="primary" onClick={() => navigate('/super-admin/companies')}>
-                                Open Companies
-                            </Button>
+
+                            <div>
+                                <h3 className="section-title">
+                                    <Plane size={18} style={{ verticalAlign: 'middle', marginRight: '0.5rem', transform: 'rotate(45deg)' }} />
+                                    Upcoming Departures
+                                </h3>
+                                <div className="report-card">
+                                    {upcomingDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 ? (
+                                        upcomingDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).slice(0, 7).map(group => (
+                                            <div key={group._id} className="report-item">
+                                                <div className="report-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+                                                    <Plane size={20} style={{ transform: 'rotate(45deg)' }} />
+                                                </div>
+                                                <div className="report-details">
+                                                    <h4>{group.company?.name}</h4>
+                                                    <p>Flight {group.departureFlightNo} • Maktab {group.maktab}</p>
+                                                    <div className="report-meta">
+                                                        {new Date(group.departureDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {new Date(group.departureDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {group.passengerCount || 0} pax
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="empty-state">
+                                            <Plane size={48} style={{ opacity: 0.3, marginBottom: '1rem', transform: 'rotate(45deg)' }} />
+                                            <p>No upcoming departures in the next 7 days</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+
+                    <div className="fade-in" style={{ marginTop: '2rem' }}>
+                        <div className="report-card">
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                                <div>
+                                    <h3 className="section-title" style={{ marginBottom: '0.5rem' }}>Company Management</h3>
+                                    <p style={{ margin: 0, color: '#666' }}>
+                                        Company setup, quota changes, and company admins are now managed from the dedicated Companies page.
+                                    </p>
+                                </div>
+                                <Button variant="primary" onClick={() => navigate('/super-admin/companies')}>
+                                    Open Companies
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </>)}
+
+                {dashboardTab === 'flightboard' && (
+                    <div className="fade-in">
+                        {/* Company Filter */}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+                            <div style={{ minWidth: '250px' }}>
+                                <select
+                                    value={scheduleCompanyFilter}
+                                    onChange={(e) => setScheduleCompanyFilter(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        border: '2px solid #e0e0e0',
+                                        borderRadius: '8px',
+                                        fontSize: '0.9rem',
+                                        background: 'white',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <option value="all">All Companies</option>
+                                    {companies.map((company) => (
+                                        <option key={company._id} value={company._id}>
+                                            {company.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Arrivals Board */}
+                        <div style={{
+                            background: '#1a1a2e',
+                            borderRadius: '12px',
+                            overflow: 'hidden',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                            marginBottom: '2rem'
+                        }}>
+                            <div style={{
+                                background: 'linear-gradient(135deg, #0f3460 0%, #16213e 100%)',
+                                padding: '1rem 1.5rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <Plane size={22} style={{ color: '#4facfe' }} />
+                                    <span style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                        Today's Arrivals
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4caf50', animation: 'pulse 2s infinite' }}></div>
+                                    <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
+                                        {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </span>
+                                </div>
+                            </div>
+                            <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
+                                    <thead>
+                                        <tr style={{ background: '#16213e' }}>
+                                            {['Flight No', 'Time', 'Airport', 'No of Pax', 'Maktab', 'Company', 'Hotel'].map((header) => (
+                                                <th key={header} style={{
+                                                    padding: '0.75rem 1rem',
+                                                    color: '#4facfe',
+                                                    fontSize: '0.8rem',
+                                                    fontWeight: '700',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '1px',
+                                                    textAlign: 'left',
+                                                    borderBottom: '1px solid #2a2a4a'
+                                                }}>
+                                                    {header}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 ? (
+                                            todayArrivals
+                                                .filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter)
+                                                .sort((a, b) => (a.arrivalTime || '').localeCompare(b.arrivalTime || ''))
+                                                .map((group, index) => (
+                                                    <tr key={group._id} style={{
+                                                        background: index % 2 === 0 ? '#1a1a2e' : '#1e1e3a',
+                                                        transition: 'background 0.2s'
+                                                    }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.background = '#2a2a4a'}
+                                                        onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? '#1a1a2e' : '#1e1e3a'}
+                                                    >
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#ffd700', fontWeight: '700', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
+                                                            {group.arrivalFlightNo || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontWeight: '600', fontSize: '0.95rem' }}>
+                                                            {group.arrivalTime || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontSize: '0.9rem' }}>
+                                                            {group.arrivalAirport || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem' }}>
+                                                            <span style={{
+                                                                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                                                color: '#fff',
+                                                                padding: '0.2rem 0.6rem',
+                                                                borderRadius: '10px',
+                                                                fontWeight: '700',
+                                                                fontSize: '0.85rem'
+                                                            }}>
+                                                                {group.passengerCount || 0}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem' }}>
+                                                            <span style={{
+                                                                background: '#2a2a4a',
+                                                                color: '#4facfe',
+                                                                padding: '0.2rem 0.6rem',
+                                                                borderRadius: '6px',
+                                                                fontWeight: '600',
+                                                                fontSize: '0.85rem',
+                                                                border: '1px solid #4facfe'
+                                                            }}>
+                                                                {group.maktab || '—'}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontSize: '0.9rem' }}>
+                                                            {group.company?.name || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontSize: '0.9rem' }}>
+                                                            {group.arrivalHotel?.name || '—'}
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                                                    <Plane size={32} style={{ opacity: 0.3, marginBottom: '0.5rem' }} />
+                                                    <p style={{ margin: 0 }}>No arrivals scheduled for today</p>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 && (
+                                <div style={{
+                                    padding: '0.75rem 1.5rem',
+                                    background: '#16213e',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    borderTop: '1px solid #2a2a4a'
+                                }}>
+                                    <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
+                                        Total Flights: {todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length}
+                                    </span>
+                                    <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
+                                        Total Passengers: {todayArrivals.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).reduce((sum, g) => sum + (g.passengerCount || 0), 0)}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Departures Board */}
+                        <div style={{
+                            background: '#1a1a2e',
+                            borderRadius: '12px',
+                            overflow: 'hidden',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+                        }}>
+                            <div style={{
+                                background: 'linear-gradient(135deg, #4a1942 0%, #16213e 100%)',
+                                padding: '1rem 1.5rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <Plane size={22} style={{ color: '#fa709a', transform: 'rotate(45deg)' }} />
+                                    <span style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                        Today's Departures
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#fa709a', animation: 'pulse 2s infinite' }}></div>
+                                    <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
+                                        {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </span>
+                                </div>
+                            </div>
+                            <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
+                                    <thead>
+                                        <tr style={{ background: '#16213e' }}>
+                                            {['Flight No', 'Time', 'Airport', 'No of Pax', 'Maktab', 'Company', 'Hotel'].map((header) => (
+                                                <th key={header} style={{
+                                                    padding: '0.75rem 1rem',
+                                                    color: '#fa709a',
+                                                    fontSize: '0.8rem',
+                                                    fontWeight: '700',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '1px',
+                                                    textAlign: 'left',
+                                                    borderBottom: '1px solid #2a2a4a'
+                                                }}>
+                                                    {header}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {todayDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 ? (
+                                            todayDepartures
+                                                .filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter)
+                                                .sort((a, b) => (a.departureTime || '').localeCompare(b.departureTime || ''))
+                                                .map((group, index) => (
+                                                    <tr key={group._id} style={{
+                                                        background: index % 2 === 0 ? '#1a1a2e' : '#1e1e3a',
+                                                        transition: 'background 0.2s'
+                                                    }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.background = '#2a2a4a'}
+                                                        onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? '#1a1a2e' : '#1e1e3a'}
+                                                    >
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#ffd700', fontWeight: '700', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
+                                                            {group.departureFlightNo || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontWeight: '600', fontSize: '0.95rem' }}>
+                                                            {group.departureTime || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontSize: '0.9rem' }}>
+                                                            {group.departureAirport || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem' }}>
+                                                            <span style={{
+                                                                background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                                                                color: '#fff',
+                                                                padding: '0.2rem 0.6rem',
+                                                                borderRadius: '10px',
+                                                                fontWeight: '700',
+                                                                fontSize: '0.85rem'
+                                                            }}>
+                                                                {group.passengerCount || 0}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem' }}>
+                                                            <span style={{
+                                                                background: '#2a2a4a',
+                                                                color: '#fa709a',
+                                                                padding: '0.2rem 0.6rem',
+                                                                borderRadius: '6px',
+                                                                fontWeight: '600',
+                                                                fontSize: '0.85rem',
+                                                                border: '1px solid #fa709a'
+                                                            }}>
+                                                                {group.maktab || '—'}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontSize: '0.9rem' }}>
+                                                            {group.company?.name || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#e0e0e0', fontSize: '0.9rem' }}>
+                                                            {group.departureHotel?.name || '—'}
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                                                    <Plane size={32} style={{ opacity: 0.3, marginBottom: '0.5rem', transform: 'rotate(45deg)' }} />
+                                                    <p style={{ margin: 0 }}>No departures scheduled for today</p>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {todayDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length > 0 && (
+                                <div style={{
+                                    padding: '0.75rem 1.5rem',
+                                    background: '#16213e',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    borderTop: '1px solid #2a2a4a'
+                                }}>
+                                    <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
+                                        Total Flights: {todayDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).length}
+                                    </span>
+                                    <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
+                                        Total Passengers: {todayDepartures.filter(group => scheduleCompanyFilter === 'all' || group.company?._id === scheduleCompanyFilter).reduce((sum, g) => sum + (g.passengerCount || 0), 0)}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Footer */}
