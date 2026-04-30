@@ -55,9 +55,15 @@ api.interceptors.response.use(
                     requestData: (() => {
                         try {
                             if (!error.config?.data) return undefined;
-                            return typeof error.config.data === 'string'
+                            const parsed = typeof error.config.data === 'string'
                                 ? JSON.parse(error.config.data)
                                 : error.config.data;
+                            // Strip sensitive fields
+                            if (parsed && typeof parsed === 'object') {
+                                const { password, newPassword, ...safe } = parsed;
+                                return safe;
+                            }
+                            return parsed;
                         } catch { return error.config?.data; }
                     })(),
                     responseData: error.response?.data,

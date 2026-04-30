@@ -88,6 +88,18 @@
     padding: 0.5rem;
 }
 
+.field-error {
+    color: #dc2626;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.input-error {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1) !important;
+}
+
 @media (max-width: 768px) {
     .page-content {
         padding: 1rem;

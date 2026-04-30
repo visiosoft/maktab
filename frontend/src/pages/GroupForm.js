@@ -45,6 +45,37 @@ const GroupForm = () => {
         remarks: ''
     });
 
+    const [errors, setErrors] = useState({});
+
+    const validate = () => {
+        const newErrors = {};
+        const requiredFields = {
+            groupName: 'Group Name',
+            maktab: 'Maktab',
+            arrivalDate: 'Arrival Date',
+            arrivalTime: 'Arrival Time',
+            arrivalAirport: 'Arrival Airport',
+            arrivalFlightNo: 'Arrival Flight No',
+            arrivalCity: 'Arrival City',
+            arrivalHotel: 'Arrival Hotel',
+            originAirport: 'Origin Airport',
+            originCity: 'Origin City',
+            departureDate: 'Departure Date',
+            departureTime: 'Departure Time',
+            departureAirport: 'Departure Airport',
+            departureFlightNo: 'Departure Flight No',
+            departureCity: 'Departure City',
+            departureHotel: 'Departure Hotel'
+        };
+        Object.entries(requiredFields).forEach(([field, label]) => {
+            if (!formData[field] || formData[field].trim() === '') {
+                newErrors[field] = `${label} is required`;
+            }
+        });
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     useEffect(() => {
         fetchHotels();
         fetchCompany();
@@ -112,10 +143,14 @@ const GroupForm = () => {
     };
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [name]: value
         });
+        if (errors[name]) {
+            setErrors({ ...errors, [name]: '' });
+        }
     };
 
     // Filter hotels by arrival city
@@ -146,6 +181,10 @@ const GroupForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validate()) {
+            alert('Please fill in all required fields before saving.');
+            return;
+        }
         try {
             setLoading(true);
             const dataToSend = {
@@ -261,6 +300,7 @@ const GroupForm = () => {
                                         required
                                         placeholder="Enter group name"
                                     />
+                                    {errors.groupName && <span className="field-error">{errors.groupName}</span>}
                                 </div>
                                 <div className="form-group">
                                     <label>Maktab *</label>
@@ -268,7 +308,7 @@ const GroupForm = () => {
                                         name="maktab"
                                         value={formData.maktab}
                                         onChange={handleChange}
-                                        className="select-input"
+                                        className={`select-input ${errors.maktab ? 'input-error' : ''}`}
                                         required
                                     >
                                         <option value="">-- Select Maktab --</option>
@@ -277,6 +317,7 @@ const GroupForm = () => {
                                         <option value="C">C</option>
                                         <option value="D">D</option>
                                     </select>
+                                    {errors.maktab && <span className="field-error">{errors.maktab}</span>}
                                 </div>
                             </div>
                         </div>
@@ -285,30 +326,34 @@ const GroupForm = () => {
                             <h3>Arrival Details</h3>
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Arrival Date</label>
+                                    <label>Arrival Date *</label>
                                     <Input
                                         type="date"
                                         name="arrivalDate"
                                         value={formData.arrivalDate}
                                         onChange={handleChange}
+                                        required
                                     />
+                                    {errors.arrivalDate && <span className="field-error">{errors.arrivalDate}</span>}
                                 </div>
                                 <div className="form-group">
-                                    <label>Arrival Time</label>
+                                    <label>Arrival Time *</label>
                                     <Input
                                         type="time"
                                         name="arrivalTime"
                                         value={formData.arrivalTime}
                                         onChange={handleChange}
+                                        required
                                     />
+                                    {errors.arrivalTime && <span className="field-error">{errors.arrivalTime}</span>}
                                 </div>
                                 <div className="form-group">
-                                    <label>Arrival Airport</label>
+                                    <label>Arrival Airport *</label>
                                     <select
                                         name="arrivalAirport"
                                         value={formData.arrivalAirport}
                                         onChange={handleChange}
-                                        className="form-select"
+                                        className={`form-select ${errors.arrivalAirport ? 'input-error' : ''}`}
                                         required
                                     >
                                         <option value="">Select Airport</option>
@@ -318,15 +363,18 @@ const GroupForm = () => {
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.arrivalAirport && <span className="field-error">{errors.arrivalAirport}</span>}
                                 </div>
                                 <div className="form-group">
-                                    <label>Arrival Flight No</label>
+                                    <label>Arrival Flight No *</label>
                                     <Input
                                         name="arrivalFlightNo"
                                         value={formData.arrivalFlightNo}
                                         onChange={handleChange}
                                         placeholder="e.g., EK001"
+                                        required
                                     />
+                                    {errors.arrivalFlightNo && <span className="field-error">{errors.arrivalFlightNo}</span>}
                                 </div>
                             </div>
                             <div className="form-row">
@@ -336,13 +384,14 @@ const GroupForm = () => {
                                         name="arrivalCity"
                                         value={formData.arrivalCity}
                                         onChange={handleChange}
-                                        className="select-input"
+                                        className={`select-input ${errors.arrivalCity ? 'input-error' : ''}`}
                                         required
                                     >
                                         <option value="">-- Select City --</option>
                                         <option value="Makkah">Makkah</option>
                                         <option value="Madinah">Madinah</option>
                                     </select>
+                                    {errors.arrivalCity && <span className="field-error">{errors.arrivalCity}</span>}
                                 </div>
                                 <div className="form-group">
                                     <label>Arrival Hotel *</label>
@@ -350,7 +399,7 @@ const GroupForm = () => {
                                         name="arrivalHotel"
                                         value={formData.arrivalHotel}
                                         onChange={handleChange}
-                                        className="select-input"
+                                        className={`select-input ${errors.arrivalHotel ? 'input-error' : ''}`}
                                         required
                                         disabled={!formData.arrivalCity}
                                     >
@@ -361,6 +410,7 @@ const GroupForm = () => {
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.arrivalHotel && <span className="field-error">{errors.arrivalHotel}</span>}
                                 </div>
                             </div>
                         </div>
@@ -369,22 +419,26 @@ const GroupForm = () => {
                             <h3>Travel Route Details</h3>
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Origin Airport</label>
+                                    <label>Origin Airport *</label>
                                     <Input
                                         name="originAirport"
                                         value={formData.originAirport}
                                         onChange={handleChange}
                                         placeholder="e.g., DAC, LHE, ISB"
+                                        required
                                     />
+                                    {errors.originAirport && <span className="field-error">{errors.originAirport}</span>}
                                 </div>
                                 <div className="form-group">
-                                    <label>Origin City</label>
+                                    <label>Origin City *</label>
                                     <Input
                                         name="originCity"
                                         value={formData.originCity}
                                         onChange={handleChange}
                                         placeholder="e.g., Dhaka, Lahore, Islamabad"
+                                        required
                                     />
+                                    {errors.originCity && <span className="field-error">{errors.originCity}</span>}
                                 </div>
                             </div>
                         </div>
@@ -393,30 +447,34 @@ const GroupForm = () => {
                             <h3>Departure Details</h3>
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Departure Date</label>
+                                    <label>Departure Date *</label>
                                     <Input
                                         type="date"
                                         name="departureDate"
                                         value={formData.departureDate}
                                         onChange={handleChange}
+                                        required
                                     />
+                                    {errors.departureDate && <span className="field-error">{errors.departureDate}</span>}
                                 </div>
                                 <div className="form-group">
-                                    <label>Departure Time</label>
+                                    <label>Departure Time *</label>
                                     <Input
                                         type="time"
                                         name="departureTime"
                                         value={formData.departureTime}
                                         onChange={handleChange}
+                                        required
                                     />
+                                    {errors.departureTime && <span className="field-error">{errors.departureTime}</span>}
                                 </div>
                                 <div className="form-group">
-                                    <label>Departure Airport</label>
+                                    <label>Departure Airport *</label>
                                     <select
                                         name="departureAirport"
                                         value={formData.departureAirport}
                                         onChange={handleChange}
-                                        className="form-select"
+                                        className={`form-select ${errors.departureAirport ? 'input-error' : ''}`}
                                         required
                                     >
                                         <option value="">Select Airport</option>
@@ -426,15 +484,18 @@ const GroupForm = () => {
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.departureAirport && <span className="field-error">{errors.departureAirport}</span>}
                                 </div>
                                 <div className="form-group">
-                                    <label>Departure Flight No</label>
+                                    <label>Departure Flight No *</label>
                                     <Input
                                         name="departureFlightNo"
                                         value={formData.departureFlightNo}
                                         onChange={handleChange}
                                         placeholder="e.g., EK002"
+                                        required
                                     />
+                                    {errors.departureFlightNo && <span className="field-error">{errors.departureFlightNo}</span>}
                                 </div>
                             </div>
                             <div className="form-row">
@@ -444,13 +505,14 @@ const GroupForm = () => {
                                         name="departureCity"
                                         value={formData.departureCity}
                                         onChange={handleChange}
-                                        className="select-input"
+                                        className={`select-input ${errors.departureCity ? 'input-error' : ''}`}
                                         required
                                     >
                                         <option value="">-- Select City --</option>
                                         <option value="Makkah">Makkah</option>
                                         <option value="Madinah">Madinah</option>
                                     </select>
+                                    {errors.departureCity && <span className="field-error">{errors.departureCity}</span>}
                                 </div>
                                 <div className="form-group">
                                     <label>Departure Hotel *</label>
@@ -458,7 +520,7 @@ const GroupForm = () => {
                                         name="departureHotel"
                                         value={formData.departureHotel}
                                         onChange={handleChange}
-                                        className="select-input"
+                                        className={`select-input ${errors.departureHotel ? 'input-error' : ''}`}
                                         required
                                         disabled={!formData.departureCity}
                                     >
@@ -469,6 +531,7 @@ const GroupForm = () => {
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.departureHotel && <span className="field-error">{errors.departureHotel}</span>}
                                 </div>
                             </div>
                         </div>
