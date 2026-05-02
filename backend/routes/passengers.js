@@ -319,6 +319,12 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Passenger not found' });
         }
 
+        // Older passenger records may not have createdBy populated.
+        // Backfill it on first update so validation can succeed.
+        if (!passenger.createdBy) {
+            passenger.createdBy = admin._id;
+        }
+
         // Check if passenger belongs to the admin's company
         if (passenger.company.toString() !== admin.company.toString()) {
             return res.status(403).json({ message: 'Access denied' });

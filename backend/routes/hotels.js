@@ -72,6 +72,15 @@ router.put('/:id', isSuperAdmin, async (req, res) => {
             return res.status(404).json({ message: 'Hotel not found' });
         }
 
+        // Older hotel records may be missing creator metadata.
+        // Backfill it on first update so validation can succeed.
+        if (!hotel.createdBy) {
+            hotel.createdBy = req.user.id;
+        }
+        if (!hotel.createdByModel) {
+            hotel.createdByModel = 'SuperAdmin';
+        }
+
         if (name) hotel.name = name;
         if (address !== undefined) hotel.address = address;
         if (city !== undefined) hotel.city = city;

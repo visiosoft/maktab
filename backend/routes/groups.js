@@ -278,6 +278,12 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Group not found' });
         }
 
+        // Older group records may not have createdBy populated.
+        // Backfill it on first update so validation can succeed.
+        if (!group.createdBy) {
+            group.createdBy = admin._id;
+        }
+
         // Check if group belongs to the admin's company
         if (group.company.toString() !== admin.company.toString()) {
             return res.status(403).json({ message: 'Access denied' });
